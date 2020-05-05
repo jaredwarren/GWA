@@ -1,0 +1,49 @@
+{{define "base"}}
+<style>
+    .x-panel {
+        border: 1px solid lightgrey;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        position: relative;
+
+        box-sizing: border-box;
+
+    }
+    .x-shadow {
+        -webkit-box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.4);
+        box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    .x-panelheader {
+        width: 100%;
+        background: lightblue;
+        margin: 0;
+        text-align: center;
+        padding: 4px;
+    }
+
+
+    .x-panel-body {
+        overflow: auto;
+        flex: 1 1;
+        display: flex;
+        flex-direction: column;
+
+        box-sizing: border-box;
+
+        background-color: #fff;
+        color: #404040;
+        border: 1px solid #b0b0b0;
+        font: 300 13px/1.25 'Open Sans', 'Helvetica Neue', helvetica, arial, sans-serif;
+    }
+</style>
+
+
+<div id="ext-panel-{{.ID}}" data-componentid="ext-panel-{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}"
+    data-xid="2" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
+    {{Render .Header}}
+    {{Render .Body}}
+</div>
+{{end}}
