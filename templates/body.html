@@ -4,11 +4,5 @@
     {{range $item := $.Items}}
     {{Render $item}}
     {{end}}
-    {{if ne $.HTML ""}}
-    <div class="x-body-el x-panel-body-el x-container-body-el x-component-body-el x-scroller x-nativescroller x-overflow-x-auto x-overflow-y-auto x-layout-box x-layout-hbox x-horizontal x-align-stretch x-pack-start x-noborder-rb"
-        id="ext-element-5" style="border-width: 0px; padding: 20px !important;">
-        <div class="x-innerhtml" id="ext-element-15">{{$.HTML}}</div>
-    </div>
-    {{end}}
 </div>
 {{end}}

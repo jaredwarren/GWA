@@ -21,7 +21,7 @@ func NewBody(items []Renderer) *Body {
 // Body ...
 // TODO: I don't need all of this crap for container
 type Body struct {
-	ID        string // how to auto generate
+	ID        string
 	Title     string
 	IconClass string
 	Layout    string
@@ -44,15 +44,13 @@ func (b *Body) Render() template.HTML {
 		b.ID = nextBodyID()
 	}
 
-	// default classes
-	b.Classes = []string{
-		"x-body-wrap-el",
-		"x-panel-body-wrap-el",
-		"x-container-body-wrap-el",
-		"x-component-body-wrap-e",
-	}
-
-	fmt.Printf("%+v\n", b)
+	// // default classes
+	// b.Classes = []string{
+	// 	"x-body-wrap-el",
+	// 	"x-panel-body-wrap-el",
+	// 	"x-container-body-wrap-el",
+	// 	"x-component-body-wrap-e",
+	// }
 
 	return render("body", b)
 }

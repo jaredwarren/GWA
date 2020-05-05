@@ -83,14 +83,23 @@ func (p *Panel) Render() template.HTML {
 
 	// TODO: might have to check all items, if docked?
 
+	// HTML
+	if p.HTML != "" {
+		p.Items = append(p.Items, &Container{
+			HTML: p.HTML,
+		})
+	}
+
 	// ITEMS
 	if len(p.Items) == 0 {
-		if p.HTML != "" {
-			// ??
+		// debug add dummy html
+		html := p.HTML
+		if html == "" {
+			html = ":("
 		}
 		p.Items = []Renderer{
 			&Container{
-				HTML: p.HTML,
+				HTML: html,
 			},
 		}
 	}
