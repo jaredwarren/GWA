@@ -1,6 +1,6 @@
 {{define "base"}}
-<div class="x-panel-body x-body-wrap-el x-panel-body-wrap-el x-container-body-wrap-el x-component-body-wrap-el"
-    id="ext-element-4">
+<div id="ext-body-{{.ID}}" class="x-panel-body x-body-wrap-el x-panel-body-wrap-el x-container-body-wrap-el x-component-body-wrap-el"
+    >
     {{range $item := $.Items}}
     {{Render $item}}
     {{end}}

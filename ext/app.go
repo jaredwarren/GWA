@@ -40,16 +40,22 @@ type Column struct {
 	Width     int
 }
 
-// should be interface
-
-// Item ...
-type Item struct {
-	Title     string
-	IconClass string
-	Layout    string
-	Items     []Renderer // maybe items should be an interface????
-	// Tables []Table
+// Layout ...
+type Layout struct {
+	Type  string // absolute, accordion, border, card, tab, hbox, vbox
+	Pack  string // start, end, center, space-between, space-arround, justify
+	Align string // start, end, center, stretch
+	Items []Renderer
 }
+
+// // Item ...
+// type Item struct {
+// 	Title     string
+// 	IconClass string
+// 	Layout    string
+// 	Items     []Renderer
+// 	// Tables []Table
+// }
 
 // Store ...
 type Store struct {
@@ -78,4 +84,9 @@ func render(t string, data interface{}) template.HTML {
 		fmt.Printf("[E] %s exec error:%s\n", t, err)
 	}
 	return template.HTML(buf.String())
+}
+
+// Dockable ...
+type Dockable interface {
+	GetDocked() string
 }

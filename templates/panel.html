@@ -11,7 +11,9 @@
         box-sizing: border-box;
 
     }
-    .x-shadow {
+
+    .x-shadow,
+    .x-floated {
         -webkit-box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.4);
         box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.4);
     }
@@ -35,15 +37,39 @@
 
         background-color: #fff;
         color: #404040;
-        border: 1px solid #b0b0b0;
+        /* border: 1px solid #b0b0b0; */
         font: 300 13px/1.25 'Open Sans', 'Helvetica Neue', helvetica, arial, sans-serif;
+    }
+
+    .x-root {
+        font: 400 14px/1.25 Roboto, sans-serif;
+        color: #111;
+        color: var(--color);
+    }
+
+
+    .x-container {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .x-panel.x-header-position-top,
+    .x-panel.x-header-position-top>.x-max-height-el {
+        flex-direction: column;
     }
 </style>
 
 
 <div id="ext-panel-{{.ID}}" data-componentid="ext-panel-{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}"
     data-xid="2" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
+    {{if .Header}}
     {{Render .Header}}
-    {{Render .Body}}
+    {{end}}
+    <div class="x-body-wrap-el x-panel-body-wrap-el x-container-body-wrap-el x-component-body-wrap-el">
+    {{range $item := $.Items}}
+    {{Render $item}}
+    {{end}}
+    </div>
 </div>
 {{end}}

@@ -34,7 +34,7 @@ type Panel struct {
 	Header    *Header
 	Body      *Body
 	Border    template.CSS
-	Docked    string // top, bottom, left, right
+	Docked    string // top, bottom, left, right, ''
 	Flex      int
 	Style     string
 	Shadow    bool
@@ -45,9 +45,6 @@ type Panel struct {
 // Render ...
 func (p *Panel) Render() template.HTML {
 	fmt.Println("  render panel")
-	if p.Header == nil {
-		p.Header = NewHeader(p.Title)
-	}
 
 	if p.ID == "" {
 		p.ID = nextPanelID()
@@ -81,53 +78,61 @@ func (p *Panel) Render() template.HTML {
 		p.Classes = append(p.Classes, "x-managed-border")
 	}
 
-	// TODO: might have to check all items, if docked?
+	// TODO: might have to check all items, if docked and then add docked class here?
+
+	// HEADER
+	if p.Title != "" {
+		if p.Header == nil {
+			p.Header = NewHeader(p.Title)
+		} else if p.Header.Title == "" {
+			p.Header.Title = p.Title
+		}
+	}
+
+	// ITEMS
+	bodyItems := []Renderer{}
 
 	// HTML
 	if p.HTML != "" {
-		p.Items = append(p.Items, &Container{
+		// TODO: append to body!!!!
+		bodyItems = append(bodyItems, &Innerhtml{
 			HTML: p.HTML,
 		})
 	}
 
-	// ITEMS
-	if len(p.Items) == 0 {
-		// debug add dummy html
-		html := p.HTML
-		if html == "" {
-			html = ":("
-		}
-		p.Items = []Renderer{
-			&Container{
-				HTML: html,
-			},
-		}
-	}
+	items := layoutItems(p.Items)
 
-	// BODY
-	if p.Body == nil {
-		p.Body = NewBody(p.Items)
+	if len(bodyItems) > 0 {
+		items = append(items, NewBody(bodyItems))
 	}
 
 	// TODO: parse p.Style and add to styles
 	p.Styles = styles
 
-	// body
-	// x-panel-body x-body-wrap-el x-panel-body-wrap-el x-container-body-wrap-el x-component-body-wrap-el
-	// x-body-wrap-el x-panel-body-wrap-el x-container-body-wrap-el x-component-body-wrap-el
-
+	p.Items = items
 	return render("panel", p)
 }
-
-// Layout ...
-type Layout struct {
-	Type  string // absolute, accordion, border, card, tab, hbox, vbox
-	Pack  string // start, end, center, space-between, space-arround, justify
-	Align string // start, end, center, stretch
+func layoutItems(oi []Renderer) []Renderer {
+	items := []Renderer{}
+	for _, i := range oi {
+		// if not dockable add to items, else add to body
+		di, ok := i.(Dockable)
+		if ok && di.GetDocked() != "" {
+			items = append(items, i)
+		} else {
+			bodyItems = append(bodyItems, i)
+		}
+	}
+	return items
 }
 
 func nextPanelID() string {
 	id := fmt.Sprintf("%d", panelID)
 	panelID++
 	return id
+}
+
+// GetDocked ...
+func (p *Panel) GetDocked() string {
+	return p.Docked
 }
