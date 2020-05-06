@@ -33,6 +33,9 @@ func (h *Innerhtml) Render() template.HTML {
 	return render("innerhtml", h)
 }
 
+// Debug ...
+func (h *Innerhtml) Debug() {}
+
 func nextInnerhtmlID() string {
 	id := fmt.Sprintf("%d", innerhtmlID)
 	innerhtmlID++

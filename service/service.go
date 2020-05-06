@@ -104,7 +104,7 @@ func t3() template.HTML {
 		Items: []ext.Renderer{
 			&ext.Panel{
 				HTML:   "My panel text...1",
-				Docked: "left",
+				Docked: "top",
 				Style:  "",
 				Flex:   1, // because default doesn't work
 			},

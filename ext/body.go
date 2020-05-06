@@ -33,6 +33,9 @@ func (b *Body) Render() template.HTML {
 	return render("body", b)
 }
 
+// Debug ...
+func (b *Body) Debug() {}
+
 func nextBodyID() string {
 	id := fmt.Sprintf("%d", bodyID)
 	bodyID++

@@ -35,3 +35,6 @@ func (b *Button) Render() template.HTML {
 	templates.ExecuteTemplate(buf, "base", b)
 	return template.HTML(buf.String())
 }
+
+// Debug ...
+func (b *Button) Debug() {}

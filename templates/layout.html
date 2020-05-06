@@ -1,0 +1,7 @@
+{{define "base"}}
+<div id="ext-layout-{{.ID}}" class="x-dock x-dock-vertical x-managed-borders"  style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
+    {{range $item := $.Items}}
+    {{Render $item}}
+    {{end}}
+</div>
+{{end}}

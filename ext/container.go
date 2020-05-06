@@ -100,6 +100,9 @@ func (c *Container) Render() template.HTML {
 	return render("container", c)
 }
 
+// Debug ...
+func (c *Container) Debug() {}
+
 func nextContainerID() string {
 	id := fmt.Sprintf("%d", containerID)
 	containerID++

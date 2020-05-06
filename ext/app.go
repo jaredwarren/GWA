@@ -40,14 +40,6 @@ type Column struct {
 	Width     int
 }
 
-// Layout ...
-type Layout struct {
-	Type  string // absolute, accordion, border, card, tab, hbox, vbox
-	Pack  string // start, end, center, space-between, space-arround, justify
-	Align string // start, end, center, stretch
-	Items []Renderer
-}
-
 // // Item ...
 // type Item struct {
 // 	Title     string
@@ -64,6 +56,7 @@ type Store struct {
 // Renderer ...
 type Renderer interface {
 	Render() template.HTML
+	Debug()
 }
 
 func render(t string, data interface{}) template.HTML {

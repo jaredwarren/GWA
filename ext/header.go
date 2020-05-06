@@ -65,6 +65,9 @@ func (h *Header) Render() template.HTML {
 	return render("header", h)
 }
 
+// Debug ...
+func (h *Header) Debug() {}
+
 func nextHeaderID() string {
 	id := fmt.Sprintf("%d", headerID)
 	headerID++
