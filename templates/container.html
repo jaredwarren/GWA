@@ -1,8 +1,0 @@
-{{define "base"}}
-<div id="ext-container-{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
-    {{Render .Body}}
-    {{if ne $.HTML ""}}
-    <div class="x-innerhtml">{{$.HTML}}</div>
-    {{end}}
-</div>
-{{end}}

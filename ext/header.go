@@ -3,6 +3,7 @@ package ext
 import (
 	"fmt"
 	"html/template"
+	"io"
 )
 
 var (
@@ -42,10 +43,10 @@ type Header struct {
 }
 
 // Render ...
-func (h *Header) Render() template.HTML {
+func (h *Header) Render(w io.Writer) error {
 	// nothing to render
 	if h.Title == "" && len(h.Items) == 0 {
-		return ""
+		return nil
 	}
 
 	if h.ID == "" {
@@ -62,7 +63,7 @@ func (h *Header) Render() template.HTML {
 		"x-noborder-tr",
 	}
 
-	return render("header", h)
+	return render(w, "header", h)
 }
 
 // Debug ...

@@ -1,6 +1,7 @@
 package ext
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -52,7 +53,6 @@ func TestOneDocked(t *testing.T) {
 	if len(body.Items) != 2 {
 		t.Errorf("wrong body item:%+v", dockedPanel)
 	}
-
 }
 
 func TestTowDocked(t *testing.T) {
@@ -114,4 +114,29 @@ func TestTowDocked(t *testing.T) {
 	if p2.HTML != "test panel 2" {
 		t.Errorf("wrong body2 item:%+v", dockedPanel)
 	}
+}
+
+func TestRender(t *testing.T) {
+	p := &Panel{
+		Title: "main",
+		Items: []Renderer{
+			&Panel{
+				HTML: "Test panel 0",
+			},
+			&Panel{
+				HTML:   "Docked panel 1",
+				Docked: "left",
+			},
+			&Panel{
+				HTML: "test panel 2",
+			},
+		},
+	}
+	buf := new(bytes.Buffer)
+	p.Render(buf)
+	err := p.Render(buf)
+	if err != nil {
+		t.Error("[E]", err)
+	}
+
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"io"
 )
 
 // Application ...
@@ -55,28 +56,26 @@ type Store struct {
 
 // Renderer ...
 type Renderer interface {
-	Render() template.HTML
+	Render(w io.Writer) error
 	Debug()
 }
 
-func render(t string, data interface{}) template.HTML {
+func render(w io.Writer, t string, data interface{}) error {
 	funcMap := template.FuncMap{
 		"Render": func(item Renderer) template.HTML {
-			return item.Render()
+			buf := new(bytes.Buffer)
+			item.Render(w)
+			return template.HTML(buf.String())
 		},
 	}
 
-	buf := new(bytes.Buffer)
+	// buf := new(bytes.Buffer)
 	tpl, err := template.New("base").Funcs(funcMap).ParseFiles(fmt.Sprintf("templates/%s.html", t))
 	if err != nil {
 		fmt.Printf("[E] %s parse error:%s\n", t, err)
 	}
 	templates := template.Must(tpl, err)
-	err = templates.ExecuteTemplate(buf, "base", data)
-	if err != nil {
-		fmt.Printf("[E] %s exec error:%s\n", t, err)
-	}
-	return template.HTML(buf.String())
+	return templates.ExecuteTemplate(w, "base", data)
 }
 
 // Dockable ...

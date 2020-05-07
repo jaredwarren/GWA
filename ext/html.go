@@ -3,6 +3,7 @@ package ext
 import (
 	"fmt"
 	"html/template"
+	"io"
 )
 
 var (
@@ -14,23 +15,20 @@ func NewInnerhtml(title string) *Innerhtml {
 	return &Innerhtml{
 		ID: nextInnerhtmlID(),
 	}
-
 }
 
 // Innerhtml ...
 type Innerhtml struct {
-	ID   string // how to auto generate
+	ID   string
 	HTML template.HTML
 }
 
 // Render ...
-func (h *Innerhtml) Render() template.HTML {
-
+func (h *Innerhtml) Render(w io.Writer) error {
 	if h.ID == "" {
 		h.ID = nextInnerhtmlID()
 	}
-
-	return render("innerhtml", h)
+	return render(w, "innerhtml", h)
 }
 
 // Debug ...

@@ -13,6 +13,59 @@ func main() {
 
 func serve() {
 
+	// data := []byte(`{
+	// 	"title":  "Panel",
+	// 	"html": "<div>asdf</div",
+	// 	"asdf": "asdf",
+	// 	"items": [
+	// 		{
+	// 			"title":  "Panel",
+	// 			"html": "<div>asdf</div"
+	// 		}
+	// 	]
+	// }`)
+
+	// var np interface{}
+
+	// err := json.Unmarshal(data, &np)
+	// if err != nil {
+	// 	fmt.Println("[E]", err)
+	// }
+
+	// // assume root is panel
+	// root := &ext.Panel{}
+	// e := reflect.ValueOf(root).Elem()
+	// for i := 0; i < e.NumField(); i++ {
+	// 	varName := e.Type().Field(i).Name
+	// 	varType := e.Type().Field(i).Type
+	// 	// varValue := e.Field(i).Interface()
+	// 	// fmt.Printf("%v %v %v\n", varName, varType, varValue)
+	// 	for k, v := range np.(map[string]interface{}) {
+	// 		if strings.ToLower(varName) == strings.ToLower(k) {
+	// 			fmt.Printf("%+v -> %+v.(%s)\n", k, v, varType)
+	// 		}
+
+	// 	}
+
+	// }
+	// return
+
+	//
+	//
+	//
+	//
+
+	// fmt.Printf("%+v\n", e)
+
+	// pp := np.(*ext.Panel)
+	// fmt.Printf("%+v\n", pp)
+
+	// return
+
+	// fmt.Printf("%+v\n", np)
+
+	// TODO: make way to import json
+
 	// panel := &ext.Panel{
 	// 	Title:  "Panel",
 	// 	Width:  300,

@@ -3,6 +3,7 @@ package ext
 import (
 	"fmt"
 	"html/template"
+	"io"
 )
 
 var (
@@ -36,14 +37,13 @@ type Panel struct {
 	Border    template.CSS
 	Docked    string // top, bottom, left, right, ''
 	Flex      int
-	Style     string
 	Shadow    bool
 	Classes   []string
 	Styles    map[string]string
 }
 
 // Render ...
-func (p *Panel) Render() template.HTML {
+func (p *Panel) Render(w io.Writer) error {
 	fmt.Println("  render panel")
 
 	if p.ID == "" {
@@ -59,12 +59,15 @@ func (p *Panel) Render() template.HTML {
 		"x-header-position-top",
 		"x-root",
 	}
-
 	if p.Shadow {
 		p.Classes = append(p.Classes, "x-shadow")
 	}
 
 	styles := map[string]string{}
+	if len(p.Styles) > 0 {
+		styles = p.Styles
+	}
+
 	if p.Width != 0 { // what if I want width to be 0px?
 		styles["width"] = fmt.Sprintf("%dpx", p.Width)
 		p.Classes = append(p.Classes, "x-widthed")
@@ -77,8 +80,7 @@ func (p *Panel) Render() template.HTML {
 		styles["border"] = string(p.Border)
 		p.Classes = append(p.Classes, "x-managed-border")
 	}
-
-	// TODO: might have to check all items, if docked and then add docked class here?
+	p.Styles = styles
 
 	// HEADER
 	if p.Title != "" {
@@ -86,7 +88,7 @@ func (p *Panel) Render() template.HTML {
 			p.Header = NewHeader(p.Title)
 		} else if p.Header.Title == "" {
 			p.Header.Title = p.Title
-		}
+		} // else header is all set, ignore Title attribute
 	}
 
 	// ITEMS
@@ -99,11 +101,8 @@ func (p *Panel) Render() template.HTML {
 
 	items := layoutItems(p.Items)
 
-	// TODO: parse p.Style and add to styles
-	p.Styles = styles
-
 	p.Items = items
-	return render("panel", p)
+	return render(w, "panel", p)
 }
 func layoutItems(oi []Renderer) []Renderer {
 	if len(oi) < 2 {
@@ -171,10 +170,7 @@ func layoutItems(oi []Renderer) []Renderer {
 			if len(bi) > 0 {
 				layout.Items = append(layout.Items, NewBody(bi))
 			} // else nothing?
-		} else {
-			// else what to do????? add a blank one?
-			panic("no body")
-		}
+		} // else what to do????? add a blank one?
 	} else {
 		return oi
 		// layout.Items = []Renderer{}

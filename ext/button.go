@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"io"
 )
 
 var (
@@ -20,7 +21,7 @@ type Button struct {
 }
 
 // Render ...
-func (b *Button) Render() template.HTML {
+func (b *Button) Render(w io.Writer) error {
 
 	// prepend newline so html/js formatting works
 	if b.Handler != "" {
@@ -32,8 +33,7 @@ func (b *Button) Render() template.HTML {
 
 	buf := new(bytes.Buffer)
 	templates := template.Must(template.ParseFiles("templates/button.html"))
-	templates.ExecuteTemplate(buf, "base", b)
-	return template.HTML(buf.String())
+	return templates.ExecuteTemplate(buf, "base", b)
 }
 
 // Debug ...

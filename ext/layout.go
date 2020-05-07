@@ -2,7 +2,7 @@ package ext
 
 import (
 	"fmt"
-	"html/template"
+	"io"
 )
 
 var (
@@ -34,7 +34,7 @@ type Layout struct {
 }
 
 // Render ...
-func (l *Layout) Render() template.HTML {
+func (l *Layout) Render(w io.Writer) error {
 	fmt.Println("  render layout")
 
 	if l.ID == "" {
@@ -94,6 +94,10 @@ func (l *Layout) Render() template.HTML {
 		} else if l.Pack == "end" {
 			styles["flex-direction"] = "column-reverse"
 		}
+
+		// TODO: fix width asnd height!!!!
+		l.Classes = append(l.Classes, "x-hbox")
+		// styles["width"] = "100%" // or something like this!!
 	}
 
 	if l.Type == "vbox" {
@@ -103,6 +107,10 @@ func (l *Layout) Render() template.HTML {
 		} else if l.Pack == "end" {
 			styles["flex-direction"] = "row-reverse"
 		}
+
+		l.Classes = append(l.Classes, "x-vbox")
+
+		// .Styles["height"] = "100%" // or something like this!!
 	}
 
 	// TODO: might have to check all items, if docked?
@@ -114,7 +122,7 @@ func (l *Layout) Render() template.HTML {
 	// x-layout-body x-body-wrap-el x-layout-body-wrap-el x-layout-body-wrap-el x-component-body-wrap-el
 	// x-body-wrap-el x-layout-body-wrap-el x-layout-body-wrap-el x-component-body-wrap-el
 
-	return render("layout", l)
+	return render(w, "layout", l)
 }
 
 // Debug ...

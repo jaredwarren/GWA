@@ -2,7 +2,7 @@ package ext
 
 import (
 	"fmt"
-	"html/template"
+	"io"
 )
 
 var (
@@ -25,12 +25,12 @@ type Body struct {
 }
 
 // Render ...
-func (b *Body) Render() template.HTML {
+func (b *Body) Render(w io.Writer) error {
 	if b.ID == "" {
 		b.ID = nextBodyID()
 	}
 
-	return render("body", b)
+	return render(w, "body", b)
 }
 
 // Debug ...

@@ -1,8 +1,10 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -38,9 +40,10 @@ func (c *Controller) Close(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) Home(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Home")
 
-	html := template.HTML("")
 	// html = t1()
-	html = t3()
+	buf := new(bytes.Buffer)
+	// item.Render(buf)
+	t3(buf)
 	// html = t2()
 
 	templates := template.Must(template.ParseFiles("templates/base.html"))
@@ -51,11 +54,11 @@ func (c *Controller) Home(w http.ResponseWriter, r *http.Request) {
 	}{
 		Title: "test",
 		// Error:   nil,
-		Body: html,
+		Body: template.HTML(buf.String()),
 	})
 }
 
-func t3() template.HTML {
+func t3(w io.Writer) error {
 	/*
 			Ext.create({
 		    xtype: 'panel',
@@ -104,67 +107,67 @@ func t3() template.HTML {
 		Items: []ext.Renderer{
 			&ext.Panel{
 				HTML:   "My panel text...1",
-				Docked: "top",
-				Style:  "",
-				Flex:   1, // because default doesn't work
+				Docked: "left",
+				// Style:  "",
+				Flex: 1, // because default doesn't work
 			},
 			&ext.Panel{
 				HTML:   "My panel text...2",
-				Docked: "left",
-				Style:  "",
-				Flex:   1, // because default doesn't work
+				Docked: "top",
+				// Style:  "",
+				Flex: 1, // because default doesn't work
 			},
 		},
 	}
 
-	return panel.Render()
+	return panel.Render(w)
 }
 
-func t1() template.HTML {
+// func t1() template.HTML {
 
-	panel := &ext.Panel{
-		Title: "test2",
-		Items: []ext.Renderer{
-			&ext.Panel{
-				HTML: template.HTML("<div>This is the sub body!</div>"),
-				Items: []ext.Renderer{&ext.Button{
-					Text:      "howdy",
-					Handler:   "alert('yo')",
-					IconClass: "fas fa-home",
-				}},
-			},
-			&ext.Panel{
-				Docked: "bottom",
-				Items: []ext.Renderer{&ext.Button{
-					Text:      "howdy",
-					Handler:   "alert('yo')",
-					IconClass: "fas fa-home",
-				}},
-			},
-		},
-	}
+// 	panel := &ext.Panel{
+// 		Title: "test2",
+// 		Items: []ext.Renderer{
+// 			&ext.Panel{
+// 				HTML: template.HTML("<div>This is the sub body!</div>"),
+// 				Items: []ext.Renderer{&ext.Button{
+// 					Text:      "howdy",
+// 					Handler:   "alert('yo')",
+// 					IconClass: "fas fa-home",
+// 				}},
+// 			},
+// 			&ext.Panel{
+// 				Docked: "bottom",
+// 				Items: []ext.Renderer{&ext.Button{
+// 					Text:      "howdy",
+// 					Handler:   "alert('yo')",
+// 					IconClass: "fas fa-home",
+// 				}},
+// 			},
+// 		},
+// 	}
 
-	return panel.Render()
-}
+// 	return panel.Render()
+// }
 
-func t2() template.HTML {
+// func t2() template.HTML {
 
-	panel := ext.NewPanel()
-	panel.Title = "test"
-	// panel.HTML = template.HTML("<div>This is the body!</div>")
+// 	panel := ext.NewPanel()
+// 	panel.Title = "test"
+// 	// panel.HTML = template.HTML("<div>This is the body!</div>")
 
-	sp := ext.NewPanel()
-	// panel.Title = "test"
-	sp.HTML = template.HTML("<div>This is the sub body!</div>")
-	sp.Items = []ext.Renderer{&ext.Button{
-		Text:      "howdy",
-		Handler:   "alert('yo')",
-		IconClass: "fas fa-home",
-	}}
+// 	sp := ext.NewPanel()
+// 	// panel.Title = "test"
+// 	sp.HTML = template.HTML("<div>This is the sub body!</div>")
+// 	sp.Items = []ext.Renderer{&ext.Button{
+// 		Text:      "howdy",
+// 		Handler:   "alert('yo')",
+// 		IconClass: "fas fa-home",
+// 	}}
 
-	panel.Items = []ext.Renderer{sp}
-	return panel.Render()
-}
+// 	panel.Items = []ext.Renderer{sp}
+// 	return panel.Render()
+// }
 
 // func render(item ext.Renderer) {
 // 	fmt.Printf("%s -> %+v\n", reflect.TypeOf(item), item)
