@@ -107,13 +107,13 @@ func t3(w io.Writer) error {
 		Items: []ext.Renderer{
 			&ext.Panel{
 				HTML:   "My panel text...1",
-				Docked: "left",
+				Docked: "top",
 				// Style:  "",
 				Flex: 1, // because default doesn't work
 			},
 			&ext.Panel{
 				HTML:   "My panel text...2",
-				Docked: "top",
+				Docked: "right",
 				// Style:  "",
 				Flex: 1, // because default doesn't work
 			},
