@@ -1,8 +1,6 @@
 package ext
 
 import (
-	"bytes"
-	"fmt"
 	"html/template"
 	"io"
 )
@@ -22,18 +20,19 @@ type Button struct {
 
 // Render ...
 func (b *Button) Render(w io.Writer) error {
+	nb, _ := b.Build()
+	return render(w, "button", nb)
+}
 
-	// prepend newline so html/js formatting works
-	if b.Handler != "" {
-		// b.Handler = "*/\n" + b.Handler + "\n/*"
+// Build copys info to a new panel
+func (b *Button) Build() (*Button, error) {
+	n := &Button{}
+	if b.ID != "" {
+		n.ID = b.ID
+	} else {
+		n.ID = nextInnerhtmlID()
 	}
-
-	b.ID = fmt.Sprintf("%d", buttonID)
-	buttonID++
-
-	buf := new(bytes.Buffer)
-	templates := template.Must(template.ParseFiles("templates/button.html"))
-	return templates.ExecuteTemplate(buf, "base", b)
+	return n, nil
 }
 
 // Debug ...

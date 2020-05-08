@@ -25,10 +25,19 @@ type Innerhtml struct {
 
 // Render ...
 func (h *Innerhtml) Render(w io.Writer) error {
-	if h.ID == "" {
-		h.ID = nextInnerhtmlID()
+	nh, _ := h.Build()
+	return render(w, "innerhtml", nh)
+}
+
+// Build copys info to a new panel
+func (h *Innerhtml) Build() (Renderer, error) {
+	nh := &Innerhtml{}
+	if h.ID != "" {
+		nh.ID = h.ID
+	} else {
+		nh.ID = nextInnerhtmlID()
 	}
-	return render(w, "innerhtml", h)
+	return nh, nil
 }
 
 // Debug ...

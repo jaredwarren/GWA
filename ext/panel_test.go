@@ -1,7 +1,7 @@
 package ext
 
 import (
-	"bytes"
+	"fmt"
 	"testing"
 )
 
@@ -121,7 +121,11 @@ func TestRender(t *testing.T) {
 		Title: "main",
 		Items: []Renderer{
 			&Panel{
-				HTML: "Test panel 0",
+				HTML:   "Test panel 0",
+				Width:  200,
+				Height: 200,
+				Shadow: true,
+				Border: "1px solid red",
 			},
 			&Panel{
 				HTML:   "Docked panel 1",
@@ -132,11 +136,45 @@ func TestRender(t *testing.T) {
 			},
 		},
 	}
-	buf := new(bytes.Buffer)
-	p.Render(buf)
-	err := p.Render(buf)
+	np, err := p.Build()
 	if err != nil {
 		t.Error("[E]", err)
 	}
+	if np == nil {
+		t.Errorf("no np")
+	}
 
+	fmt.Printf("%+v\n", np.(*Panel))
+
+	layout := np.(*Panel).Items[0].(*Layout)
+	if len(layout.Items) != 2 {
+		t.Errorf("wrong number of items:%+v", layout)
+	}
+
+	header := layout.Items[0].(*Header)
+	if header.Title != "main" {
+		t.Errorf("wrong header:%+v", header)
+	}
+
+	dockedPanel1 := layout.Items[1].(*Body).Items[0].(*Layout).Items[0].(*Panel).HTML
+	if dockedPanel1 != "Docked panel 1" {
+		t.Errorf("wrong docked item:%+v", header)
+	}
+
+	bodyPanel0 := layout.Items[1].(*Body).Items[0].(*Layout).Items[1].(*Body).Items[0].(*Panel)
+
+	if bodyPanel0.Width != 200 {
+		t.Errorf("wrong width:%+v", layout.Items[1].(*Body).Items[0].(*Layout).Items[1].(*Body).Items[0].(*Panel))
+	}
+	if layout.Items[1].(*Body).Items[0].(*Layout).Items[1].(*Body).Items[0].(*Panel).Height != 200 {
+		t.Errorf("wrong height:%+v", layout.Items[1].(*Body).Items[0].(*Layout).Items[1].(*Body).Items[0].(*Panel))
+	}
+	if layout.Items[1].(*Body).Items[0].(*Layout).Items[1].(*Body).Items[0].(*Panel).Border != "1px solid red" {
+		t.Errorf("wrong border:%+v", layout.Items[1].(*Body).Items[0].(*Layout).Items[1].(*Body).Items[0].(*Panel))
+	}
+	if layout.Items[1].(*Body).Items[0].(*Layout).Items[1].(*Body).Items[0].(*Panel).Shadow != true {
+		t.Errorf("wrong shadow:%+v", layout.Items[1].(*Body).Items[0].(*Layout).Items[1].(*Body).Items[0].(*Panel))
+	}
+	fmt.Printf("%+v\n", layout.Items[1].(*Body).Items[0].(*Layout).Items[1].(*Body).Items[0].(*Panel))
+	t.Error("")
 }

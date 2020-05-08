@@ -18,6 +18,7 @@ func NewHeader(title string) *Header {
 		Width:  300,
 		Height: 200,
 		Border: template.CSS("1px solid lightgrey"),
+		Docked: "top",
 	}
 
 }
@@ -44,26 +45,42 @@ type Header struct {
 
 // Render ...
 func (h *Header) Render(w io.Writer) error {
-	// nothing to render
-	if h.Title == "" && len(h.Items) == 0 {
-		return nil
-	}
+	// // nothing to render
+	// if h.Title == "" && len(h.Items) == 0 {
+	// 	return nil
+	// }
 
-	if h.ID == "" {
-		h.ID = nextHeaderID()
-	}
+	// if h.ID == "" {
+	// 	h.ID = nextHeaderID()
+	// }
 
-	// default classes
-	h.Classes = []string{
-		"x-panelheader",
-		"x-container",
-		"x-component",
-		"x-docked-top",
-		"x-horizontal",
-		"x-noborder-tr",
-	}
+	// // default classes
+	// h.Classes = []string{
+	// 	"x-panelheader",
+	// 	"x-container",
+	// 	"x-component",
+	// 	"x-docked-top",
+	// 	"x-horizontal",
+	// 	"x-noborder-tr",
+	// }
+	nh, _ := h.Build()
+	return render(w, "header", nh)
+}
 
-	return render(w, "header", h)
+// Build copys info to a new panel
+func (h *Header) Build() (Renderer, error) {
+	n := &Header{}
+	if h.ID != "" {
+		n.ID = h.ID
+	} else {
+		n.ID = nextInnerhtmlID()
+	}
+	return n, nil
+}
+
+// GetDocked ...
+func (h *Header) GetDocked() string {
+	return h.Docked
 }
 
 // Debug ...

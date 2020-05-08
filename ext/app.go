@@ -57,6 +57,7 @@ type Store struct {
 // Renderer ...
 type Renderer interface {
 	Render(w io.Writer) error
+	Build() (Renderer, error)
 	Debug()
 }
 

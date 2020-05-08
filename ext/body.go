@@ -26,11 +26,19 @@ type Body struct {
 
 // Render ...
 func (b *Body) Render(w io.Writer) error {
-	if b.ID == "" {
-		b.ID = nextBodyID()
-	}
+	nb, _ := b.Build()
+	return render(w, "body", nb)
+}
 
-	return render(w, "body", b)
+// Build copys info to a new panel
+func (b *Body) Build() (Renderer, error) {
+	n := &Body{}
+	if b.ID != "" {
+		n.ID = b.ID
+	} else {
+		n.ID = nextInnerhtmlID()
+	}
+	return n, nil
 }
 
 // Debug ...

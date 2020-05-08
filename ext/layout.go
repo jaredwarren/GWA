@@ -36,23 +36,31 @@ type Layout struct {
 // Render ...
 func (l *Layout) Render(w io.Writer) error {
 	fmt.Println("  render layout")
+	nl, _ := l.Build()
+	return render(w, "layout", nl)
+}
 
-	if l.ID == "" {
-		l.ID = nextLayoutID()
+// Build copys info to a new panel
+func (l *Layout) Build() (Renderer, error) {
+	n := &Layout{}
+	if l.ID != "" {
+		n.ID = l.ID
+	} else {
+		n.ID = nextInnerhtmlID()
 	}
 
 	// default classes
 	// TODO: add class based on type, pack, align
-	l.Classes = []string{
-		"x-dock",
-		"x-dock-vertical",
-		"x-managed-border",
-		// "x-layout",
-		// "x-layout",
-		// "x-component",
-		// "x-noborder-trbl",
-		// "x-header-position-top",
-		// "x-root",
+	classess := map[string]bool{
+		"x-dock":           true,
+		"x-dock-vertical":  true,
+		"x-managed-border": true,
+	}
+	// add classses from p, no duplicates
+	for _, c := range l.Classes {
+		if _, ok := classess[c]; !ok {
+			classess[c] = true
+		}
 	}
 
 	// TODO: if pack is end flex-end?
@@ -83,6 +91,7 @@ func (l *Layout) Render(w io.Writer) error {
 	// 	l.Body = NewBody(l.Items)
 	// }
 
+	// copy styles from og
 	styles := map[string]string{}
 	if len(l.Styles) > 0 {
 		styles = l.Styles
@@ -96,7 +105,7 @@ func (l *Layout) Render(w io.Writer) error {
 		}
 
 		// TODO: fix width asnd height!!!!
-		l.Classes = append(l.Classes, "x-hbox")
+		classess["x-hbox"] = true
 		// styles["width"] = "100%" // or something like this!!
 	}
 
@@ -108,21 +117,22 @@ func (l *Layout) Render(w io.Writer) error {
 			styles["flex-direction"] = "row-reverse"
 		}
 
-		l.Classes = append(l.Classes, "x-vbox")
-
+		classess["x-vbox"] = true
 		// .Styles["height"] = "100%" // or something like this!!
+	}
+	n.Styles = styles
+
+	n.Classes = []string{}
+	for k := range classess {
+		n.Classes = append(n.Classes, k)
 	}
 
 	// TODO: might have to check all items, if docked?
 
 	// TODO: parse l.Style and add to styles
-	l.Styles = styles
+	// l.Styles = styles
 
-	// body
-	// x-layout-body x-body-wrap-el x-layout-body-wrap-el x-layout-body-wrap-el x-component-body-wrap-el
-	// x-body-wrap-el x-layout-body-wrap-el x-layout-body-wrap-el x-component-body-wrap-el
-
-	return render(w, "layout", l)
+	return n, nil
 }
 
 // Debug ...

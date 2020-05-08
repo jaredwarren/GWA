@@ -46,64 +46,113 @@ type Panel struct {
 func (p *Panel) Render(w io.Writer) error {
 	fmt.Println("  render panel")
 
-	if p.ID == "" {
-		p.ID = nextPanelID()
+	np, err := p.Build()
+	if err != nil {
+		fmt.Println("[E] ", err)
+	}
+
+	return render(w, "panel", np)
+}
+
+// Build copys info to a new panel
+func (p *Panel) Build() (Renderer, error) {
+	np := &Panel{}
+	if p.ID != "" {
+		np.ID = p.ID
+	} else {
+		np.ID = nextPanelID()
 	}
 
 	// default classes
-	p.Classes = []string{
-		"x-panel",
-		"x-container",
-		"x-component",
-		"x-noborder-trbl",
-		"x-header-position-top",
-		"x-root",
+	classess := map[string]bool{
+		"x-panel":               true,
+		"x-container":           true,
+		"x-component":           true,
+		"x-noborder-trbl":       true,
+		"x-header-position-top": true,
+		"x-root":                true,
+	}
+	// add classses from p, no duplicates
+	for _, c := range p.Classes {
+		if _, ok := classess[c]; !ok {
+			classess[c] = true
+		}
 	}
 	if p.Shadow {
-		p.Classes = append(p.Classes, "x-shadow")
+		classess["x-shadow"] = true
 	}
+	// TODO: add other classess?
 
+	// copy styles from og
 	styles := map[string]string{}
 	if len(p.Styles) > 0 {
 		styles = p.Styles
 	}
 
+	// append new styles based on p's properties
+	// TODO: if docked, ignore width or height
 	if p.Width != 0 { // what if I want width to be 0px?
 		styles["width"] = fmt.Sprintf("%dpx", p.Width)
-		p.Classes = append(p.Classes, "x-widthed")
+		classess["x-widthed"] = true
 	}
 	if p.Height != 0 { // what if I want height to be 0px?
 		styles["height"] = fmt.Sprintf("%dpx", p.Height)
-		p.Classes = append(p.Classes, "x-heighted")
+		classess["x-heighted"] = true
 	}
 	if p.Border != "" {
 		styles["border"] = string(p.Border)
-		p.Classes = append(p.Classes, "x-managed-border")
+		classess["x-managed-border"] = true
 	}
-	p.Styles = styles
+	np.Styles = styles
+
+	np.Classes = []string{}
+	for k := range classess {
+		np.Classes = append(np.Classes, k)
+	}
+
+	// ITEMS
+	items := []Renderer{}
 
 	// HEADER
+	var header *Header
 	if p.Title != "" {
 		if p.Header == nil {
-			p.Header = NewHeader(p.Title)
+			header = NewHeader(p.Title)
 		} else if p.Header.Title == "" {
-			p.Header.Title = p.Title
+			header = p.Header
+			header.Title = p.Title
+			header.Docked = "top"
 		} // else header is all set, ignore Title attribute
+	}
+	// TODO: append header as docked item[0]
+	if header != nil {
+		// np.Header = header
+		items = append(items, header)
+	}
+
+	if len(p.Items) > 0 {
+		items = append(items, p.Items...)
 	}
 
 	// ITEMS
 	// HTML
 	if p.HTML != "" {
-		p.Items = append(p.Items, &Innerhtml{
+		items = append(items, &Innerhtml{
 			HTML: p.HTML,
 		})
 	}
 
-	items := layoutItems(p.Items)
+	// Build everything
+	// is := make([]Renderer, len(items))
+	// for i, item := range items {
+	// 	ii, _ := item.Build()
+	// 	is[i] = ii
+	// }
 
-	p.Items = items
-	return render(w, "panel", p)
+	np.Items = layoutItems(items)
+	return np, nil
 }
+
 func layoutItems(oi []Renderer) []Renderer {
 	if len(oi) < 2 {
 		return oi
@@ -115,6 +164,7 @@ func layoutItems(oi []Renderer) []Renderer {
 	}
 	var di Renderer
 	for _, i := range oi {
+		// i, _ = i.Build()
 		// already find docked item, append rest to body and move on
 		if di != nil {
 			bodyItems = append(bodyItems, i)
