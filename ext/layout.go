@@ -20,7 +20,7 @@ func NewLayout() *Layout {
 }
 
 // ItemList ...
-type ItemList []Renderer
+type ItemList Items
 
 // Layout ...
 type Layout struct {
@@ -28,20 +28,13 @@ type Layout struct {
 	Type    string // absolute, accordion, border, card, tab, hbox, vbox
 	Pack    string // start, end, center, space-between, space-arround, justify
 	Align   string // start, end, center, stretch
-	Items   []Renderer
+	Items   Items
 	Classes []string
 	Styles  map[string]string
 }
 
 // Render ...
 func (l *Layout) Render(w io.Writer) error {
-	fmt.Println("  render layout")
-	nl, _ := l.Build()
-	return render(w, "layout", nl)
-}
-
-// Build copys info to a new panel
-func (l *Layout) Build() (Renderer, error) {
 	n := &Layout{}
 	if l.ID != "" {
 		n.ID = l.ID
@@ -65,32 +58,6 @@ func (l *Layout) Build() (Renderer, error) {
 
 	// TODO: if pack is end flex-end?
 
-	// // HTML
-	// if l.HTML != "" {
-	// 	l.Items = append(l.Items, &Layout{
-	// 		HTML: l.HTML,
-	// 	})
-	// }
-
-	// // ITEMS
-	// if len(l.Items) == 0 {
-	// 	// debug add dummy html
-	// 	html := l.HTML
-	// 	if html == "" {
-	// 		html = ":("
-	// 	}
-	// 	l.Items = []Renderer{
-	// 		&Layout{
-	// 			HTML: html,
-	// 		},
-	// 	}
-	// }
-
-	// // BODY
-	// if l.Body == nil {
-	// 	l.Body = NewBody(l.Items)
-	// }
-
 	// copy styles from og
 	styles := map[string]string{}
 	if len(l.Styles) > 0 {
@@ -104,7 +71,7 @@ func (l *Layout) Build() (Renderer, error) {
 			styles["flex-direction"] = "column-reverse"
 		}
 
-		// TODO: fix width asnd height!!!!
+		// TODO: fix width and height!!!!
 		classess["x-hbox"] = true
 		// styles["width"] = "100%" // or something like this!!
 	}
@@ -127,17 +94,10 @@ func (l *Layout) Build() (Renderer, error) {
 		n.Classes = append(n.Classes, k)
 	}
 
-	// TODO: might have to check all items, if docked?
+	// don't layout again just copy items
+	n.Items = l.Items
 
-	// TODO: parse l.Style and add to styles
-	// l.Styles = styles
-
-	return n, nil
-}
-
-// Debug ...
-func (l *Layout) Debug() {
-
+	return render(w, "layout", n)
 }
 
 func nextLayoutID() string {

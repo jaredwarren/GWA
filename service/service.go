@@ -43,7 +43,10 @@ func (c *Controller) Home(w http.ResponseWriter, r *http.Request) {
 	// html = t1()
 	buf := new(bytes.Buffer)
 	// item.Render(buf)
-	t3(buf)
+	err := t3(buf)
+	if err != nil {
+		fmt.Println("[EE]", err)
+	}
 	// html = t2()
 
 	templates := template.Must(template.ParseFiles("templates/base.html"))
@@ -93,7 +96,7 @@ func t3(w io.Writer) error {
 
 	*/
 	panel := &ext.Panel{
-		Title:  "Panel",
+		Title:  "Panel Title!",
 		Width:  300,
 		Height: 200,
 		Shadow: true,

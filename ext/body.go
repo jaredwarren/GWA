@@ -10,7 +10,7 @@ var (
 )
 
 // NewBody ...
-func NewBody(items []Renderer) *Body {
+func NewBody(items Items) *Body {
 	return &Body{
 		ID:    nextBodyID(),
 		Items: items,
@@ -21,28 +21,23 @@ func NewBody(items []Renderer) *Body {
 // Body ...
 type Body struct {
 	ID    string
-	Items []Renderer
+	Items Items
 }
 
 // Render ...
 func (b *Body) Render(w io.Writer) error {
-	nb, _ := b.Build()
-	return render(w, "body", nb)
-}
-
-// Build copys info to a new panel
-func (b *Body) Build() (Renderer, error) {
+	fmt.Print("  render Body:")
 	n := &Body{}
 	if b.ID != "" {
 		n.ID = b.ID
 	} else {
 		n.ID = nextInnerhtmlID()
 	}
-	return n, nil
+	fmt.Println(n.ID) // show id
+	// n.Items = b.Items
+	n.Items = LayoutItems(b.Items)
+	return render(w, "body", n)
 }
-
-// Debug ...
-func (b *Body) Debug() {}
 
 func nextBodyID() string {
 	id := fmt.Sprintf("%d", bodyID)

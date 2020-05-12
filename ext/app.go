@@ -47,7 +47,7 @@ type Column struct {
 // 	Title     string
 // 	IconClass string
 // 	Layout    string
-// 	Items     []Renderer
+// 	Items     Items
 // 	// Tables []Table
 // }
 
@@ -55,11 +55,12 @@ type Column struct {
 type Store struct {
 }
 
+// Items ...
+type Items []Renderer
+
 // Renderer ...
 type Renderer interface {
 	Render(w io.Writer) error
-	Build() (Renderer, error)
-	Debug()
 }
 
 func render(w io.Writer, t string, data interface{}) error {
@@ -70,6 +71,9 @@ func render(w io.Writer, t string, data interface{}) error {
 			return template.HTML(buf.String())
 		},
 	}
+	// fmt.Println("\n~~~~~~", t, "~~~~~~~~")
+	// Debug(data.(Renderer))
+	// fmt.Println("~~~~~~~~~~~~~~")
 
 	// buf := new(bytes.Buffer)
 	tpl, err := template.New("base").Funcs(funcMap).ParseFiles(fmt.Sprintf("templates/%s.html", t))
@@ -93,10 +97,10 @@ func Debug(p Renderer) {
 func d(p Renderer, depth int) {
 	pd(depth)
 	typeof := reflect.TypeOf(p).String()
-	fmt.Print("| ", typeof)
 
 	switch typeof {
 	case "*ext.Panel":
+		fmt.Print("| ", "Panel", p.(*Panel).ID)
 		fmt.Println("  html:", p.(*Panel).HTML)
 		pd(depth)
 		fmt.Println("  style:", p.(*Panel).Styles)
@@ -104,21 +108,26 @@ func d(p Renderer, depth int) {
 			d(i, depth+1)
 		}
 	case "*ext.Innerhtml":
+		fmt.Print("| ", "Innerhtml", p.(*Innerhtml).ID)
 		fmt.Println("  html:", p.(*Innerhtml).HTML)
 	case "*ext.Layout":
+		fmt.Print("| ", "Layout", p.(*Layout).ID)
 		fmt.Println(":", p.(*Layout).Type)
 		for _, i := range p.(*Layout).Items {
 			d(i, depth+1)
 		}
 	case "*ext.Body":
+		fmt.Print("| ", "Body", p.(*Body).ID)
 		fmt.Println("")
 		for _, i := range p.(*Body).Items {
 			d(i, depth+1)
 		}
 	case "*ext.Header":
+		fmt.Print("| ", "Header", p.(*Header).ID)
 		fmt.Println("::", p.(*Header).Title)
 	default:
-		fmt.Println("")
+		fmt.Print("| ?", typeof)
+		fmt.Println(" ?")
 	}
 }
 
@@ -126,4 +135,83 @@ func pd(depth int) {
 	for i := 0; i < depth; i++ {
 		fmt.Print(" ")
 	}
+}
+
+// LayoutItems ...
+func LayoutItems(oi Items) Items {
+	// if there's only one item there's nothing to layout
+	if len(oi) < 2 {
+		return oi
+	}
+
+	bodyItems := Items{}
+	layout := &Layout{
+		Items: Items{},
+	}
+	var di Renderer
+	for _, i := range oi {
+		// i, _ = i.Build()
+		// already find docked item, append rest to body and move on
+		if di != nil {
+			bodyItems = append(bodyItems, i)
+			continue
+		}
+
+		// Look for docked item
+		// if not dockable add to items, else add to body
+		d, ok := i.(Dockable)
+		if ok {
+			docked := d.GetDocked()
+			if docked != "" {
+				switch docked {
+				case "top":
+					layout.Type = "hbox"
+					layout.Pack = "start"
+					// i goes first
+				case "bottom":
+					layout.Type = "hbox"
+					layout.Pack = "end"
+					// i goes last
+				case "left":
+					layout.Type = "vbox"
+					layout.Pack = "start"
+					// i goes first
+				case "right":
+					layout.Type = "vbox"
+					layout.Pack = "end"
+					// i goes last
+				default:
+					// what to do
+				}
+				layout.Align = "start" // should always be start?
+				di = i
+			} else {
+				bodyItems = append(bodyItems, i)
+			}
+		} else {
+			bodyItems = append(bodyItems, i)
+		}
+	}
+
+	// Nothing to layout
+	if di != nil {
+		layout.Items = Items{di}
+
+		// Add body items to layout
+		if len(bodyItems) > 0 {
+			// fmt.Printf("=%d=  ", len(bodyItems))
+			// lbi := len(bodyItems)
+			// recurse on body
+			// bi := LayoutItems(bodyItems)
+			// if len(bi) > 0 {
+			layout.Items = append(layout.Items, NewBody(bodyItems))
+			// } // else nothing?
+		} // else what to do????? add a blank one?
+	} else {
+		return oi
+		// layout.Items = Items{}
+	}
+
+	// add rest
+	return Items{layout}
 }

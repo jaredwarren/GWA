@@ -17,6 +17,7 @@ var (
 		"\n☐ json to panel (use xtype)",
 		"\n☐ make header 'docked'",
 		"\n☐ fix things so they work in test\n",
+		"\n☐ make 'app' class that's full-screen\n",
 	}
 )
 
@@ -24,8 +25,8 @@ func main() {
 	fmt.Println("TODO:", TODO)
 
 	// testJSON()
-	// serve()
-	db()
+	serve()
+	// db()
 }
 
 // TODO:
@@ -114,7 +115,7 @@ func db() {
 		// 	Flex: 1,
 		// },
 		HTML: "test",
-		Items: []ext.Renderer{
+		Items: ext.Items{
 			&ext.Panel{
 				HTML:   "My panel text...1",
 				Docked: "top",
@@ -129,10 +130,8 @@ func db() {
 			},
 		},
 	}
+	fmt.Printf("%+v\n", p)
 	// ext.Debug(p)
-	np, _ := p.Build()
-	fmt.Println("-------")
-	ext.Debug(np)
 
 	// d, err := json.Marshal(np)
 	// if err != nil {

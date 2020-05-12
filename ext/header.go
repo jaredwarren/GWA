@@ -45,48 +45,23 @@ type Header struct {
 
 // Render ...
 func (h *Header) Render(w io.Writer) error {
-	// // nothing to render
-	// if h.Title == "" && len(h.Items) == 0 {
-	// 	return nil
-	// }
-
-	// if h.ID == "" {
-	// 	h.ID = nextHeaderID()
-	// }
-
-	// // default classes
-	// h.Classes = []string{
-	// 	"x-panelheader",
-	// 	"x-container",
-	// 	"x-component",
-	// 	"x-docked-top",
-	// 	"x-horizontal",
-	// 	"x-noborder-tr",
-	// }
-	nh, _ := h.Build()
-	return render(w, "header", nh)
-}
-
-// Build copys info to a new panel
-func (h *Header) Build() (Renderer, error) {
+	fmt.Print("  render header:")
 	n := &Header{}
 	if h.ID != "" {
 		n.ID = h.ID
 	} else {
 		n.ID = nextInnerhtmlID()
 	}
+	fmt.Println(n.ID) // show id
 	n.Title = h.Title
 	n.Docked = h.Docked
-	return n, nil
+	return render(w, "header", n)
 }
 
 // GetDocked ...
 func (h *Header) GetDocked() string {
 	return h.Docked
 }
-
-// Debug ...
-func (h *Header) Debug() {}
 
 func nextHeaderID() string {
 	id := fmt.Sprintf("%d", headerID)
