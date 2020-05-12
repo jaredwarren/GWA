@@ -72,13 +72,8 @@
 
 <div id="ext-panel-{{.ID}}" data-componentid="ext-panel-{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}"
     data-xid="2" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
-    {{if .Header}}
-    {{Render .Header}}
+    {{range $item := $.Items}}
+    {{Render $item}}
     {{end}}
-    <div class="x-body-wrap-el x-panel-body-wrap-el x-container-body-wrap-el x-component-body-wrap-el">
-        {{range $item := $.Items}}
-        {{Render $item}}
-        {{end}}
-    </div>
 </div>
 {{end}}

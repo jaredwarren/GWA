@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"reflect"
 )
 
 // Application ...
@@ -82,4 +83,47 @@ func render(w io.Writer, t string, data interface{}) error {
 // Dockable ...
 type Dockable interface {
 	GetDocked() string
+}
+
+// Debug ...
+func Debug(p Renderer) {
+	d(p, 0)
+}
+
+func d(p Renderer, depth int) {
+	pd(depth)
+	typeof := reflect.TypeOf(p).String()
+	fmt.Print("| ", typeof)
+
+	switch typeof {
+	case "*ext.Panel":
+		fmt.Println("  html:", p.(*Panel).HTML)
+		pd(depth)
+		fmt.Println("  style:", p.(*Panel).Styles)
+		for _, i := range p.(*Panel).Items {
+			d(i, depth+1)
+		}
+	case "*ext.Innerhtml":
+		fmt.Println("  html:", p.(*Innerhtml).HTML)
+	case "*ext.Layout":
+		fmt.Println(":", p.(*Layout).Type)
+		for _, i := range p.(*Layout).Items {
+			d(i, depth+1)
+		}
+	case "*ext.Body":
+		fmt.Println("")
+		for _, i := range p.(*Body).Items {
+			d(i, depth+1)
+		}
+	case "*ext.Header":
+		fmt.Println("::", p.(*Header).Title)
+	default:
+		fmt.Println("")
+	}
+}
+
+func pd(depth int) {
+	for i := 0; i < depth; i++ {
+		fmt.Print(" ")
+	}
 }

@@ -56,7 +56,9 @@ func (p *Panel) Render(w io.Writer) error {
 
 // Build copys info to a new panel
 func (p *Panel) Build() (Renderer, error) {
-	np := &Panel{}
+	np := &Panel{
+		Docked: p.Docked,
+	}
 	if p.ID != "" {
 		np.ID = p.ID
 	} else {
@@ -143,17 +145,30 @@ func (p *Panel) Build() (Renderer, error) {
 	}
 
 	// Build everything
-	// is := make([]Renderer, len(items))
-	// for i, item := range items {
-	// 	ii, _ := item.Build()
-	// 	is[i] = ii
-	// }
+	//*/
 
-	np.Items = layoutItems(items)
+	is := make([]Renderer, len(items))
+	for i, item := range items {
+		ii, _ := item.Build()
+		// fmt.Printf("... %+v --> %s\n", ii, reflect.TypeOf(ii))
+		is[i] = ii
+	}
+	// np.Items = is
+	np.Items = LayoutItems(is)
+	/*/
+	for j, i := range items {
+		fmt.Printf(" (%d)======> %+v\n", j, i)
+	}
+	np.Items = items
+	np.Items = LayoutItems(items)
+	//*/
+
 	return np, nil
 }
 
-func layoutItems(oi []Renderer) []Renderer {
+// LayoutItems ...
+func LayoutItems(oi []Renderer) []Renderer {
+	// if there's only one item there's nothing to layout
 	if len(oi) < 2 {
 		return oi
 	}
@@ -216,7 +231,7 @@ func layoutItems(oi []Renderer) []Renderer {
 			// fmt.Printf("=%d=  ", len(bodyItems))
 			// lbi := len(bodyItems)
 			// recurse on body
-			bi := layoutItems(bodyItems)
+			bi := LayoutItems(bodyItems)
 			if len(bi) > 0 {
 				layout.Items = append(layout.Items, NewBody(bi))
 			} // else nothing?

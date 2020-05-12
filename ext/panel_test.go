@@ -144,7 +144,13 @@ func TestRender(t *testing.T) {
 		t.Errorf("no np")
 	}
 
-	fmt.Printf("%+v\n", np.(*Panel))
+	Debug(np)
+	t.Errorf("no np")
+	return
+
+	for j, i := range np.(*Panel).Items {
+		fmt.Printf(" (%d)---> %+v\n", j, i)
+	}
 
 	layout := np.(*Panel).Items[0].(*Layout)
 	if len(layout.Items) != 2 {

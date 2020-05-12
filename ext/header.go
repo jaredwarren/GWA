@@ -75,6 +75,8 @@ func (h *Header) Build() (Renderer, error) {
 	} else {
 		n.ID = nextInnerhtmlID()
 	}
+	n.Title = h.Title
+	n.Docked = h.Docked
 	return n, nil
 }
 

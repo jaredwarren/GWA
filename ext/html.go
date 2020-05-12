@@ -37,6 +37,7 @@ func (h *Innerhtml) Build() (Renderer, error) {
 	} else {
 		nh.ID = nextInnerhtmlID()
 	}
+	nh.HTML = h.HTML
 	return nh, nil
 }
 

@@ -24,7 +24,8 @@ func main() {
 	fmt.Println("TODO:", TODO)
 
 	// testJSON()
-	serve()
+	// serve()
+	db()
 }
 
 // TODO:
@@ -79,4 +80,63 @@ func testJSON() {
 		}
 
 	}
+}
+
+func db() {
+	// p := &ext.Panel{
+	// 	Title: "main",
+	// 	Items: []ext.Renderer{
+	// 		&ext.Panel{
+	// 			HTML:   "Test panel 0",
+	// 			Width:  200,
+	// 			Height: 200,
+	// 			Shadow: true,
+	// 			Border: "1px solid red",
+	// 		},
+	// 		&ext.Panel{
+	// 			HTML:   "Docked panel 1",
+	// 			Docked: "left",
+	// 		},
+	// 		&ext.Panel{
+	// 			HTML: "test panel 2",
+	// 		},
+	// 	},
+	// }
+	p := &ext.Panel{
+		Title:  "Header Title",
+		Width:  300,
+		Height: 200,
+		Shadow: true,
+		// Scrollable: true,
+		// Padding: 20,
+		Layout: "hbox",
+		// Defaults: []interface{}{
+		// 	Flex: 1,
+		// },
+		HTML: "test",
+		Items: []ext.Renderer{
+			&ext.Panel{
+				HTML:   "My panel text...1",
+				Docked: "top",
+				// Style:  "",
+				Flex: 1, // because default doesn't work
+			},
+			&ext.Panel{
+				HTML:   "My panel text...2",
+				Docked: "right",
+				// Style:  "",
+				Flex: 1, // because default doesn't work
+			},
+		},
+	}
+	// ext.Debug(p)
+	np, _ := p.Build()
+	fmt.Println("-------")
+	ext.Debug(np)
+
+	// d, err := json.Marshal(np)
+	// if err != nil {
+	// 	fmt.Printf("%+v\n", err)
+	// }
+	// fmt.Printf("%+v\n", string(d))
 }
