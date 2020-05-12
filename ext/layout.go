@@ -35,11 +35,8 @@ type Layout struct {
 
 // Render ...
 func (l *Layout) Render(w io.Writer) error {
-	n := &Layout{}
-	if l.ID != "" {
-		n.ID = l.ID
-	} else {
-		n.ID = nextInnerhtmlID()
+	if l.ID == "" {
+		l.ID = nextInnerhtmlID()
 	}
 
 	// default classes
@@ -87,17 +84,19 @@ func (l *Layout) Render(w io.Writer) error {
 		classess["x-vbox"] = true
 		// .Styles["height"] = "100%" // or something like this!!
 	}
-	n.Styles = styles
 
-	n.Classes = []string{}
+	nClasses := []string{}
 	for k := range classess {
-		n.Classes = append(n.Classes, k)
+		nClasses = append(nClasses, k)
 	}
 
-	// don't layout again just copy items
-	n.Items = l.Items
-
-	return render(w, "layout", n)
+	div := &DivContainer{
+		ID:      fmt.Sprintf("body-%s", l.ID),
+		Styles:  styles,
+		Classes: nClasses,
+		Items:   l.Items, // don't layout again just copy items
+	}
+	return renderDiv(w, "body", div)
 }
 
 func nextLayoutID() string {

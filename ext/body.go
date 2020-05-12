@@ -26,17 +26,22 @@ type Body struct {
 
 // Render ...
 func (b *Body) Render(w io.Writer) error {
-	fmt.Print("  render Body:")
-	n := &Body{}
-	if b.ID != "" {
-		n.ID = b.ID
-	} else {
-		n.ID = nextInnerhtmlID()
+	if b.ID == "" {
+		b.ID = nextInnerhtmlID()
 	}
-	fmt.Println(n.ID) // show id
-	// n.Items = b.Items
-	n.Items = LayoutItems(b.Items)
-	return render(w, "body", n)
+
+	div := &DivContainer{
+		ID: fmt.Sprintf("body-%s", b.ID),
+		Classes: []string{
+			"x-panel-body",
+			"x-body-wrap-el",
+			"x-panel-body-wrap-el",
+			"x-container-body-wrap-el",
+			"x-component-body-wrap-el",
+		},
+		Items: LayoutItems(b.Items),
+	}
+	return renderDiv(w, "body", div)
 }
 
 func nextBodyID() string {

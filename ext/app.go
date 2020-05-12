@@ -215,3 +215,38 @@ func LayoutItems(oi Items) Items {
 	// add rest
 	return Items{layout}
 }
+
+func renderDiv(w io.Writer, t string, data *DivContainer) error {
+	tpl, err := template.New("base").Funcs(template.FuncMap{
+		"Render": func(item Renderer) template.HTML {
+			buf := new(bytes.Buffer)
+			item.Render(w)
+			return template.HTML(buf.String())
+		},
+	}).Parse(`<div id="{{.ID}}" 
+	class="{{range $c:= $.Classes}}{{$c}} {{end}}" 
+	style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
+			{{range $item := $.Items}}
+			{{Render $item}}
+			{{end}}
+		</div>`)
+	if err != nil {
+		fmt.Printf("[E] %s parse error:%s\n", t, err)
+	}
+
+	templates := template.Must(tpl, err)
+	err = templates.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		fmt.Printf("[E] %s execute error:%s\n", t, err)
+	}
+	return err
+}
+
+// DivContainer ...
+type DivContainer struct {
+	ID            string
+	Items         Items
+	ContainerType string
+	Classes       []string
+	Styles        map[string]string
+}

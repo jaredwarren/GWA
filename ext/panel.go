@@ -44,13 +44,8 @@ type Panel struct {
 
 // Render ...
 func (p *Panel) Render(w io.Writer) error {
-	np := &Panel{
-		Docked: p.Docked,
-	}
-	if p.ID != "" {
-		np.ID = p.ID
-	} else {
-		np.ID = nextPanelID()
+	if p.ID == "" {
+		p.ID = nextPanelID()
 	}
 
 	// default classes
@@ -93,11 +88,10 @@ func (p *Panel) Render(w io.Writer) error {
 		styles["border"] = string(p.Border)
 		classess["x-managed-border"] = true
 	}
-	np.Styles = styles
 
-	np.Classes = []string{}
+	npClasses := []string{}
 	for k := range classess {
-		np.Classes = append(np.Classes, k)
+		npClasses = append(npClasses, k)
 	}
 
 	// ITEMS
@@ -136,8 +130,13 @@ func (p *Panel) Render(w io.Writer) error {
 	// // This layout should only apply to non-docked items!
 
 	// Ad layout to all items
-	np.Items = LayoutItems(items)
-	return render(w, "panel", np)
+	div := &DivContainer{
+		ID:      fmt.Sprintf("panel-%s", p.ID),
+		Classes: npClasses,
+		Styles:  styles,
+		Items:   LayoutItems(items),
+	}
+	return renderDiv(w, "body", div)
 }
 
 func nextPanelID() string {

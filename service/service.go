@@ -62,39 +62,6 @@ func (c *Controller) Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func t3(w io.Writer) error {
-	/*
-			Ext.create({
-		    xtype: 'panel',
-
-		    renderTo: Ext.getBody(),
-		    width: 300,
-		    height: 200,
-
-		    shadow: true,
-		    scrollable: true,
-		    padding: 20,
-
-		    title: 'Panel',
-
-		    layout: 'hbox',
-
-		    defaults: {
-		        flex: 1
-			},
-			html: "test",
-
-		    items: [{
-		        html: 'My panel text...',
-		        style: '',
-		        docked: "left"
-		    },{
-		        html: 'My panel text...',
-		        style: '',
-		        docked: "left"
-		    }]
-		});
-
-	*/
 	panel := &ext.Panel{
 		Title:  "Panel Title!",
 		Width:  300,
@@ -125,55 +92,3 @@ func t3(w io.Writer) error {
 
 	return panel.Render(w)
 }
-
-// func t1() template.HTML {
-
-// 	panel := &ext.Panel{
-// 		Title: "test2",
-// 		Items: []ext.Renderer{
-// 			&ext.Panel{
-// 				HTML: template.HTML("<div>This is the sub body!</div>"),
-// 				Items: []ext.Renderer{&ext.Button{
-// 					Text:      "howdy",
-// 					Handler:   "alert('yo')",
-// 					IconClass: "fas fa-home",
-// 				}},
-// 			},
-// 			&ext.Panel{
-// 				Docked: "bottom",
-// 				Items: []ext.Renderer{&ext.Button{
-// 					Text:      "howdy",
-// 					Handler:   "alert('yo')",
-// 					IconClass: "fas fa-home",
-// 				}},
-// 			},
-// 		},
-// 	}
-
-// 	return panel.Render()
-// }
-
-// func t2() template.HTML {
-
-// 	panel := ext.NewPanel()
-// 	panel.Title = "test"
-// 	// panel.HTML = template.HTML("<div>This is the body!</div>")
-
-// 	sp := ext.NewPanel()
-// 	// panel.Title = "test"
-// 	sp.HTML = template.HTML("<div>This is the sub body!</div>")
-// 	sp.Items = []ext.Renderer{&ext.Button{
-// 		Text:      "howdy",
-// 		Handler:   "alert('yo')",
-// 		IconClass: "fas fa-home",
-// 	}}
-
-// 	panel.Items = []ext.Renderer{sp}
-// 	return panel.Render()
-// }
-
-// func render(item ext.Renderer) {
-// 	fmt.Printf("%s -> %+v\n", reflect.TypeOf(item), item)
-
-// 	fmt.Printf("\n<html>%s</html>\n", item.Render())
-// }
