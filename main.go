@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/jaredwarren/app"
+	"github.com/jaredwarren/goext/app"
 	"github.com/jaredwarren/goext/ext"
 	"github.com/jaredwarren/goext/service"
 )
@@ -15,8 +15,8 @@ var (
 	// TODO ...
 	TODO = []string{
 		"\n☐ json to panel (use xtype)",
-		"\n☐ make header 'docked'", // I think this is done, but header template needs cleaned up
-		"\n☐ fix things so they work in test\n",
+		"\n☐ make header 'docked'",              // I think this is done, but header template needs cleaned up
+		"\n☐ fix things so they work in test\n", // almost done
 		"\n☐ make 'app' class that's full-screen, merge with native app\n",
 	}
 )
@@ -25,8 +25,56 @@ func main() {
 	fmt.Println("TODO:", TODO)
 
 	// testJSON()
-	serve()
+	native()
+	// serve()
 	// db()
+}
+
+func native() {
+	app := &ext.Application{
+		Name: "my app",
+		MainView: &ext.Panel{
+			Title:  "Panel Title!",
+			Width:  300,
+			Height: 200,
+			Shadow: true,
+			// Scrollable: true,
+			// Padding: 20,
+			Layout: "hbox",
+			// Defaults: []interface{}{
+			// 	Flex: 1,
+			// },
+			HTML: "test",
+			Items: []ext.Renderer{
+				&ext.Panel{
+					HTML:   "My panel text...1",
+					Docked: "top",
+					// Style:  "",
+					Flex: 1, // because default doesn't work
+				},
+				&ext.Panel{
+					HTML:   "My panel text...2",
+					Docked: "right",
+					// Style:  "",
+					Flex: 1, // because default doesn't work
+				},
+			},
+		},
+	}
+	done := app.Launch()
+
+	// app := app.NewNative(nil)
+	// defer app.Close()
+	// service.Register(app.Service)
+
+	// app.Run()
+
+	// done := <-app.Exit
+	if done != nil {
+		fmt.Println("Something Happened, Bye!", done)
+	} else {
+		fmt.Println("Good Bye!")
+	}
 }
 
 // TODO:

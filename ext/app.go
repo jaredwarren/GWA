@@ -5,7 +5,16 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"mime"
+	"net/http"
+	"net/url"
+	"os"
+	"os/signal"
+	"path/filepath"
 	"reflect"
+
+	"github.com/gorilla/mux"
+	"github.com/zserge/lorca"
 )
 
 // Application ...
@@ -14,16 +23,102 @@ type Application struct {
 	// Schemas map[string]Schema
 	// Using   string // seledted schema
 	MainView Renderer
+
+	Width  int
+	Height int
+
+	Exit chan error
+
+	service *Service
+	cwd     string
+	ui      lorca.UI
+}
+
+// Launch ...
+func (a *Application) Launch() error {
+
+	// setup web service
+	addr := "127.0.0.1:8083" // TODO: find open port
+	u, _ := url.Parse(fmt.Sprintf("http://%s", addr))
+	app := &Service{
+		Name: a.Name,
+		Exit: make(chan error),
+		Home: u,
+	}
+
+	// Interrupt handler (ctrl-c)
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+	go func() {
+		done := <-signalChan
+		app.Exit <- fmt.Errorf("%s", done)
+	}()
+
+	// Start Server
+	app.Mux = mux.NewRouter()
+	app.Mux.HandleFunc("/static/{filename:[a-zA-Z0-9\\.\\-\\_\\/]*}", FileServer)
+	app.Mux.HandleFunc("/health-check", HealthCheck).Methods("GET", "HEAD")
+	app.Mux.HandleFunc("/", a.Home).Methods("GET")
+	app.Server = &http.Server{
+		Addr:    addr,
+		Handler: app.Mux,
+	}
+	go func() {
+		// TODO: add https, stuff...
+		fmt.Printf("HTTP server listening on %q\n", addr)
+		app.Exit <- app.Server.ListenAndServe()
+	}()
+
+	a.service = app
+
+	done := <-a.Exit
+	return done
+}
+
+// Home serves a file with mime type header
+func (a *Application) Home(w http.ResponseWriter, r *http.Request) {
+	err := a.Render(w)
+	if err != nil {
+		fmt.Println("[[E]]:", err)
+	}
+}
+
+// FileServer serves a file with mime type header
+func FileServer(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	file := vars["filename"]
+	w.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext(file)))
+	http.ServeFile(w, r, "./static/"+file)
+}
+
+// HealthCheck return ok
+func HealthCheck(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
 }
 
 // Render ...
 func (a *Application) Render(w io.Writer) error {
+	buf := new(bytes.Buffer)
+
+	// render main view
 	div := &DivContainer{
 		ID:      fmt.Sprintf("app"),
 		Classes: []string{"x-viewport"},
 		Items:   Items{a.MainView},
 	}
-	return renderDiv(w, div)
+	err := renderDiv(buf, div)
+	if err != nil {
+		fmt.Println("[E] render:", err)
+	}
+
+	// render full html
+	return render(w, "base", &struct {
+		Title string
+		Body  template.HTML
+	}{
+		Title: a.Name,
+		Body:  template.HTML(buf.String()),
+	})
 }
 
 // TabPanel ...
