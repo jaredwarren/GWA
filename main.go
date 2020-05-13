@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/jaredwarren/goext/app"
+	"github.com/jaredwarren/app"
 	"github.com/jaredwarren/goext/ext"
 	"github.com/jaredwarren/goext/service"
 )
