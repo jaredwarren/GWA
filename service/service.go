@@ -62,33 +62,36 @@ func (c *Controller) Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func t3(w io.Writer) error {
-	panel := &ext.Panel{
-		Title:  "Panel Title!",
-		Width:  300,
-		Height: 200,
-		Shadow: true,
-		// Scrollable: true,
-		// Padding: 20,
-		Layout: "hbox",
-		// Defaults: []interface{}{
-		// 	Flex: 1,
-		// },
-		HTML: "test",
-		Items: []ext.Renderer{
-			&ext.Panel{
-				HTML:   "My panel text...1",
-				Docked: "top",
-				// Style:  "",
-				Flex: 1, // because default doesn't work
-			},
-			&ext.Panel{
-				HTML:   "My panel text...2",
-				Docked: "right",
-				// Style:  "",
-				Flex: 1, // because default doesn't work
+	app := &ext.Application{
+		Name: "my app",
+		MainView: &ext.Panel{
+			Title:  "Panel Title!",
+			Width:  300,
+			Height: 200,
+			Shadow: true,
+			// Scrollable: true,
+			// Padding: 20,
+			Layout: "hbox",
+			// Defaults: []interface{}{
+			// 	Flex: 1,
+			// },
+			HTML: "test",
+			Items: []ext.Renderer{
+				&ext.Panel{
+					HTML:   "My panel text...1",
+					Docked: "top",
+					// Style:  "",
+					Flex: 1, // because default doesn't work
+				},
+				&ext.Panel{
+					HTML:   "My panel text...2",
+					Docked: "right",
+					// Style:  "",
+					Flex: 1, // because default doesn't work
+				},
 			},
 		},
 	}
 
-	return panel.Render(w)
+	return app.Render(w)
 }

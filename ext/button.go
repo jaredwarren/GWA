@@ -21,7 +21,7 @@ type Button struct {
 // Render ...
 func (b *Button) Render(w io.Writer) error {
 	nb, _ := b.Build()
-	return render(w, "button", nb)
+	return renderTemplate(w, "button", nb)
 }
 
 // Build copys info to a new panel

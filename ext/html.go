@@ -25,18 +25,32 @@ type Innerhtml struct {
 
 // Render ...
 func (h *Innerhtml) Render(w io.Writer) error {
-	n := &Innerhtml{}
-	if h.ID != "" {
-		n.ID = h.ID
-	} else {
-		n.ID = nextInnerhtmlID()
+	if h.ID == "" {
+		h.ID = nextInnerhtmlID()
 	}
-	n.HTML = h.HTML
-	return render(w, "innerhtml", n)
+
+	div := &DivContainer{
+		ID:      fmt.Sprintf("innerhtml-%s", h.ID),
+		Classes: []string{"x-innerhtml"},
+		Items: Items{&RawHTML{
+			HTML: h.HTML,
+		}}, // don't layout again just copy items
+	}
+	return renderDiv(w, div)
 }
 
 func nextInnerhtmlID() string {
 	id := fmt.Sprintf("%d", innerhtmlID)
 	innerhtmlID++
 	return id
+}
+
+// RawHTML ...
+type RawHTML struct {
+	HTML template.HTML
+}
+
+// Render ...
+func (h *RawHTML) Render(w io.Writer) error {
+	return render(w, `{{$.HTML}}`, h)
 }

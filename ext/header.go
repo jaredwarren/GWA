@@ -55,7 +55,7 @@ func (h *Header) Render(w io.Writer) error {
 	fmt.Println(n.ID) // show id
 	n.Title = h.Title
 	n.Docked = h.Docked
-	return render(w, "header", n)
+	return renderTemplate(w, "header", n)
 }
 
 // GetDocked ...

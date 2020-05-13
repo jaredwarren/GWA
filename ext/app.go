@@ -13,13 +13,17 @@ type Application struct {
 	Name string
 	// Schemas map[string]Schema
 	// Using   string // seledted schema
-	MainView *View
+	MainView Renderer
 }
 
-// View ...
-type View struct {
-	// Name   string
-	// Tables []Table
+// Render ...
+func (a *Application) Render(w io.Writer) error {
+	div := &DivContainer{
+		ID:      fmt.Sprintf("app"),
+		Classes: []string{"x-viewport"},
+		Items:   Items{a.MainView},
+	}
+	return renderDiv(w, div)
 }
 
 // TabPanel ...
@@ -42,15 +46,6 @@ type Column struct {
 	Width     int
 }
 
-// // Item ...
-// type Item struct {
-// 	Title     string
-// 	IconClass string
-// 	Layout    string
-// 	Items     Items
-// 	// Tables []Table
-// }
-
 // Store ...
 type Store struct {
 }
@@ -58,12 +53,24 @@ type Store struct {
 // Items ...
 type Items []Renderer
 
-// Renderer ...
+// Render ...
+func (i Items) Render(w io.Writer) error {
+	for _, item := range i {
+		err := item.Render(w)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Renderer an item that can be rendered
 type Renderer interface {
 	Render(w io.Writer) error
 }
 
-func render(w io.Writer, t string, data interface{}) error {
+// Render a template
+func renderTemplate(w io.Writer, t string, data interface{}) error {
 	funcMap := template.FuncMap{
 		"Render": func(item Renderer) template.HTML {
 			buf := new(bytes.Buffer)
@@ -71,11 +78,6 @@ func render(w io.Writer, t string, data interface{}) error {
 			return template.HTML(buf.String())
 		},
 	}
-	// fmt.Println("\n~~~~~~", t, "~~~~~~~~")
-	// Debug(data.(Renderer))
-	// fmt.Println("~~~~~~~~~~~~~~")
-
-	// buf := new(bytes.Buffer)
 	tpl, err := template.New("base").Funcs(funcMap).ParseFiles(fmt.Sprintf("templates/%s.html", t))
 	if err != nil {
 		fmt.Printf("[E] %s parse error:%s\n", t, err)
@@ -84,12 +86,12 @@ func render(w io.Writer, t string, data interface{}) error {
 	return templates.ExecuteTemplate(w, "base", data)
 }
 
-// Dockable ...
+// Dockable item that can be docked
 type Dockable interface {
 	GetDocked() string
 }
 
-// Debug ...
+// Debug print crap out
 func Debug(p Renderer) {
 	d(p, 0)
 }
@@ -131,6 +133,7 @@ func d(p Renderer, depth int) {
 	}
 }
 
+// Print depth spaces
 func pd(depth int) {
 	for i := 0; i < depth; i++ {
 		fmt.Print(" ")
@@ -150,7 +153,6 @@ func LayoutItems(oi Items) Items {
 	}
 	var di Renderer
 	for _, i := range oi {
-		// i, _ = i.Build()
 		// already find docked item, append rest to body and move on
 		if di != nil {
 			bodyItems = append(bodyItems, i)
@@ -196,53 +198,46 @@ func LayoutItems(oi Items) Items {
 	// Nothing to layout
 	if di != nil {
 		layout.Items = Items{di}
-
 		// Add body items to layout
 		if len(bodyItems) > 0 {
-			// fmt.Printf("=%d=  ", len(bodyItems))
-			// lbi := len(bodyItems)
-			// recurse on body
-			// bi := LayoutItems(bodyItems)
-			// if len(bi) > 0 {
 			layout.Items = append(layout.Items, NewBody(bodyItems))
-			// } // else nothing?
 		} // else what to do????? add a blank one?
 	} else {
 		return oi
-		// layout.Items = Items{}
 	}
 
 	// add rest
 	return Items{layout}
 }
 
-func renderDiv(w io.Writer, t string, data *DivContainer) error {
+func renderDiv(w io.Writer, data *DivContainer) error {
+	return render(w, `<div id="{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
+			{{range $item := $.Items}}
+			{{Render $item}}
+			{{end}}</div>`, data)
+}
+
+func render(w io.Writer, t string, data interface{}) error {
 	tpl, err := template.New("base").Funcs(template.FuncMap{
 		"Render": func(item Renderer) template.HTML {
 			buf := new(bytes.Buffer)
 			item.Render(w)
 			return template.HTML(buf.String())
 		},
-	}).Parse(`<div id="{{.ID}}" 
-	class="{{range $c:= $.Classes}}{{$c}} {{end}}" 
-	style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
-			{{range $item := $.Items}}
-			{{Render $item}}
-			{{end}}
-		</div>`)
+	}).Parse(t)
 	if err != nil {
-		fmt.Printf("[E] %s parse error:%s\n", t, err)
+		fmt.Printf("[E] parse error:%s\n", err)
 	}
 
 	templates := template.Must(tpl, err)
 	err = templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		fmt.Printf("[E] %s execute error:%s\n", t, err)
+		fmt.Printf("[E] execute error:%s\n", err)
 	}
 	return err
 }
 
-// DivContainer ...
+// DivContainer gerneric div container
 type DivContainer struct {
 	ID            string
 	Items         Items

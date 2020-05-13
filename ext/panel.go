@@ -31,7 +31,6 @@ type Panel struct {
 	Width     int // float?
 	Height    int // float?
 	Items     Items
-	RenderTo  string // type???
 	Header    *Header
 	Body      *Body
 	Border    template.CSS
@@ -40,6 +39,7 @@ type Panel struct {
 	Shadow    bool
 	Classes   []string
 	Styles    map[string]string
+	// RenderTo  string // type???
 }
 
 // Render ...
@@ -50,14 +50,9 @@ func (p *Panel) Render(w io.Writer) error {
 
 	// default classes
 	classess := map[string]bool{
-		"x-panel":               true,
-		"x-container":           true,
-		"x-component":           true,
-		"x-noborder-trbl":       true,
-		"x-header-position-top": true,
-		"x-root":                true,
+		"x-panel": true,
 	}
-	// add classses from p, no duplicates
+	// copy classes
 	for _, c := range p.Classes {
 		if _, ok := classess[c]; !ok {
 			classess[c] = true
@@ -66,21 +61,21 @@ func (p *Panel) Render(w io.Writer) error {
 	if p.Shadow {
 		classess["x-shadow"] = true
 	}
-	// TODO: add other classess?
 
-	// copy styles from og
+	// copy styles
 	styles := map[string]string{}
 	if len(p.Styles) > 0 {
 		styles = p.Styles
 	}
 
 	// append new styles based on p's properties
-	// TODO: if docked, ignore width or height
-	if p.Width != 0 { // what if I want width to be 0px?
+	// what if I want width to be 0px?
+	if p.Width != 0 && p.Docked != "top" && p.Docked != "bottom" {
 		styles["width"] = fmt.Sprintf("%dpx", p.Width)
 		classess["x-widthed"] = true
 	}
-	if p.Height != 0 { // what if I want height to be 0px?
+	// what if I want height to be 0px?
+	if p.Height != 0 && p.Docked != "left" && p.Docked != "right" {
 		styles["height"] = fmt.Sprintf("%dpx", p.Height)
 		classess["x-heighted"] = true
 	}
@@ -89,6 +84,7 @@ func (p *Panel) Render(w io.Writer) error {
 		classess["x-managed-border"] = true
 	}
 
+	// convert class back to array
 	npClasses := []string{}
 	for k := range classess {
 		npClasses = append(npClasses, k)
@@ -108,17 +104,16 @@ func (p *Panel) Render(w io.Writer) error {
 			header.Docked = "top"
 		} // else header is all set, ignore Title attribute
 	}
-	// TODO: append header as docked item[0]
+	// append header as docked item[0]
 	if header != nil {
-		// np.Header = header
 		items = append(items, header)
 	}
 
+	// append rest of items
 	if len(p.Items) > 0 {
 		items = append(items, p.Items...)
 	}
 
-	// ITEMS
 	// HTML
 	if p.HTML != "" {
 		items = append(items, &Innerhtml{
@@ -129,14 +124,13 @@ func (p *Panel) Render(w io.Writer) error {
 	// TODO: if panel has "layout" set that up here
 	// // This layout should only apply to non-docked items!
 
-	// Ad layout to all items
 	div := &DivContainer{
 		ID:      fmt.Sprintf("panel-%s", p.ID),
 		Classes: npClasses,
 		Styles:  styles,
 		Items:   LayoutItems(items),
 	}
-	return renderDiv(w, "body", div)
+	return renderDiv(w, div)
 }
 
 func nextPanelID() string {

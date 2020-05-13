@@ -13,14 +13,8 @@ var (
 func NewLayout() *Layout {
 	return &Layout{
 		ID: nextLayoutID(),
-		// Width:  300,
-		// Height: 200,
-		// Border: template.CSS("1px solid lightgrey"),
 	}
 }
-
-// ItemList ...
-type ItemList Items
 
 // Layout ...
 type Layout struct {
@@ -40,11 +34,8 @@ func (l *Layout) Render(w io.Writer) error {
 	}
 
 	// default classes
-	// TODO: add class based on type, pack, align
 	classess := map[string]bool{
-		"x-dock":           true,
-		"x-dock-vertical":  true,
-		"x-managed-border": true,
+		"x-layout": true,
 	}
 	// add classses from p, no duplicates
 	for _, c := range l.Classes {
@@ -67,8 +58,6 @@ func (l *Layout) Render(w io.Writer) error {
 		} else if l.Pack == "end" {
 			styles["flex-direction"] = "column-reverse"
 		}
-
-		// TODO: fix width and height!!!!
 		classess["x-hbox"] = true
 		// styles["width"] = "100%" // or something like this!!
 	}
@@ -96,7 +85,7 @@ func (l *Layout) Render(w io.Writer) error {
 		Classes: nClasses,
 		Items:   l.Items, // don't layout again just copy items
 	}
-	return renderDiv(w, "body", div)
+	return renderDiv(w, div)
 }
 
 func nextLayoutID() string {

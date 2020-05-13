@@ -15,9 +15,9 @@ var (
 	// TODO ...
 	TODO = []string{
 		"\n☐ json to panel (use xtype)",
-		"\n☐ make header 'docked'",
+		"\n☐ make header 'docked'", // I think this is done, but header template needs cleaned up
 		"\n☐ fix things so they work in test\n",
-		"\n☐ make 'app' class that's full-screen\n",
+		"\n☐ make 'app' class that's full-screen, merge with native app\n",
 	}
 )
 
