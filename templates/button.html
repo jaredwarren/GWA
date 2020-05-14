@@ -28,18 +28,11 @@
         background: rgb(66, 184, 221);
         /* this is a light blue */
     }
+    button {
+        width: fit-content;
+    }
 </style>
 
-<script>
-    // {{if .Handler}}
-    $(document).ready(function () {
-        $('#ext-button-{{.ID}}').click(function (event) {
-            {{.Handler}};
-        });
-    });
-    // {{end}}
-</script>
-
-<button id="ext-button-{{.ID}}" class="pure-button">{{if .IconClass}}<i class="{{.IconClass}}"></i>
+<button id="ext-button-{{.ID}}" {{if .Handler}}onclick="{{.Handler}}()"{{end}} class="pure-button">{{if .IconClass}}<i class="{{.IconClass}}"></i>
     {{end}}{{.Text}}</button>
 {{end}}

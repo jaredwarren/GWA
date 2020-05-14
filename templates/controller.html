@@ -1,0 +1,9 @@
+{{define "base"}}
+{{ range $key, $value := .Handlers }}
+<script>
+    function {{$key}}(){
+        alert("{{$key}} called");
+    }
+</script>
+{{ end }}
+{{end}}

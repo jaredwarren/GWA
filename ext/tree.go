@@ -15,6 +15,7 @@ type Tree struct {
 	// Handler   template.JS
 	// UI        string // TODO
 	// IconClass string
+	Parent Renderer
 }
 
 // Render ...
@@ -27,6 +28,11 @@ func (t *Tree) Render() template.HTML {
 	templates := template.Must(template.ParseFiles("templates/button.html"))
 	templates.ExecuteTemplate(buf, "base", t)
 	return template.HTML(buf.String())
+}
+
+// SetParent ...
+func (t *Tree) SetParent(p Renderer) {
+	t.Parent = p
 }
 
 // TreeStore ...

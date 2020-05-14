@@ -23,22 +23,24 @@ func NewPanel() *Panel {
 
 // Panel ...
 type Panel struct {
-	ID        string // how to auto generate
-	Title     string
-	IconClass string
-	Layout    string
-	HTML      template.HTML
-	Width     int // float?
-	Height    int // float?
-	Items     Items
-	Header    *Header
-	Body      *Body
-	Border    template.CSS
-	Docked    string // top, bottom, left, right, ''
-	Flex      int
-	Shadow    bool
-	Classes   []string
-	Styles    map[string]string
+	ID         string // how to auto generate
+	Title      string
+	IconClass  string
+	Layout     string
+	HTML       template.HTML
+	Width      int // float?
+	Height     int // float?
+	Items      Items
+	Header     *Header
+	Body       *Body
+	Border     template.CSS
+	Docked     string // top, bottom, left, right, ''
+	Flex       int
+	Shadow     bool
+	Classes    []string
+	Styles     map[string]string
+	Controller *Controller
+	Parent     Renderer
 	// RenderTo  string // type???
 }
 
@@ -109,6 +111,11 @@ func (p *Panel) Render(w io.Writer) error {
 		items = append(items, header)
 	}
 
+	// CONTROLLER
+	if p.Controller != nil {
+		items = append(items, p.Controller)
+	}
+
 	// append rest of items
 	if len(p.Items) > 0 {
 		items = append(items, p.Items...)
@@ -123,6 +130,13 @@ func (p *Panel) Render(w io.Writer) error {
 
 	// TODO: if panel has "layout" set that up here
 	// // This layout should only apply to non-docked items!
+
+	for _, i := range items {
+		c, ok := i.(Child)
+		if ok {
+			c.SetParent(p)
+		}
+	}
 
 	div := &DivContainer{
 		ID:      fmt.Sprintf("panel-%s", p.ID),
@@ -142,4 +156,9 @@ func nextPanelID() string {
 // GetDocked ...
 func (p *Panel) GetDocked() string {
 	return p.Docked
+}
+
+// SetParent ...
+func (p *Panel) SetParent(parent Renderer) {
+	p.Parent = parent
 }

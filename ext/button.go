@@ -1,6 +1,7 @@
 package ext
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 )
@@ -11,29 +12,31 @@ var (
 
 // Button ...
 type Button struct {
-	ID        string
-	Text      template.HTML
+	ID   string
+	Text template.HTML
+	// TODO: use ui.Eval()
+	// Handler   template.JS
 	Handler   template.JS
 	UI        string // TODO
 	IconClass string
+	Parent    Renderer
 }
 
 // Render ...
 func (b *Button) Render(w io.Writer) error {
-	nb, _ := b.Build()
-	return renderTemplate(w, "button", nb)
-}
-
-// Build copys info to a new panel
-func (b *Button) Build() (*Button, error) {
-	n := &Button{}
-	if b.ID != "" {
-		n.ID = b.ID
-	} else {
-		n.ID = nextInnerhtmlID()
+	if b.ID == "" {
+		b.ID = nextButtonID()
 	}
-	return n, nil
+	return renderTemplate(w, "button", b)
 }
 
-// Debug ...
-func (b *Button) Debug() {}
+// SetParent ...
+func (b *Button) SetParent(p Renderer) {
+	b.Parent = p
+}
+
+func nextButtonID() string {
+	id := fmt.Sprintf("%d", buttonID)
+	buttonID++
+	return id
+}
