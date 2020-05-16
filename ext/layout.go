@@ -80,7 +80,7 @@ func (l *Layout) Render(w io.Writer) error {
 	}
 
 	div := &DivContainer{
-		ID:      fmt.Sprintf("body-%s", l.ID),
+		ID:      l.ID,
 		Styles:  styles,
 		Classes: nClasses,
 		Items:   l.Items, // don't layout again just copy items
@@ -89,7 +89,7 @@ func (l *Layout) Render(w io.Writer) error {
 }
 
 func nextLayoutID() string {
-	id := fmt.Sprintf("%d", layoutID)
+	id := fmt.Sprintf("layout-%d", layoutID)
 	layoutID++
 	return id
 }

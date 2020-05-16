@@ -31,7 +31,7 @@ func (b *Body) Render(w io.Writer) error {
 	}
 
 	div := &DivContainer{
-		ID: fmt.Sprintf("body-%s", b.ID),
+		ID: b.ID,
 		Classes: []string{
 			"x-panel-body",
 			"x-body-wrap-el",
@@ -45,7 +45,7 @@ func (b *Body) Render(w io.Writer) error {
 }
 
 func nextBodyID() string {
-	id := fmt.Sprintf("%d", bodyID)
+	id := fmt.Sprintf("body-%d", bodyID)
 	bodyID++
 	return id
 }

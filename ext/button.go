@@ -36,7 +36,7 @@ func (b *Button) SetParent(p Renderer) {
 }
 
 func nextButtonID() string {
-	id := fmt.Sprintf("%d", buttonID)
+	id := fmt.Sprintf("button-%d", buttonID)
 	buttonID++
 	return id
 }

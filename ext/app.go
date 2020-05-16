@@ -22,8 +22,7 @@ type Service struct {
 	Mux    *mux.Router
 	Exit   chan error
 	Server *http.Server
-	// Controllers []Controller
-	Home *url.URL
+	Home   *url.URL
 	// Config      *WebConfig
 }
 
@@ -32,7 +31,8 @@ type Application struct {
 	Name string
 	// Schemas map[string]Schema
 	// Using   string // seledted schema
-	MainView Renderer
+	MainView    Renderer
+	Controllers []*Controller
 
 	Width  int
 	Height int
@@ -171,17 +171,28 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 
 // Render ...
 func (a *Application) Render(w io.Writer) error {
+	items := Items{}
+	// set controllers ui, so ui.Bind works
+	for _, c := range a.Controllers {
+		c.ui = a.ui
+		items = append(items, c)
+	}
+
 	// render main view
+	items = append(items, a.MainView)
 	div := &DivContainer{
 		ID:      fmt.Sprintf("app"),
 		Classes: []string{"x-viewport"},
-		Items:   Items{a.MainView},
+		Styles:  map[string]string{},
+		Items:   items,
 	}
 	buf := new(bytes.Buffer)
 	err := renderDiv(buf, div)
 	if err != nil {
 		fmt.Println("[E] render:", err)
 	}
+
+	fmt.Println("...")
 
 	// render full html
 	return renderTemplate(w, "base", &struct {

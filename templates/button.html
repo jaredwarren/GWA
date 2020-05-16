@@ -33,6 +33,6 @@
     }
 </style>
 
-<button id="ext-button-{{.ID}}" {{if .Handler}}onclick="{{.Handler}}()"{{end}} class="pure-button">{{if .IconClass}}<i class="{{.IconClass}}"></i>
+<button id="{{.ID}}" {{if .Handler}}onclick="{{.Handler}}('{{.ID}}')"{{end}} class="pure-button">{{if .IconClass}}<i class="{{.IconClass}}"></i>
     {{end}}{{.Text}}</button>
 {{end}}

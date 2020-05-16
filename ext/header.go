@@ -15,12 +15,9 @@ func NewHeader(title string) *Header {
 	return &Header{
 		ID:     nextHeaderID(),
 		Title:  title,
-		Width:  300,
-		Height: 200,
 		Border: template.CSS("1px solid lightgrey"),
 		Docked: "top",
 	}
-
 }
 
 // Header ...
@@ -34,7 +31,6 @@ type Header struct {
 	Width     int // float?
 	Height    int // float?
 	Items     []Renderer
-	RenderTo  string // type???
 	Header    *Header
 	Border    template.CSS
 	Docked    string // top, bottom, left, right
@@ -45,17 +41,11 @@ type Header struct {
 
 // Render ...
 func (h *Header) Render(w io.Writer) error {
-	fmt.Print("  render header:")
-	n := &Header{}
-	if h.ID != "" {
-		n.ID = h.ID
-	} else {
-		n.ID = nextInnerhtmlID()
+	if h.ID == "" {
+		h.ID = nextInnerhtmlID()
 	}
-	fmt.Println(n.ID) // show id
-	n.Title = h.Title
-	n.Docked = h.Docked
-	return renderTemplate(w, "header", n)
+	// TODO: add stuff from header.html as items
+	return renderTemplate(w, "header", h)
 }
 
 // GetDocked ...
@@ -64,7 +54,7 @@ func (h *Header) GetDocked() string {
 }
 
 func nextHeaderID() string {
-	id := fmt.Sprintf("%d", headerID)
+	id := fmt.Sprintf("header-%d", headerID)
 	headerID++
 	return id
 }

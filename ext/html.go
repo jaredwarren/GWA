@@ -30,7 +30,7 @@ func (h *Innerhtml) Render(w io.Writer) error {
 	}
 
 	div := &DivContainer{
-		ID:      fmt.Sprintf("innerhtml-%s", h.ID),
+		ID:      h.ID,
 		Classes: []string{"x-innerhtml"},
 		Items: Items{&RawHTML{
 			HTML: h.HTML,
@@ -40,7 +40,7 @@ func (h *Innerhtml) Render(w io.Writer) error {
 }
 
 func nextInnerhtmlID() string {
-	id := fmt.Sprintf("%d", innerhtmlID)
+	id := fmt.Sprintf("innerhtml-%d", innerhtmlID)
 	innerhtmlID++
 	return id
 }

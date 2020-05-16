@@ -112,6 +112,7 @@ func (p *Panel) Render(w io.Writer) error {
 	}
 
 	// CONTROLLER
+	// TODO: controllers don't work kere yet
 	if p.Controller != nil {
 		items = append(items, p.Controller)
 	}
@@ -139,7 +140,7 @@ func (p *Panel) Render(w io.Writer) error {
 	}
 
 	div := &DivContainer{
-		ID:      fmt.Sprintf("panel-%s", p.ID),
+		ID:      p.ID,
 		Classes: npClasses,
 		Styles:  styles,
 		Items:   LayoutItems(items),
@@ -148,7 +149,7 @@ func (p *Panel) Render(w io.Writer) error {
 }
 
 func nextPanelID() string {
-	id := fmt.Sprintf("%d", panelID)
+	id := fmt.Sprintf("panel-%d", panelID)
 	panelID++
 	return id
 }
