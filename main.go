@@ -17,7 +17,7 @@ var (
 		"\n☐ figure a way to re-attach to web service (keep running in backgorund (might have to be saparate app))\n",
 		"\n☐ Figure a way to update single panel without page reload!!!\n",
 		"\n☐ figure way to make controller work -> pass ui to controller, ui.bind?\n",
-		"\n☐ STORE\n",
+		"\n☐ store (get data from ui.bind->ui.eval? or ajax, something...)\n",
 		"\n☐ fix handler problem with type (might have to make all the same!), wonder if I can override json marshaller?, if not then what?\n",
 		"\n☐ \n",
 	}
@@ -26,20 +26,22 @@ var (
 	mainController = &ext.Controller{
 		Handlers: ext.Handlers{
 			"btnClick": func(id string) {
-				fmt.Println("Button Clicked!!!!")
+				fmt.Print("Button Clicked:")
 				fmt.Printf("   %+v\n", id)
+
+				// Button update test
 				btn := app.Find(id)
 				if btn != nil {
 					btn.(*ext.Button).Text = "Clicked!!!"
 					app.Update(btn)
 				}
 
-				// // Update Tree Test
-				// t := app.Find("tree-0")
-				// if t != nil {
-				// 	t.(*ext.Tree).Root.Text = "UPDATED"
-				// 	app.Update(t)
-				// }
+				// Update Tree Test
+				t := app.Find("tree-0")
+				if t != nil {
+					t.(*ext.Tree).Root.Text = "UPDATED"
+					app.Update(t)
+				}
 			},
 		},
 	}
