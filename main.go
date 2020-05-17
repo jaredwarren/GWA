@@ -28,18 +28,28 @@ var (
 			"btnClick": func(id string) {
 				fmt.Println("Button Clicked!!!!")
 				fmt.Printf("   %+v\n", id)
-				// for k, a := range args {
-				// 	fmt.Printf("   %+v -> %+v\n", k, a)
+				btn := app.Find(id)
+				if btn != nil {
+					btn.(*ext.Button).Text = "Clicked!!!"
+					app.Update(btn)
+				}
+
+				// // Update Tree Test
+				// t := app.Find("tree-0")
+				// if t != nil {
+				// 	t.(*ext.Tree).Root.Text = "UPDATED"
+				// 	app.Update(t)
 				// }
 			},
 		},
 	}
+	app *ext.Application
 )
 
 func main() {
 	fmt.Println("TODO:", TODO)
 
-	app := &ext.Application{
+	app = &ext.Application{
 		Name: "my app",
 		Controllers: []*ext.Controller{
 			mainController,
@@ -54,10 +64,10 @@ func main() {
 					HTML:   "My panel text...1",
 					Docked: "top",
 				},
-				&ext.Panel{
-					HTML:   "My panel text...2",
-					Docked: "right",
-				},
+				// &ext.Panel{
+				// 	HTML:   "My panel text...2",
+				// 	Docked: "right",
+				// },
 				&ext.Panel{
 					HTML:   "My panel text...3",
 					Docked: "left",
@@ -69,6 +79,27 @@ func main() {
 				&ext.Button{
 					Text:    "Click Here",
 					Handler: "btnClick",
+				},
+				&ext.Tree{
+					Docked:   "right",
+					ShowRoot: true,
+					Root: &ext.TreeNode{
+						Text: "root",
+						Children: []*ext.TreeNode{
+							&ext.TreeNode{
+								Text: "c1",
+							},
+							&ext.TreeNode{
+								Text: "c2",
+								Children: []*ext.TreeNode{
+									&ext.TreeNode{
+										Text:     "c2c1",
+										Children: []*ext.TreeNode{},
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},

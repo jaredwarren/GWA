@@ -44,6 +44,11 @@ func (b *Body) Render(w io.Writer) error {
 	return renderDiv(w, div)
 }
 
+// GetID ...
+func (b *Body) GetID() string {
+	return b.ID
+}
+
 func nextBodyID() string {
 	id := fmt.Sprintf("body-%d", bodyID)
 	bodyID++

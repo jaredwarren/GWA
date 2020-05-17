@@ -1,0 +1,13 @@
+{{define "base"}}
+
+<ul id="{{.ID}}">
+{{if .ShowRoot}}
+    {{Render .Root}}
+{{else}}
+    {{ range $key, $c := .Root.Children }}
+    {{Render $c}}
+    {{ end }}
+{{end}}
+</ul>
+
+{{end}}

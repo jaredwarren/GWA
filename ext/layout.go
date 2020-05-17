@@ -88,6 +88,11 @@ func (l *Layout) Render(w io.Writer) error {
 	return renderDiv(w, div)
 }
 
+// GetID ...
+func (l *Layout) GetID() string {
+	return l.ID
+}
+
 func nextLayoutID() string {
 	id := fmt.Sprintf("layout-%d", layoutID)
 	layoutID++

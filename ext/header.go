@@ -48,6 +48,11 @@ func (h *Header) Render(w io.Writer) error {
 	return renderTemplate(w, "header", h)
 }
 
+// GetID ...
+func (h *Header) GetID() string {
+	return h.ID
+}
+
 // GetDocked ...
 func (h *Header) GetDocked() string {
 	return h.Docked

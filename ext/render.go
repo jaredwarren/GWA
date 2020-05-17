@@ -24,6 +24,7 @@ func (i Items) Render(w io.Writer) error {
 // Renderer an item that can be rendered
 type Renderer interface {
 	Render(w io.Writer) error
+	GetID() string
 }
 
 // Render a template
@@ -31,7 +32,7 @@ func renderTemplate(w io.Writer, t string, data interface{}) error {
 	funcMap := template.FuncMap{
 		"Render": func(item Renderer) template.HTML {
 			buf := new(bytes.Buffer)
-			item.Render(w)
+			item.Render(buf)
 			return template.HTML(buf.String())
 		},
 	}

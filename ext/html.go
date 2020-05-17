@@ -39,6 +39,11 @@ func (h *Innerhtml) Render(w io.Writer) error {
 	return renderDiv(w, div)
 }
 
+// GetID ...
+func (h *Innerhtml) GetID() string {
+	return h.ID
+}
+
 func nextInnerhtmlID() string {
 	id := fmt.Sprintf("innerhtml-%d", innerhtmlID)
 	innerhtmlID++
@@ -53,4 +58,9 @@ type RawHTML struct {
 // Render ...
 func (h *RawHTML) Render(w io.Writer) error {
 	return render(w, `{{$.HTML}}`, h)
+}
+
+// GetID ...
+func (h *RawHTML) GetID() string {
+	return ""
 }

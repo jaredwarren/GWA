@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/zserge/lorca"
@@ -192,8 +193,6 @@ func (a *Application) Render(w io.Writer) error {
 		fmt.Println("[E] render:", err)
 	}
 
-	fmt.Println("...")
-
 	// render full html
 	return renderTemplate(w, "base", &struct {
 		Title string
@@ -204,12 +203,55 @@ func (a *Application) Render(w io.Writer) error {
 	})
 }
 
+// Update ...
+func (a *Application) Update(r Renderer) error {
+	buf := new(bytes.Buffer)
+	err := r.Render(buf)
+	if err != nil {
+		return err
+	}
+	js := strings.Replace(buf.String(), "\n", "", -1)
+	js = strings.Replace(js, "'", "\\'", -1)
+	js = fmt.Sprintf(`document.getElementById('%s').outerHTML = '%s';`, r.GetID(), js)
+	fmt.Println(js)
+	a.ui.Eval(js)
+	return nil
+}
+
+// Find ...
+func (a *Application) Find(id string) Renderer {
+	return find(id, a.MainView)
+}
+
+func find(id string, node Renderer) Renderer {
+	ni, ok := node.(Parent)
+	if !ok {
+		return nil
+	}
+	items := ni.GetChildren()
+	for _, i := range items {
+		if i.GetID() == id {
+			return i
+		}
+		r := find(id, i)
+		if r != nil {
+			return r
+		}
+	}
+	return nil
+}
+
 // Dockable item that can be docked
 type Dockable interface {
 	GetDocked() string
 }
 
-// Child item that can be docked
+// Child ...
 type Child interface {
 	SetParent(p Renderer)
+}
+
+// Parent ...
+type Parent interface {
+	GetChildren() Items
 }

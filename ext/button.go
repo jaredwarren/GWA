@@ -30,6 +30,11 @@ func (b *Button) Render(w io.Writer) error {
 	return renderTemplate(w, "button", b)
 }
 
+// GetID ...
+func (b *Button) GetID() string {
+	return b.ID
+}
+
 // SetParent ...
 func (b *Button) SetParent(p Renderer) {
 	b.Parent = p

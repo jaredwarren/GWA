@@ -163,3 +163,13 @@ func (p *Panel) GetDocked() string {
 func (p *Panel) SetParent(parent Renderer) {
 	p.Parent = parent
 }
+
+// GetChildren ...
+func (p *Panel) GetChildren() Items {
+	return p.Items
+}
+
+// GetID ...
+func (p *Panel) GetID() string {
+	return p.ID
+}

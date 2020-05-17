@@ -1,0 +1,15 @@
+{{define "base"}}
+
+<li>
+{{$numChildren := len .Children}}
+<span>{{.Text}}</span>
+{{if gt $numChildren 0}}
+    <ul>
+        {{ range $key, $c := .Children }}
+        {{Render $c}}
+        {{ end }}
+    </ul>
+{{end}}
+</li>
+
+{{end}}

@@ -44,3 +44,8 @@ func (c *Controller) Render(w io.Writer) error {
 	return nil
 	// return renderTemplate(w, "controller", c)
 }
+
+// GetID ...
+func (c *Controller) GetID() string {
+	return ""
+}

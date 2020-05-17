@@ -1,33 +1,35 @@
 package ext
 
 import (
-	"bytes"
 	"fmt"
-	"html/template"
-	"net/url"
+	"io"
+)
+
+var (
+	treeID = 0
 )
 
 // Tree ...
 type Tree struct {
-	ID    string
-	Store *TreeStore
-	// Text      template.HTML
-	// Handler   template.JS
-	// UI        string // TODO
-	// IconClass string
-	Parent Renderer
+	ID       string
+	ShowRoot bool
+	Parent   Renderer
+	Root     *TreeNode
+	Docked   string
 }
 
 // Render ...
-func (t *Tree) Render() template.HTML {
+func (t *Tree) Render(w io.Writer) error {
+	if t.ID == "" {
+		t.ID = nextTreeID()
+	}
 
-	t.ID = fmt.Sprintf("%d", buttonID)
-	buttonID++
+	return renderTemplate(w, "tree", t)
+}
 
-	buf := new(bytes.Buffer)
-	templates := template.Must(template.ParseFiles("templates/button.html"))
-	templates.ExecuteTemplate(buf, "base", t)
-	return template.HTML(buf.String())
+// GetID ...
+func (t *Tree) GetID() string {
+	return t.ID
 }
 
 // SetParent ...
@@ -35,35 +37,36 @@ func (t *Tree) SetParent(p Renderer) {
 	t.Parent = p
 }
 
-// TreeStore ...
-type TreeStore struct {
-	ID         string
-	AutoLoad   bool
-	Root       *Node  // TODO: type
-	Proxy      *Proxy // TODO: type
-	Sorters    string // TODO type
-	FolderSort bool   // TODO:
+// GetDocked ...
+func (t *Tree) GetDocked() string {
+	return t.Docked
 }
 
-// Proxy ...
-type Proxy struct {
-	Type   string
-	URL    *url.URL
-	reader *Reader
-}
-
-// Reader ...
-type Reader struct {
-	Type         string
-	RootProperty string
-}
-
-// Node ...
-type Node struct {
-	Text      string
+// TreeNode ...
+type TreeNode struct {
 	ID        string
+	Text      string
 	Expanded  bool
-	leaf      bool
+	Leaf      bool
 	IconClass string
-	Children  []*Node
+	Children  []*TreeNode
+}
+
+// Render ...
+func (tn *TreeNode) Render(w io.Writer) error {
+	// if tn.ID == "" {
+	// 	tn.ID = nextTreeID()
+	// }
+	return renderTemplate(w, "treenode", tn)
+}
+
+// GetID ...
+func (tn *TreeNode) GetID() string {
+	return tn.ID
+}
+
+func nextTreeID() string {
+	id := fmt.Sprintf("tree-%d", treeID)
+	treeID++
+	return id
 }
