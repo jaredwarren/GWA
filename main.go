@@ -83,6 +83,26 @@ func main() {
 					Text:    "Click Here",
 					Handler: "btnClick",
 				},
+				&ext.Form{
+					// Text:    "Click Here",
+					// Handler: "btnClick",
+					Method: "post",
+					Action: "",
+					// Handler: "", //
+
+					Items: []ext.Renderer{
+						&ext.Fieldset{
+							Legend: "Form Legend",
+							Items: []ext.Renderer{
+								&ext.Input{
+									Label: "User Name:",
+									Name:  "username",
+									Type:  "text",
+								},
+							},
+						},
+					},
+				},
 				&ext.Tree{
 					Docked:   "right",
 					ShowRoot: true,

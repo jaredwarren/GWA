@@ -115,6 +115,7 @@ func LayoutItems(oi Items) Items {
 }
 
 func renderDiv(w io.Writer, data *DivContainer) error {
+	// TODO: combine class and style into "Attributes"
 	return render(w, `<div id="{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
 			{{range $item := $.Items}}
 			{{Render $item}}
@@ -125,7 +126,10 @@ func render(w io.Writer, t string, data interface{}) error {
 	tpl, err := template.New("base").Funcs(template.FuncMap{
 		"Render": func(item Renderer) template.HTML {
 			buf := new(bytes.Buffer)
-			item.Render(w)
+			err := item.Render(buf)
+			if err != nil {
+				fmt.Printf("[E] html Render:%s\n", err)
+			}
 			return template.HTML(buf.String())
 		},
 	}).Parse(t)
@@ -136,7 +140,7 @@ func render(w io.Writer, t string, data interface{}) error {
 	templates := template.Must(tpl, err)
 	err = templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		fmt.Printf("[E] execute error:%s\n", err)
+		fmt.Printf("[E] execute error:%s - %+v - %+v\n", err, data, t)
 	}
 	return err
 }
@@ -148,4 +152,33 @@ type DivContainer struct {
 	ContainerType string
 	Classes       []string
 	Styles        map[string]string
+	Attributes    map[string]template.HTMLAttr
+}
+
+// Element gerneric div container
+type Element struct {
+	Name        string
+	SelfClosing bool
+	Attributes  map[string]template.HTMLAttr
+	InnerHTML   template.HTML
+}
+
+// Render ...
+func (e *Element) Render(w io.Writer) error {
+	name := string(e.Name)
+
+	// Force Type attribute
+	if t, ok := e.Attributes["type"]; ok {
+		name = fmt.Sprintf("%s type=\"%s\"", name, t)
+	}
+
+	if e.SelfClosing {
+		return render(w, fmt.Sprintf(`<%s {{range $k, $s:= $.Attributes}}{{$k}}="{{$s}}" {{end}}>`, name), e)
+	}
+	return render(w, fmt.Sprintf(`<%s {{range $k, $s:= $.Attributes}}{{$k}}="{{$s}}" {{end}}>{{.InnerHTML}}</%s>`, name, name), e)
+}
+
+// GetID ...
+func (e *Element) GetID() string {
+	return ""
 }
