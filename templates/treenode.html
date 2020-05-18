@@ -2,13 +2,15 @@
 
 <li>
 {{$numChildren := len .Children}}
-<span>{{.Text}}</span>
 {{if gt $numChildren 0}}
+    <span><i class="fas fa-folder-open"></i> {{.Text}}</span>
     <ul>
         {{ range $key, $c := .Children }}
         {{Render $c}}
         {{ end }}
     </ul>
+{{else}}
+<span>{{if ne .IconClass ""}}<i class="{{.IconClass}}"></i> {{end}}{{.Text}}</span>
 {{end}}
 </li>
 

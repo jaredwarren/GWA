@@ -19,6 +19,7 @@ var (
 		"\n☐ figure way to make controller work -> pass ui to controller, ui.bind?\n",
 		"\n☐ store (get data from ui.bind->ui.eval? or ajax, something...)\n",
 		"\n☐ fix handler problem with type (might have to make all the same!), wonder if I can override json marshaller?, if not then what?\n",
+		"\n☐ create FORM and figure  good way to submit to controller\n",
 		"\n☐ \n",
 	}
 
@@ -87,9 +88,11 @@ func main() {
 					ShowRoot: true,
 					Root: &ext.TreeNode{
 						Text: "root",
+						// IconClass: "fas fa-folder-open",
 						Children: []*ext.TreeNode{
 							&ext.TreeNode{
-								Text: "c1",
+								Text:      "c1",
+								IconClass: "fas fa-fighter-jet",
 							},
 							&ext.TreeNode{
 								Text: "c2",

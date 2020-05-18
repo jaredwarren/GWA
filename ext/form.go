@@ -6,62 +6,62 @@ import (
 )
 
 var (
-	treeID = 0
+	formID = 0
 )
 
-// Tree ...
-type Tree struct {
+// Form ...
+type Form struct {
 	ID       string
 	ShowRoot bool
 	Parent   Renderer
-	Root     *TreeNode
+	Root     *FormNode
 	Docked   string
 	Classes  []string
 	Styles   map[string]string
 }
 
 // Render ...
-func (t *Tree) Render(w io.Writer) error {
+func (t *Form) Render(w io.Writer) error {
 	if t.ID == "" {
-		t.ID = nextTreeID()
+		t.ID = nextFormID()
 	}
 	if t.Styles == nil {
 		t.Styles = map[string]string{}
 	}
-	t.Classes = append(t.Classes, "x-tree")
+	t.Classes = append(t.Classes, "x-form")
 	t.Styles["border"] = "1px solid lightgrey"
-	return renderTemplate(w, "tree", t)
+	return renderTemplate(w, "form", t)
 }
 
 // GetID ...
-func (t *Tree) GetID() string {
+func (t *Form) GetID() string {
 	return t.ID
 }
 
 // SetParent ...
-func (t *Tree) SetParent(p Renderer) {
+func (t *Form) SetParent(p Renderer) {
 	t.Parent = p
 }
 
 // GetDocked ...
-func (t *Tree) GetDocked() string {
+func (t *Form) GetDocked() string {
 	return t.Docked
 }
 
-// TreeNode ...
-type TreeNode struct {
+// FormNode ...
+type FormNode struct {
 	ID        string
 	Text      string
 	Expanded  bool
 	Leaf      bool
 	IconClass string
-	Children  []*TreeNode
+	Children  []*FormNode
 }
 
 // Render ...
-func (tn *TreeNode) Render(w io.Writer) error {
+func (tn *FormNode) Render(w io.Writer) error {
 	// if tn.ID == "" {
-	// 	tn.ID = nextTreeID()
+	// 	tn.ID = nextFormID()
 	// }
 	// copy styles
 	// styles := map[string]string{}
@@ -69,16 +69,16 @@ func (tn *TreeNode) Render(w io.Writer) error {
 	// 	styles = t.Styles
 	// }
 
-	return renderTemplate(w, "treenode", tn)
+	return renderTemplate(w, "formnode", tn)
 }
 
 // GetID ...
-func (tn *TreeNode) GetID() string {
+func (tn *FormNode) GetID() string {
 	return tn.ID
 }
 
-func nextTreeID() string {
-	id := fmt.Sprintf("tree-%d", treeID)
-	treeID++
+func nextFormID() string {
+	id := fmt.Sprintf("form-%d", formID)
+	formID++
 	return id
 }
