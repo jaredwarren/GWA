@@ -20,6 +20,7 @@ type Button struct {
 	UI        string // TODO
 	IconClass string
 	Parent    Renderer
+	HandlerFn Handler
 }
 
 // Render ...
@@ -27,6 +28,14 @@ func (b *Button) Render(w io.Writer) error {
 	if b.ID == "" {
 		b.ID = nextButtonID()
 	}
+
+	if b.HandlerFn != nil {
+		// TODO: fix id: remove '-'
+		name := fmt.Sprintf("%s_click", "todo_")
+		b.Handler = template.JS(name)
+		go ui.Bind(name, b.HandlerFn)
+	}
+
 	return renderTemplate(w, "button", b)
 }
 

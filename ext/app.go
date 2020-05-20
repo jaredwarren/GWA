@@ -17,6 +17,12 @@ import (
 	"github.com/zserge/lorca"
 )
 
+var (
+	// for now make the stupid thing global
+	web *Service
+	ui  lorca.UI
+)
+
 // Service basic web service
 type Service struct {
 	Name   string
@@ -42,19 +48,19 @@ type Application struct {
 
 	service *Service
 	cwd     string
-	ui      lorca.UI
+
+	ui lorca.UI
 }
 
 // Launch ...
 func (a *Application) Launch() error {
-	fmt.Println("LAUNCH")
 	a.Exit = make(chan error)
 	// setup web service
 	addr := "127.0.0.1:8083" // TODO: find open port
 	// sudo lsof -i tcp:8083
 	// kill -9 45590
 	u, _ := url.Parse(fmt.Sprintf("http://%s", addr))
-	web := &Service{
+	web = &Service{
 		Name: a.Name,
 		Home: u,
 	}
@@ -64,13 +70,19 @@ func (a *Application) Launch() error {
 	signal.Notify(signalChan, os.Interrupt)
 	go func() {
 		done := <-signalChan
-		fmt.Println("ctrl-c", done)
 		a.Exit <- fmt.Errorf("%s", done)
 	}()
 
 	// Start Server
 	web.Mux = mux.NewRouter()
 	web.Mux.HandleFunc("/static/{filename:[a-zA-Z0-9\\.\\-\\_\\/]*}", FileServer)
+	web.Mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		// favicon
+		// brew install imagemagick
+		// convert -background none static/db.svg -define icon:auto-resize static/favicon.ico
+		w.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext("static/favicon.ico")))
+		http.ServeFile(w, r, "static/favicon.ico")
+	})
 	web.Mux.HandleFunc("/health-check", HealthCheck).Methods("GET", "HEAD")
 	web.Mux.HandleFunc("/", a.Home).Methods("GET")
 	web.Mux.HandleFunc("/close", func(w http.ResponseWriter, r *http.Request) {
@@ -84,16 +96,12 @@ func (a *Application) Launch() error {
 		// TODO: add https, stuff...
 		fmt.Printf("HTTP server listening on %q\n", addr)
 		err := web.Server.ListenAndServe()
-		fmt.Println("[E] http:", err)
+		if err != nil {
+			fmt.Println("[E] http:", err)
+		}
 		a.Exit <- err
 	}()
 	a.service = web
-
-	// fmt.Println("Waiting for exit")
-	// done := <-a.Exit
-	// fmt.Println("DONE:", done)
-	// a.Close()
-	// return done
 
 	// Setup UI
 	uiArgs := []string{}
@@ -106,7 +114,8 @@ func (a *Application) Launch() error {
 		height = a.Height
 	}
 
-	ui, err := lorca.New("", "", width, height, uiArgs...)
+	var err error
+	ui, err = lorca.New("", "", width, height, uiArgs...)
 	if err != nil {
 		fmt.Println("[E] ui.New", err)
 	}
@@ -116,20 +125,16 @@ func (a *Application) Launch() error {
 	// use ui.Bind("counterAdd", c.Add)? for call backs???
 
 	// run ui
-	fmt.Println("LOAD:", a.service.Home.String())
 	err = ui.Load(a.service.Home.String())
 	if err != nil {
 		fmt.Println("[E] ui.load", err)
 	}
 
 	go func() {
-		fmt.Println("waiting for ui")
-		x := <-ui.Done()
-		fmt.Printf("X:%+v\n", x)
+		<-ui.Done()
 		a.Exit <- fmt.Errorf("UI Closed")
 	}()
 
-	fmt.Println("Waiting for exit")
 	done := <-a.Exit
 	a.Close()
 	return done
@@ -213,7 +218,6 @@ func (a *Application) Update(r Renderer) error {
 	js := strings.Replace(buf.String(), "\n", "", -1)
 	js = strings.Replace(js, "'", "\\'", -1)
 	js = fmt.Sprintf(`document.getElementById('%s').outerHTML = '%s';`, r.GetID(), js)
-	fmt.Println(js)
 	a.ui.Eval(js)
 	return nil
 }

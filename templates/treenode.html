@@ -3,8 +3,8 @@
 <li>
 {{$numChildren := len .Children}}
 {{if gt $numChildren 0}}
-    <span><i class="fas fa-folder-open"></i> {{.Text}}</span>
-    <ul>
+    <span class="parent"><i class="fas fa-folder-open"></i> {{.Text}}</span>
+    <ul class="{{if .Collapsed}}collapsed{{else}}expanded{{end}}">
         {{ range $key, $c := .Children }}
         {{Render $c}}
         {{ end }}

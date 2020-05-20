@@ -11,13 +11,15 @@ var (
 
 // Tree ...
 type Tree struct {
-	ID       string
-	ShowRoot bool
-	Parent   Renderer
-	Root     *TreeNode
-	Docked   string
-	Classes  []string
-	Styles   map[string]string
+	ID         string
+	ShowRoot   bool
+	Parent     Renderer
+	Root       *TreeNode
+	BranchIcon string
+	LeafIcon   string
+	Docked     string
+	Classes    []string
+	Styles     map[string]string
 }
 
 // Render ...
@@ -50,9 +52,10 @@ func (t *Tree) GetDocked() string {
 
 // TreeNode ...
 type TreeNode struct {
-	ID        string
-	Text      string
-	Expanded  bool
+	ID   string
+	Text string
+	// Expanded  bool
+	Collapsed bool
 	Leaf      bool
 	IconClass string
 	Children  []*TreeNode

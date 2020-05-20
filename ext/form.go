@@ -22,6 +22,8 @@ type Form struct {
 	Items   Items
 	Action  string
 	Method  string
+	Handler FormHandler
+	// TODO: success/fail handler, how to push info back to front?
 }
 
 // Render ...
@@ -36,6 +38,17 @@ func (f *Form) Render(w io.Writer) error {
 		method = "post"
 	}
 	f.Method = method
+
+	// Setup Handler/Action
+	if f.Action == "" {
+		f.Action = fmt.Sprintf("/submit/%s", f.ID)
+	}
+	if f.Handler == nil {
+		// what to do?????????
+	}
+
+	// Maybe I could make this generic so I dont have to setup every time???, though, I'd have to find the form
+	web.Mux.HandleFunc(f.Action, f.Handler).Methods(strings.ToUpper(f.Method))
 
 	// Default styles
 	if f.Styles == nil {
@@ -87,6 +100,7 @@ func (f *Fieldset) Render(w io.Writer) error {
 	// if f.ID == "" {
 	// 	f.ID = nextFormID()
 	// }
+
 	// if f.Styles == nil {
 	// 	f.Styles = map[string]string{}
 	// }
@@ -169,6 +183,7 @@ func (i *Input) Render(w io.Writer) error {
 	if i.ID == "" {
 		i.ID = nextInputID()
 	}
+
 	// if f.Styles == nil {
 	// 	f.Styles = map[string]string{}
 	// }

@@ -2,6 +2,7 @@ package ext
 
 import (
 	"io"
+	"net/http"
 
 	"github.com/zserge/lorca"
 )
@@ -49,3 +50,6 @@ func (c *Controller) Render(w io.Writer) error {
 func (c *Controller) GetID() string {
 	return ""
 }
+
+// FormHandler ...
+type FormHandler func(w http.ResponseWriter, r *http.Request)

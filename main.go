@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/jaredwarren/goext/ext"
 )
@@ -9,7 +10,7 @@ import (
 var (
 	// TODO ...
 	TODO = []string{
-		"\n☐ json to panel (use xtype)",
+		"\n☐ json to panel (use xtype)",         // big problem with functions
 		"\n☐ make header 'docked'",              // I think this is done, but header template needs cleaned up
 		"\n☐ fix things so they work in test\n", // almost done
 		// "\n☐ make 'app' class that's full-screen, merge with native app\n",
@@ -19,7 +20,10 @@ var (
 		"\n☐ figure way to make controller work -> pass ui to controller, ui.bind?\n",
 		"\n☐ store (get data from ui.bind->ui.eval? or ajax, something...)\n",
 		"\n☐ fix handler problem with type (might have to make all the same!), wonder if I can override json marshaller?, if not then what?\n",
-		"\n☐ create FORM and figure  good way to submit to controller\n",
+		"\n☐ create FORM and figure good way to submit to controller\n",
+		"\n☐ create multiple sessions/instances of app\n",
+		"\n☐ create multiple windows\n",
+		"\n☐ save app state, have to do manually\n",
 		"\n☐ \n",
 	}
 
@@ -67,10 +71,6 @@ func main() {
 					HTML:   "My panel text...1",
 					Docked: "top",
 				},
-				// &ext.Panel{
-				// 	HTML:   "My panel text...2",
-				// 	Docked: "right",
-				// },
 				&ext.Panel{
 					HTML:   "My panel text...3",
 					Docked: "left",
@@ -83,12 +83,35 @@ func main() {
 					Text:    "Click Here",
 					Handler: "btnClick",
 				},
+				&ext.Button{
+					Text: "2 Here",
+					HandlerFn: func(id string) {
+						fmt.Print("Button 2 Clicked:")
+						fmt.Printf("   %+v\n", id)
+
+						// Button update test
+						btn := app.Find(id)
+						if btn != nil {
+							btn.(*ext.Button).Text = "Clicked!!!"
+							app.Update(btn)
+						}
+
+						// Update Tree Test
+						t := app.Find("tree-0")
+						if t != nil {
+							t.(*ext.Tree).Root.Text = "UPDATED"
+							app.Update(t)
+						}
+					},
+				},
 				&ext.Form{
 					// Text:    "Click Here",
 					// Handler: "btnClick",
 					Method: "post",
-					Action: "",
-					// Handler: "", //
+					// Action: "submit",
+					Handler: func(w http.ResponseWriter, r *http.Request) {
+						fmt.Println("submit....")
+					},
 
 					Items: []ext.Renderer{
 						&ext.Fieldset{
@@ -99,13 +122,20 @@ func main() {
 									Name:  "username",
 									Type:  "text",
 								},
+								&ext.Input{
+									Label: "Send:",
+									Name:  "submit",
+									Type:  "submit",
+								},
 							},
 						},
 					},
 				},
 				&ext.Tree{
-					Docked:   "right",
-					ShowRoot: true,
+					Docked:     "right",
+					ShowRoot:   true,
+					BranchIcon: "",
+					LeafIcon:   "",
 					Root: &ext.TreeNode{
 						Text: "root",
 						// IconClass: "fas fa-folder-open",
@@ -119,6 +149,15 @@ func main() {
 								Children: []*ext.TreeNode{
 									&ext.TreeNode{
 										Text:     "c2c1",
+										Children: []*ext.TreeNode{},
+									},
+								},
+							},
+							&ext.TreeNode{
+								Text: "c3",
+								Children: []*ext.TreeNode{
+									&ext.TreeNode{
+										Text:     "c3c1",
 										Children: []*ext.TreeNode{},
 									},
 								},
