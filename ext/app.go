@@ -2,6 +2,7 @@ package ext
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -35,21 +36,16 @@ type Service struct {
 
 // Application ...
 type Application struct {
-	Name string
-	// Schemas map[string]Schema
-	// Using   string // seledted schema
-	MainView    Renderer
-	Controllers []*Controller
-
-	Width  int
-	Height int
-
-	Exit chan error
-
-	service *Service
-	cwd     string
-
-	ui lorca.UI
+	XType       string        `json:"xtype"`
+	Name        string        `json:"name"`
+	MainView    Renderer      `json:"mainview"`
+	Width       int           `json:"width,omitempty"`
+	Height      int           `json:"height,omitempty"`
+	Controllers []*Controller `json:"-"`
+	Exit        chan error    `json:"-"`
+	service     *Service      `json:"-"`
+	cwd         string        `json:"-"`
+	ui          lorca.UI      `json:"-"`
 }
 
 // Launch ...
@@ -225,6 +221,79 @@ func (a *Application) Update(r Renderer) error {
 // Find ...
 func (a *Application) Find(id string) Renderer {
 	return find(id, a.MainView)
+}
+
+// MarshalJSON ...
+func (a *Application) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		XType    string   `json:"xtype"`
+		Width    int      `json:"width,omitempty"`
+		Height   int      `json:"height,omitempty"`
+		Name     string   `json:"name"`
+		MainView Renderer `json:"mainview"`
+	}{
+		XType:    "app",
+		Name:     a.Name,
+		Width:    a.Width,
+		Height:   a.Height,
+		MainView: a.MainView,
+	})
+}
+
+// UnmarshalJSON ...
+func (a *Application) UnmarshalJSON(data []byte) error {
+	fmt.Println("App.UnmarshalJSON")
+	var jApp map[string]interface{}
+	if err := json.Unmarshal(data, &jApp); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	if xtype, ok := jApp["xtype"]; !ok || xtype != "app" {
+		return fmt.Errorf("Root must be app")
+	}
+
+	if name, ok := jApp["name"]; ok {
+		a.Name = name.(string)
+	}
+
+	// fmt.Printf("%+v\n", a)
+	mainview, ok := jApp["mainview"]
+	if !ok || mainview == nil {
+		return fmt.Errorf("mainview missing")
+	}
+
+	p := buildPanel(mainview)
+	fmt.Printf("%+v\n", p)
+
+	// for k, v := range mainview.(map[string]interface{}) {
+	// 	fmt.Printf("  %s: %+v\n", k, v)
+	// }
+	return nil
+
+	// b.Price, _ = v[0].(string)
+	// b.Size, _ = v[1].(string)
+	// b.NumOrders = int(v[2].(float64))
+
+	return nil
+}
+
+// TODO: move this to json file
+//  - finish building other comps
+
+func buildPanel(i interface{}) *Panel {
+	// if xtype, ok := jApp["xtype"]; !ok || xtype != "panel" {
+	// 	return fmt.Errorf("Root must be app")
+	// }
+
+	// for k, v := range mainview.(map[string]interface{}) {
+	// 	fmt.Printf("  %s: %+v\n", k, v)
+	// }
+	return nil
+}
+
+func addChild() {
+
 }
 
 func find(id string, node Renderer) Renderer {

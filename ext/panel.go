@@ -1,6 +1,7 @@
 package ext
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -172,4 +173,45 @@ func (p *Panel) GetChildren() Items {
 // GetID ...
 func (p *Panel) GetID() string {
 	return p.ID
+}
+
+// MarshalJSON ...
+func (p *Panel) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		XType     string            `json:"xtype"`
+		ID        string            `json:"id,omitempty"`
+		Title     string            `json:"title,omitempty"`
+		IconClass string            `json:"iconClass,omitempty"`
+		Layout    string            `json:"layout,omitempty"`
+		HTML      template.HTML     `json:"html,omitempty"`
+		Width     int               `json:"width,omitempty"`
+		Height    int               `json:"height,omitempty"`
+		Items     Items             `json:"items,omitempty"`
+		Header    *Header           `json:"header,omitempty"`
+		Body      *Body             `json:"body,omitempty"`
+		Border    template.CSS      `json:"border,omitempty"`
+		Docked    string            `json:"docked,omitempty"`
+		Flex      int               `json:"flex,omitempty"`
+		Shadow    bool              `json:"shadow,omitempty"`
+		Classes   []string          `json:"classes,omitempty"`
+		Styles    map[string]string `json:"styles,omitempty"`
+	}{
+		XType:     "panel",
+		ID:        p.ID,
+		Title:     p.Title,
+		IconClass: p.IconClass,
+		Layout:    p.Layout,
+		HTML:      p.HTML,
+		Width:     p.Width,
+		Height:    p.Height,
+		Border:    p.Border,
+		Docked:    p.Docked,
+		Flex:      p.Flex,
+		Shadow:    p.Shadow,
+		Classes:   p.Classes,
+		Styles:    p.Styles,
+		Header:    p.Header,
+		Body:      p.Body,
+		Items:     p.Items,
+	})
 }

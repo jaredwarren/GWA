@@ -1,8 +1,15 @@
 package main
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
+	"regexp"
+	"strings"
 
 	"github.com/jaredwarren/goext/ext"
 )
@@ -24,6 +31,8 @@ var (
 		"\n☐ create multiple sessions/instances of app\n",
 		"\n☐ create multiple windows\n",
 		"\n☐ save app state, have to do manually\n",
+		"\n☐ \n",
+		"\n☐ replace all woff2 in pro.min.css https://kit-pro.fontawesome.com/releases/v5.13.0/webfonts/pro-fa-brands-400-5.12.0.woff2\n",
 		"\n☐ \n",
 	}
 
@@ -49,12 +58,46 @@ var (
 				}
 			},
 		},
+		FormHandlers: ext.FormHandlers{
+			"formSubmit": func(w http.ResponseWriter, r *http.Request) {
+				fmt.Println("submit....")
+			},
+		},
 	}
 	app *ext.Application
 )
 
 func main() {
-	fmt.Println("TODO:", TODO)
+	// fmt.Println("TODO:", TODO)
+
+	other2()
+	return
+
+	// // //
+	dat, err := ioutil.ReadFile("./app.json")
+	na := &ext.Application{}
+	err = json.Unmarshal(dat, na)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return
+
+	na.Controllers = []*ext.Controller{
+		mainController,
+	}
+
+	d := na.Launch()
+	if d != nil {
+		fmt.Println("Something Happened, Bye!", d)
+	} else {
+		fmt.Println("Good Bye!")
+	}
+
+	return
+
+	//na
+
+	// // //
 
 	app = &ext.Application{
 		Name: "my app",
@@ -107,11 +150,12 @@ func main() {
 				&ext.Form{
 					// Text:    "Click Here",
 					// Handler: "btnClick",
-					Method: "post",
+					// Method: "post",
 					// Action: "submit",
-					Handler: func(w http.ResponseWriter, r *http.Request) {
-						fmt.Println("submit....")
-					},
+					Handler: "formSubmit",
+					// Handler: func(w http.ResponseWriter, r *http.Request) {
+					// 	fmt.Println("submit....")
+					// },
 
 					Items: []ext.Renderer{
 						&ext.Fieldset{
@@ -168,10 +212,118 @@ func main() {
 			},
 		},
 	}
+
+	b, err := json.MarshalIndent(app, "", "  ")
+	// b, err := json.Marshal(app)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	ioutil.WriteFile("./app.json", b, 0644)
+
+	// //
+
+	return
 	done := app.Launch()
 	if done != nil {
 		fmt.Println("Something Happened, Bye!", done)
 	} else {
 		fmt.Println("Good Bye!")
 	}
+}
+
+func other() {
+	f, err := os.Open("static/css/pro.min.css")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer f.Close()
+
+	// Splits on newlines by default.
+	scanner := bufio.NewScanner(f)
+
+	// \(\.\.\/webfonts\/([a-z\-0-9\.])\.woff2\)
+
+	// src:url\((.+?)\)
+	// ../webfonts/pro-fa-light-300-5.0.1.woff2
+	// re := regexp.MustCompile(`\.\.\/webfonts\/(.+?)\.woff2`)
+	re := regexp.MustCompile(`url\((.+?)\)`)
+
+	line := 1
+	// https://golang.org/pkg/bufio/#Scanner.Scan
+	for scanner.Scan() {
+		text := scanner.Text()
+		// fmt.Println(text)
+		matches := re.FindAllString(text, -1)
+		if len(matches) > 0 {
+			fmt.Println(matches)
+		}
+
+		// if strings.Contains(scanner.Text(), "yourstring") {
+		// 	return line, nil
+		// }
+
+		line++
+		// if line > 100 {
+		// 	return
+		// }
+	}
+
+	fmt.Println(line)
+
+	if err := scanner.Err(); err != nil {
+		// Handle the error
+	}
+}
+
+func other2() {
+	data, _ := ioutil.ReadFile("static/css/pro.min.css")
+	/* ... omitted error check..and please add ... */
+	/* find index of newline */
+	file := string(data)
+	/* func Split(s, sep string) []string */
+	temp := strings.Split(file, "\n")
+
+	// re := regexp.MustCompile(`url\((.+?)\)`)
+	re := regexp.MustCompile(`url\((.+?)\.woff2\)`)
+
+	for _, item := range temp {
+		// matches := re.FindAllString(item, -1)
+		matches := re.FindAllStringSubmatch(item, -1)
+		if len(matches) > 0 {
+			relPath := matches[0][1]
+
+			url := strings.Replace(relPath, "../", "https://kit-pro.fontawesome.com/releases/v5.13.0/", -1) + ".woff2"
+
+			// https://kit-pro.fontawesome.com/releases/v5.13.0/
+			fmt.Println(url)
+		}
+
+		// https://kit-pro.fontawesome.com/releases/v5.13.0/webfonts/pro-fa-solid-900-5.11.2
+		// https://kit-pro.fontawesome.com/releases/v5.13.0/webfonts/pro-fa-light-300-5.0.9.woff2
+
+		// time.Sleep(1 * time.Second)
+	}
+}
+
+// DownloadFile will download a url to a local file. It's efficient because it will
+// write as it downloads and not load the whole file into memory.
+func DownloadFile(filepath string, url string) error {
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Create the file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	return err
 }

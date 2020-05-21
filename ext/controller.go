@@ -1,6 +1,7 @@
 package ext
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -11,15 +12,22 @@ import (
 type Controller struct {
 	// Name   string
 	// Tables []Table
-	Handlers Handlers
-	ui       lorca.UI
+	Handlers     Handlers
+	FormHandlers FormHandlers
+	ui           lorca.UI
 }
 
 // Handlers ...
 type Handlers map[string]Handler
 
+// FormHandlers ...
+type FormHandlers map[string]FormHandler
+
 // Handler ...
 type Handler func(id string)
+
+// FormHandler ...
+type FormHandler func(w http.ResponseWriter, r *http.Request)
 
 // type Handler func(data string)
 
@@ -41,6 +49,10 @@ func (c *Controller) Render(w io.Writer) error {
 		go c.ui.Bind(name, f)
 	}
 
+	for name, f := range c.FormHandlers {
+		web.Mux.HandleFunc(fmt.Sprintf("/submit/%s", name), f).Methods("POST")
+	}
+
 	// currently nothing to render
 	return nil
 	// return renderTemplate(w, "controller", c)
@@ -50,6 +62,3 @@ func (c *Controller) Render(w io.Writer) error {
 func (c *Controller) GetID() string {
 	return ""
 }
-
-// FormHandler ...
-type FormHandler func(w http.ResponseWriter, r *http.Request)

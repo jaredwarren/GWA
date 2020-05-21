@@ -1,10 +1,10 @@
 package ext
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
-	"strings"
 )
 
 var (
@@ -14,15 +14,16 @@ var (
 
 // Form ...
 type Form struct {
-	ID      string
-	Parent  Renderer
-	Docked  string
-	Classes []string
-	Styles  map[string]string
-	Items   Items
-	Action  string
-	Method  string
-	Handler FormHandler
+	ID        string
+	Parent    Renderer
+	Docked    string
+	Classes   []string
+	Styles    map[string]string
+	Items     Items
+	Action    string
+	Method    string
+	Handler   string
+	HandlerFn FormHandler
 	// TODO: success/fail handler, how to push info back to front?
 }
 
@@ -32,23 +33,15 @@ func (f *Form) Render(w io.Writer) error {
 		f.ID = nextFormID()
 	}
 
-	// validate method
-	method := strings.ToLower(f.Method)
-	if method != "get" || method != "post" || method != "dialog" {
-		method = "post"
+	//
+	if f.Method == "" {
+		f.Method = "post"
 	}
-	f.Method = method
 
-	// Setup Handler/Action
+	//
 	if f.Action == "" {
-		f.Action = fmt.Sprintf("/submit/%s", f.ID)
+		f.Action = fmt.Sprintf("/submit/%s", f.Handler)
 	}
-	if f.Handler == nil {
-		// what to do?????????
-	}
-
-	// Maybe I could make this generic so I dont have to setup every time???, though, I'd have to find the form
-	web.Mux.HandleFunc(f.Action, f.Handler).Methods(strings.ToUpper(f.Method))
 
 	// Default styles
 	if f.Styles == nil {
@@ -72,6 +65,31 @@ func (f *Form) SetParent(p Renderer) {
 // GetDocked ...
 func (f *Form) GetDocked() string {
 	return f.Docked
+}
+
+// MarshalJSON ...
+func (f *Form) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		XType   string            `json:"xtype"`
+		ID      string            `json:"id,omitempty"`
+		Docked  string            `json:"docked,omitempty"`
+		Classes []string          `json:"classes,omitempty"`
+		Styles  map[string]string `json:"styles,omitempty"`
+		Items   Items             `json:"items,omitempty"`
+		Action  string            `json:"action,omitempty"`
+		Method  string            `json:"method,omitempty"`
+		Handler string            `json:"handler,omitempty"`
+	}{
+		XType:   "form",
+		ID:      f.ID,
+		Docked:  f.Docked,
+		Classes: f.Classes,
+		Styles:  f.Styles,
+		Items:   f.Items,
+		Action:  f.Action,
+		Method:  f.Method,
+		Handler: f.Handler,
+	})
 }
 
 func nextFormID() string {
