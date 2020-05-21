@@ -242,7 +242,7 @@ func (a *Application) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON ...
 func (a *Application) UnmarshalJSON(data []byte) error {
-	fmt.Println("App.UnmarshalJSON")
+	fmt.Println("App.UnmarshalJSON\n")
 	var jApp map[string]interface{}
 	if err := json.Unmarshal(data, &jApp); err != nil {
 		fmt.Println(err)
@@ -263,8 +263,9 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("mainview missing")
 	}
 
-	p := buildPanel(mainview)
-	fmt.Printf("%+v\n", p)
+	a.MainView = addChild(mainview)
+
+	fmt.Printf("%+v\n", a.MainView)
 
 	// for k, v := range mainview.(map[string]interface{}) {
 	// 	fmt.Printf("  %s: %+v\n", k, v)
@@ -281,19 +282,30 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 // TODO: move this to json file
 //  - finish building other comps
 
-func buildPanel(i interface{}) *Panel {
-	// if xtype, ok := jApp["xtype"]; !ok || xtype != "panel" {
-	// 	return fmt.Errorf("Root must be app")
-	// }
-
-	// for k, v := range mainview.(map[string]interface{}) {
-	// 	fmt.Printf("  %s: %+v\n", k, v)
-	// }
+func addChild(i interface{}) Renderer {
+	xtype, ok := i.(map[string]interface{})["xtype"]
+	if !ok {
+		fmt.Printf("[error] %+v\n", i)
+		return nil
+	}
+	switch xtype {
+	case "panel":
+		return buildPanel(i)
+	case "button":
+		return buildButton(i)
+	case "form":
+		return buildForm(i)
+	case "input":
+		return buildInput(i)
+	case "fieldset":
+		return buildFieldset(i)
+	case "tree":
+		return buildTree(i)
+	case "treenode":
+		return buildTreeNode(i)
+	}
+	fmt.Printf("[error] %+v\n", xtype)
 	return nil
-}
-
-func addChild() {
-
 }
 
 func find(id string, node Renderer) Renderer {

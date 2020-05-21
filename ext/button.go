@@ -72,3 +72,30 @@ func nextButtonID() string {
 	buttonID++
 	return id
 }
+
+func buildButton(i interface{}) *Button {
+	ii := i.(map[string]interface{})
+
+	p := &Button{}
+	if ID, ok := ii["id"]; ok {
+		p.ID = ID.(string)
+	}
+
+	if IconClass, ok := ii["iconClass"]; ok {
+		p.IconClass = IconClass.(string)
+	}
+
+	if ui, ok := ii["ui"]; ok {
+		p.UI = ui.(string)
+	}
+
+	if text, ok := ii["text"]; ok {
+		p.Text = template.HTML(text.(string))
+	}
+
+	if handler, ok := ii["handler"]; ok {
+		p.Handler = template.JS(handler.(string))
+	}
+
+	return p
+}

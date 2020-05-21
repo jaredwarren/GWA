@@ -31,6 +31,7 @@ var (
 		"\n☐ create multiple sessions/instances of app\n",
 		"\n☐ create multiple windows\n",
 		"\n☐ save app state, have to do manually\n",
+		"\n☐ Look for template e.g. panel.html\n",
 		"\n☐ \n",
 		"\n☐ replace all woff2 in pro.min.css https://kit-pro.fontawesome.com/releases/v5.13.0/webfonts/pro-fa-brands-400-5.12.0.woff2\n",
 		"\n☐ \n",
@@ -70,29 +71,11 @@ var (
 func main() {
 	// fmt.Println("TODO:", TODO)
 
-	other2()
-	return
+	// other2()
+	// return
 
 	// // //
-	dat, err := ioutil.ReadFile("./app.json")
-	na := &ext.Application{}
-	err = json.Unmarshal(dat, na)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return
-
-	na.Controllers = []*ext.Controller{
-		mainController,
-	}
-
-	d := na.Launch()
-	if d != nil {
-		fmt.Println("Something Happened, Bye!", d)
-	} else {
-		fmt.Println("Good Bye!")
-	}
-
+	app = buildFromJSON()
 	return
 
 	//na
@@ -189,6 +172,18 @@ func main() {
 								IconClass: "fas fa-fighter-jet",
 							},
 							&ext.TreeNode{
+								Text:      "c2",
+								IconClass: "fad fa-acorn",
+							},
+							&ext.TreeNode{
+								Text:      "c3",
+								IconClass: "fad fa-arrow-alt-from-right",
+							},
+							&ext.TreeNode{
+								Text:      "c4",
+								IconClass: "fad fa-tree-palm",
+							},
+							&ext.TreeNode{
 								Text: "c2",
 								Children: []*ext.TreeNode{
 									&ext.TreeNode{
@@ -213,16 +208,16 @@ func main() {
 		},
 	}
 
-	b, err := json.MarshalIndent(app, "", "  ")
-	// b, err := json.Marshal(app)
-	if err != nil {
-		fmt.Println("error:", err)
+	// app -> json
+	if false {
+		b, err := json.MarshalIndent(app, "", "  ")
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		ioutil.WriteFile("./app.json", b, 0644)
+		return
 	}
-	ioutil.WriteFile("./app.json", b, 0644)
 
-	// //
-
-	return
 	done := app.Launch()
 	if done != nil {
 		fmt.Println("Something Happened, Bye!", done)
@@ -294,15 +289,23 @@ func other2() {
 			relPath := matches[0][1]
 
 			url := strings.Replace(relPath, "../", "https://kit-pro.fontawesome.com/releases/v5.13.0/", -1) + ".woff2"
+			file := strings.Replace(relPath, "../webfonts/", "static/webfonts/", -1) + ".woff2"
 
+			if !fileExists(file) {
+				fmt.Println("DOWN", file, url)
+				// err := DownloadFile(file, url)
+				// if err != nil {
+				// 	fmt.Println(err)
+				// }
+			}
 			// https://kit-pro.fontawesome.com/releases/v5.13.0/
-			fmt.Println(url)
+
+			// time.Sleep(3 * time.Second)
 		}
 
 		// https://kit-pro.fontawesome.com/releases/v5.13.0/webfonts/pro-fa-solid-900-5.11.2
 		// https://kit-pro.fontawesome.com/releases/v5.13.0/webfonts/pro-fa-light-300-5.0.9.woff2
 
-		// time.Sleep(1 * time.Second)
 	}
 }
 
@@ -326,4 +329,41 @@ func DownloadFile(filepath string, url string) error {
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
 	return err
+}
+
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
+func buildFromJSON() *ext.Application {
+	dat, err := ioutil.ReadFile("./app.json")
+	na := &ext.Application{}
+	err = json.Unmarshal(dat, na)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	na.Controllers = []*ext.Controller{
+		mainController,
+	}
+
+	b, err := json.MarshalIndent(na, "", "  ")
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	ioutil.WriteFile("./app2.json", b, 0644)
+	return nil
+
+	d := na.Launch()
+	if d != nil {
+		fmt.Println("Something Happened, Bye!", d)
+	} else {
+		fmt.Println("Good Bye!")
+	}
+
+	return na
 }

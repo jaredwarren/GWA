@@ -215,3 +215,91 @@ func (p *Panel) MarshalJSON() ([]byte, error) {
 		Items:     p.Items,
 	})
 }
+
+func buildPanel(i interface{}) *Panel {
+	ii := i.(map[string]interface{})
+
+	p := &Panel{}
+
+	if title, ok := ii["title"]; ok {
+		p.Title = title.(string)
+	}
+
+	if ID, ok := ii["id"]; ok {
+		p.ID = ID.(string)
+	}
+
+	if IconClass, ok := ii["iconClass"]; ok {
+		p.IconClass = IconClass.(string)
+	}
+
+	if Layout, ok := ii["layout"]; ok {
+		p.Layout = Layout.(string)
+	}
+
+	if HTML, ok := ii["html"]; ok {
+		p.HTML = template.HTML(HTML.(string))
+	}
+
+	if Width, ok := ii["width"]; ok {
+		p.Width = Width.(int)
+	}
+
+	if Height, ok := ii["height"]; ok {
+		p.Height = Height.(int)
+	}
+
+	if header, ok := ii["header"]; ok {
+		p.Header = addChild(header).(*Header)
+	}
+
+	if body, ok := ii["body"]; ok {
+		p.Body = addChild(body).(*Body)
+	}
+
+	if border, ok := ii["border"]; ok {
+		p.Border = template.CSS(border.(string))
+	}
+
+	if docked, ok := ii["docked"]; ok {
+		p.Docked = docked.(string)
+	}
+	if flex, ok := ii["flex"]; ok {
+		p.Flex = flex.(int)
+	}
+
+	if shadow, ok := ii["shadow"]; ok {
+		p.Shadow = shadow.(bool)
+	}
+
+	if c, ok := ii["classes"]; ok {
+		jclass := c.([]interface{})
+		classes := make([]string, len(jclass))
+		for i, cl := range jclass {
+			classes[i] = cl.(string)
+		}
+		p.Classes = classes
+	}
+
+	if s, ok := ii["styles"]; ok {
+		jclass := s.(map[string]interface{})
+		styles := map[string]string{}
+		for i, cl := range jclass {
+			styles[i] = cl.(string)
+		}
+		p.Styles = styles
+	}
+
+	items := []Renderer{}
+	if ii, ok := ii["items"]; ok {
+		is := ii.([]interface{})
+		for _, i := range is {
+			item := addChild(i)
+			items = append(items, item)
+		}
+	}
+
+	p.Items = items
+
+	return p
+}
