@@ -76,6 +76,12 @@ func main() {
 
 	// // //
 	app = buildFromJSON()
+	done := app.Launch()
+	if done != nil {
+		fmt.Println("Something Happened, Bye!", done)
+	} else {
+		fmt.Println("Good Bye!")
+	}
 	return
 
 	//na
