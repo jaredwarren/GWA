@@ -11,7 +11,7 @@ var (
 )
 
 // NewHeader ...
-func NewHeader(title string) *Header {
+func NewHeader(title template.HTML) *Header {
 	return &Header{
 		ID:     nextHeaderID(),
 		Title:  title,
@@ -24,7 +24,7 @@ func NewHeader(title string) *Header {
 // TODO: I don't need all of this crap for container
 type Header struct {
 	ID        string // how to auto generate
-	Title     string
+	Title     template.HTML
 	IconClass string
 	Layout    string
 	HTML      template.HTML
@@ -37,15 +37,99 @@ type Header struct {
 	Flex      int
 	Style     string
 	Classes   []string
+	Styles    map[string]string
 }
 
 // Render ...
 func (h *Header) Render(w io.Writer) error {
 	if h.ID == "" {
-		h.ID = nextInnerhtmlID()
+		h.ID = nextHeaderID()
 	}
-	// TODO: add stuff from header.html as items
-	return renderTemplate(w, "header", h)
+	// default classes
+	classess := map[string]bool{
+		"x-panel": true,
+	}
+	// copy classes
+	for _, c := range h.Classes {
+		if _, ok := classess[c]; !ok {
+			classess[c] = true
+		}
+	}
+	// if h.Shadow {
+	// 	classess["x-shadow"] = true
+	// }
+
+	// copy styles
+	styles := map[string]string{}
+	if len(h.Styles) > 0 {
+		styles = h.Styles
+	}
+
+	// append new styles based on p's properties
+	// what if I want width to be 0px?
+	if h.Width != 0 && h.Docked != "top" && h.Docked != "bottom" {
+		styles["width"] = fmt.Sprintf("%dpx", h.Width)
+		classess["x-widthed"] = true
+	}
+	// what if I want height to be 0px?
+	if h.Height != 0 && h.Docked != "left" && h.Docked != "right" {
+		styles["height"] = fmt.Sprintf("%dpx", h.Height)
+		classess["x-heighted"] = true
+	}
+	if h.Border != "" {
+		styles["border"] = string(h.Border)
+		classess["x-managed-border"] = true
+	}
+
+	// convert class back to array
+	npClasses := []string{}
+	for k := range classess {
+		npClasses = append(npClasses, k)
+	}
+
+	// ITEMS
+	items := Items{}
+
+	// HEADER
+	var title *Innerhtml
+	if h.Title != "" {
+		title.HTML = h.Title
+	}
+	// append title
+	if title != nil {
+		items = append(items, title)
+	}
+
+	// append rest of items
+	if len(h.Items) > 0 {
+		items = append(items, h.Items...)
+	}
+
+	// HTML
+	if h.HTML != "" {
+		items = append(items, &Innerhtml{
+			HTML: h.HTML,
+		})
+	}
+
+	// TODO: if panel has "layout" set that up here
+	// // This layout should only apply to non-docked items!
+
+	for _, i := range items {
+		c, ok := i.(Child)
+		if ok {
+			c.SetParent(h)
+		}
+	}
+
+	div := &DivContainer{
+		ID:      h.ID,
+		Classes: npClasses,
+		Styles:  styles,
+		Items:   LayoutItems(items),
+	}
+	fmt.Printf("\n\nD:%+v\n\n", div)
+	return renderDiv(w, div)
 }
 
 // GetID ...

@@ -1,10 +1,10 @@
 package ext
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
+	"unicode"
 )
 
 var (
@@ -24,24 +24,26 @@ func NewPanel() *Panel {
 
 // Panel ...
 type Panel struct {
-	ID         string // how to auto generate
-	Title      string
-	IconClass  string
-	Layout     string
-	HTML       template.HTML
-	Width      int // float?
-	Height     int // float?
-	Items      Items
-	Header     *Header
-	Body       *Body
-	Border     template.CSS
-	Docked     string // top, bottom, left, right, ''
-	Flex       int
-	Shadow     bool
-	Classes    []string
-	Styles     map[string]string
-	Controller *Controller
-	Parent     Renderer
+	ID          string            // how to auto generate
+	Title       template.HTML     `json:"title,omitempty"`
+	IconClass   string            `json:"iconClass,omitempty"`
+	Layout      string            `json:"layout,omitempty"`
+	HTML        template.HTML     `json:"html,omitempty"`
+	Width       int               `json:"width,omitempty"`
+	Height      int               `json:"height,omitempty"`
+	Items       Items             `json:"items,omitempty"`
+	Header      *Header           `json:"header,omitempty"`
+	Body        *Body             `json:"body,omitempty"`
+	Border      template.CSS      `json:"border,omitempty"`
+	Docked      string            `json:"docked,omitempty"` // top, bottom, left, right, ''
+	Flex        int               `json:"flex,omitempty"`
+	Shadow      bool              `json:"shadow,omitempty"`
+	Closable    bool              `json:"closable,omitempty"`
+	Collapsable bool              `json:"collapsable,omitempty"`
+	Classes     []string          `json:"classes,omitempty"`
+	Styles      map[string]string `json:"styles,omitempty"`
+	Controller  *Controller       `json:"-"`
+	Parent      Renderer          `json:"-"`
 	// RenderTo  string // type???
 }
 
@@ -106,9 +108,17 @@ func (p *Panel) Render(w io.Writer) error {
 			header.Title = p.Title
 			header.Docked = "top"
 		} // else header is all set, ignore Title attribute
-	}
+	} else if p.Header != nil {
+		header = p.Header
+	} // else assume no header
 	// append header as docked item[0]
 	if header != nil {
+		if header.Docked == "" {
+			header.Docked = "top"
+		}
+
+		// TODO: if
+
 		items = append(items, header)
 	}
 
@@ -175,45 +185,39 @@ func (p *Panel) GetID() string {
 	return p.ID
 }
 
-// MarshalJSON ...
-func (p *Panel) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		XType     string            `json:"xtype"`
-		ID        string            `json:"id,omitempty"`
-		Title     string            `json:"title,omitempty"`
-		IconClass string            `json:"iconClass,omitempty"`
-		Layout    string            `json:"layout,omitempty"`
-		HTML      template.HTML     `json:"html,omitempty"`
-		Width     int               `json:"width,omitempty"`
-		Height    int               `json:"height,omitempty"`
-		Items     Items             `json:"items,omitempty"`
-		Header    *Header           `json:"header,omitempty"`
-		Body      *Body             `json:"body,omitempty"`
-		Border    template.CSS      `json:"border,omitempty"`
-		Docked    string            `json:"docked,omitempty"`
-		Flex      int               `json:"flex,omitempty"`
-		Shadow    bool              `json:"shadow,omitempty"`
-		Classes   []string          `json:"classes,omitempty"`
-		Styles    map[string]string `json:"styles,omitempty"`
-	}{
-		XType:     "panel",
-		ID:        p.ID,
-		Title:     p.Title,
-		IconClass: p.IconClass,
-		Layout:    p.Layout,
-		HTML:      p.HTML,
-		Width:     p.Width,
-		Height:    p.Height,
-		Border:    p.Border,
-		Docked:    p.Docked,
-		Flex:      p.Flex,
-		Shadow:    p.Shadow,
-		Classes:   p.Classes,
-		Styles:    p.Styles,
-		Header:    p.Header,
-		Body:      p.Body,
-		Items:     p.Items,
-	})
+// // MarshalJSON ...
+// func (p *Panel) MarshalJSON() ([]byte, error) {
+// 	result := map[string]interface{}{}
+// 	e := reflect.ValueOf(p).Elem()
+// 	for i := 0; i < e.NumField(); i++ {
+// 		// fmt.Println(varName, "->", , " ---- ")
+// 		varName := ""
+
+// 		omit := true
+
+// 		jsonTag := e.Type().Field(i).Tag.Get("json")
+// 		if jsonTag != "" {
+// 			tags := strings.Split(jsonTag, ",")
+// 			varName = tags[0]
+// 			if len(tags) > 1 && tags[1] == "omitempty" {
+
+// 			}
+// 		} else {
+// 			varName := lowerInitial(e.Type().Field(i).Name)
+// 		}
+
+// 		if e.Field(i).CanInterface() && varName != "" && omit {
+// 			result[varName] = e.Field(i).Interface()
+// 		}
+// 	}
+// 	return json.Marshal(result)
+// }
+
+func lowerInitial(str string) string {
+	for i, v := range str {
+		return string(unicode.ToUpper(v)) + str[i+1:]
+	}
+	return ""
 }
 
 func buildPanel(i interface{}) *Panel {
@@ -222,7 +226,7 @@ func buildPanel(i interface{}) *Panel {
 	p := &Panel{}
 
 	if title, ok := ii["title"]; ok {
-		p.Title = title.(string)
+		p.Title = template.HTML(title.(string))
 	}
 
 	if ID, ok := ii["id"]; ok {

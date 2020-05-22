@@ -1,0 +1,112 @@
+{
+  "xtype": "app",
+  "name": "my app",
+  "mainview": {
+    "xtype": "panel",
+    "title": "Panel Title!",
+    "layout": "hbox",
+    "html": "test",
+    "items": [
+      {
+        "xtype": "panel",
+        "html": "My panel text...1",
+        "docked": "top"
+      },
+      {
+        "xtype": "panel",
+        "html": "My panel text...3",
+        "docked": "left"
+      },
+      {
+        "xtype": "panel",
+        "html": "My panel text...4",
+        "docked": "bottom"
+      },
+      {
+        "xtype": "button",
+        "text": "Click Here",
+        "handler": "btnClick"
+      },
+      {
+        "xtype": "button",
+        "text": "2 Here"
+      },
+      {
+        "xtype": "form",
+        "items": [
+          {
+            "xtype": "fieldset",
+            "items": [
+              {
+                "xtype": "input",
+                "type": "text",
+                "name": "username",
+                "label": "User Name:"
+              },
+              {
+                "xtype": "input",
+                "type": "submit",
+                "name": "submit",
+                "label": "Send:"
+              }
+            ],
+            "legend": "Form Legend"
+          }
+        ],
+        "handler": "formSubmit"
+      },
+      {
+        "xtype": "tree",
+        "showRoot": true,
+        "root": {
+          "xtype": "treenode",
+          "text": "root",
+          "children": [
+            {
+              "xtype": "treenode",
+              "text": "c1",
+              "iconClass": "fas fa-fighter-jet"
+            },
+            {
+              "xtype": "treenode",
+              "text": "c2",
+              "iconClass": "fad fa-acorn"
+            },
+            {
+              "xtype": "treenode",
+              "text": "c3",
+              "iconClass": "fad fa-arrow-alt-from-right"
+            },
+            {
+              "xtype": "treenode",
+              "text": "c4",
+              "iconClass": "fad fa-tree-palm"
+            },
+            {
+              "xtype": "treenode",
+              "text": "c2",
+              "children": [
+                {
+                  "xtype": "treenode",
+                  "text": "c2c1"
+                }
+              ]
+            },
+            {
+              "xtype": "treenode",
+              "text": "c3",
+              "children": [
+                {
+                  "xtype": "treenode",
+                  "text": "c3c1"
+                }
+              ]
+            }
+          ]
+        },
+        "docked": "right"
+      }
+    ],
+    "shadow": true
+  }
+}

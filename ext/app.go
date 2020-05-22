@@ -223,26 +223,34 @@ func (a *Application) Find(id string) Renderer {
 	return find(id, a.MainView)
 }
 
-// MarshalJSON ...
-func (a *Application) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		XType    string   `json:"xtype"`
-		Width    int      `json:"width,omitempty"`
-		Height   int      `json:"height,omitempty"`
-		Name     string   `json:"name"`
-		MainView Renderer `json:"mainview"`
-	}{
-		XType:    "app",
-		Name:     a.Name,
-		Width:    a.Width,
-		Height:   a.Height,
-		MainView: a.MainView,
-	})
-}
+// // MarshalJSON ...
+// func (a *Application) MarshalJSON() ([]byte, error) {
+// 	result := map[string]interface{}{}
+// 	e := reflect.ValueOf(a).Elem()
+// 	for i := 0; i < e.NumField(); i++ {
+// 		varName := lowerInitial(e.Type().Field(i).Name)
+// 		if e.Field(i).CanInterface() {
+// 			result[varName] = e.Field(i).Interface()
+// 		}
+// 	}
+// 	return json.Marshal(result)
+// 	return json.Marshal(&struct {
+// 		XType    string   `json:"xtype"`
+// 		Width    int      `json:"width,omitempty"`
+// 		Height   int      `json:"height,omitempty"`
+// 		Name     string   `json:"name"`
+// 		MainView Renderer `json:"mainview"`
+// 	}{
+// 		XType:    "app",
+// 		Name:     a.Name,
+// 		Width:    a.Width,
+// 		Height:   a.Height,
+// 		MainView: a.MainView,
+// 	})
+// }
 
 // UnmarshalJSON ...
 func (a *Application) UnmarshalJSON(data []byte) error {
-	fmt.Println("App.UnmarshalJSON\n")
 	var jApp map[string]interface{}
 	if err := json.Unmarshal(data, &jApp); err != nil {
 		fmt.Println(err)
