@@ -13,6 +13,7 @@ var (
 
 // Button ...
 type Button struct {
+	XType     string
 	ID        string
 	Text      template.HTML
 	Handler   template.JS

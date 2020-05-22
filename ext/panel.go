@@ -24,7 +24,8 @@ func NewPanel() *Panel {
 
 // Panel ...
 type Panel struct {
-	ID          string            // how to auto generate
+	ID          string            `json:"id,omitempty"`
+	XType       string            `json:"xtype,omitempty"`
 	Title       template.HTML     `json:"title,omitempty"`
 	IconClass   string            `json:"iconClass,omitempty"`
 	Layout      string            `json:"layout,omitempty"`

@@ -14,6 +14,7 @@ var (
 
 // Form ...
 type Form struct {
+	XType     string
 	ID        string
 	Parent    Renderer
 	Docked    string
@@ -160,6 +161,7 @@ func nextFormID() string {
 
 // Fieldset ...
 type Fieldset struct {
+	XType   string
 	ID      string
 	Parent  Renderer
 	Docked  string
@@ -305,6 +307,7 @@ func buildFieldset(i interface{}) *Fieldset {
 
 // Input ...
 type Input struct {
+	XType        string
 	ID           string
 	Parent       Renderer
 	Classes      []string

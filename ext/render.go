@@ -116,6 +116,12 @@ func LayoutItems(oi Items) Items {
 
 func renderDiv(w io.Writer, data *DivContainer) error {
 	// TODO: combine class and style into "Attributes"
+	// fmt.Println("\n\nrenderDiv:", len(data.Items))
+	// for _, i := range data.Items {
+	// 	fmt.Printf("   %+v\n", i)
+	// }
+	// fmt.Println("   --------")
+
 	return render(w, `<div id="{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
 			{{range $item := $.Items}}
 			{{Render $item}}
@@ -125,6 +131,9 @@ func renderDiv(w io.Writer, data *DivContainer) error {
 func render(w io.Writer, t string, data interface{}) error {
 	tpl, err := template.New("base").Funcs(template.FuncMap{
 		"Render": func(item Renderer) template.HTML {
+			if item == nil {
+				return template.HTML("NULL ITEM")
+			}
 			buf := new(bytes.Buffer)
 			err := item.Render(buf)
 			if err != nil {

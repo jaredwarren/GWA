@@ -65,6 +65,7 @@ var (
 
 func main() {
 	// app = loadFromJSON()
+
 	app = load()
 
 	done := app.Launch()
@@ -92,19 +93,23 @@ func loadFromJSON() *ext.Application {
 
 func load() *ext.Application {
 	return &ext.Application{
-		Name: "my app",
+		XType: "app",
+		Name:  "my app",
 		Controllers: []*ext.Controller{
 			mainController,
 		},
 		MainView: &ext.Panel{
+			XType: "panel",
 			// Title: "Panel Title!",
 			Header: &ext.Header{
+				XType: "header",
 				Title: "header title",
 				Items: ext.Items{
 					&ext.Button{
-						// Text:    "Click Here",
-						IconClass: "fad fa-window-close",
-						Handler:   "close",
+						XType: "button",
+						Text:  "Click Here",
+						// IconClass: "fad fa-window-close",
+						// Handler: "close",
 					},
 				},
 			},
@@ -113,23 +118,28 @@ func load() *ext.Application {
 			HTML:   "test",
 			Items: []ext.Renderer{
 				&ext.Panel{
+					XType:  "panel",
 					HTML:   "My panel text...1",
 					Docked: "top",
 				},
 				&ext.Panel{
+					XType:  "panel",
 					HTML:   "My panel text...3",
 					Docked: "left",
 				},
 				&ext.Panel{
+					XType:  "panel",
 					HTML:   "My panel text...4",
 					Docked: "bottom",
 				},
 				&ext.Button{
+					XType:   "button",
 					Text:    "Click Here",
 					Handler: "btnClick",
 				},
 				&ext.Button{
-					Text: "2 Here",
+					XType: "button",
+					Text:  "2 Here",
 					HandlerFn: func(id string) {
 						fmt.Print("Button 2 Clicked:")
 						fmt.Printf("   %+v\n", id)
@@ -150,6 +160,7 @@ func load() *ext.Application {
 					},
 				},
 				&ext.Form{
+					XType: "form",
 					// Text:    "Click Here",
 					// Handler: "btnClick",
 					// Method: "post",
@@ -161,14 +172,17 @@ func load() *ext.Application {
 
 					Items: []ext.Renderer{
 						&ext.Fieldset{
+							XType:  "fieldset",
 							Legend: "Form Legend",
 							Items: []ext.Renderer{
 								&ext.Input{
+									XType: "input",
 									Label: "User Name:",
 									Name:  "username",
 									Type:  "text",
 								},
 								&ext.Input{
+									XType: "input",
 									Label: "Send:",
 									Name:  "submit",
 									Type:  "submit",
@@ -178,6 +192,7 @@ func load() *ext.Application {
 					},
 				},
 				&ext.Tree{
+					XType:      "tree",
 					Docked:     "right",
 					ShowRoot:   true,
 					BranchIcon: "",

@@ -12,6 +12,7 @@ var (
 
 // Tree ...
 type Tree struct {
+	XType      string
 	ID         string
 	ShowRoot   bool
 	Parent     Renderer
@@ -119,7 +120,7 @@ func buildTree(i interface{}) *Tree {
 	}
 
 	if root, ok := ii["root"]; ok {
-		p.Root = addChild(root).(*TreeNode)
+		p.Root = buildTreeNode(root)
 	}
 
 	return p
@@ -204,7 +205,7 @@ func buildTreeNode(i interface{}) *TreeNode {
 	if ii, ok := ii["children"]; ok {
 		is := ii.([]interface{})
 		for _, i := range is {
-			item := addChild(i).(*TreeNode)
+			item := buildTreeNode(i)
 			items = append(items, item)
 		}
 	}

@@ -23,6 +23,7 @@ func NewHeader(title template.HTML) *Header {
 // Header ...
 // TODO: I don't need all of this crap for container
 type Header struct {
+	XType     string
 	ID        string // how to auto generate
 	Title     template.HTML
 	IconClass string
@@ -39,6 +40,15 @@ type Header struct {
 	Classes   []string
 	Styles    map[string]string
 }
+
+// // Render ...
+// func (h *Header) Render(w io.Writer) error {
+// 	if h.ID == "" {
+// 		h.ID = nextHeaderID()
+// 	}
+// 	// TODO: add stuff from header.html as items
+// 	return renderTemplate(w, "header", h)
+// }
 
 // Render ...
 func (h *Header) Render(w io.Writer) error {
@@ -91,29 +101,29 @@ func (h *Header) Render(w io.Writer) error {
 	items := Items{}
 
 	// HEADER
-	var title *Innerhtml
 	if h.Title != "" {
-		title.HTML = h.Title
-	}
-	// append title
-	if title != nil {
+		title := &Innerhtml{
+			HTML: h.Title,
+		}
 		items = append(items, title)
 	}
+	// append title
 
 	// append rest of items
 	if len(h.Items) > 0 {
 		items = append(items, h.Items...)
 	}
 
-	// HTML
-	if h.HTML != "" {
-		items = append(items, &Innerhtml{
-			HTML: h.HTML,
-		})
-	}
+	// // HTML
+	// if h.HTML != "" {
+	// 	items = append(items, &Innerhtml{
+	// 		HTML: h.HTML,
+	// 	})
+	// }
 
 	// TODO: if panel has "layout" set that up here
 	// // This layout should only apply to non-docked items!
+	fmt.Println("  7", len(items))
 
 	for _, i := range items {
 		c, ok := i.(Child)
@@ -122,13 +132,16 @@ func (h *Header) Render(w io.Writer) error {
 		}
 	}
 
+	fmt.Println("  8", len(items))
+
 	div := &DivContainer{
 		ID:      h.ID,
 		Classes: npClasses,
 		Styles:  styles,
-		Items:   LayoutItems(items),
+		// Items:   LayoutItems(items),
+		Items: items,
 	}
-	fmt.Printf("\n\nD:%+v\n\n", div)
+	fmt.Printf("\n\nHEADER DIV:::::%+v\n\n", div)
 	return renderDiv(w, div)
 }
 

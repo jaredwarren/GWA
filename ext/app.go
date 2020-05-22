@@ -48,6 +48,14 @@ type Application struct {
 	ui          lorca.UI      `json:"-"`
 }
 
+// NewApp ...
+func NewApp(name string) *Application {
+	return &Application{
+		XType: "app",
+		Name:  name,
+	}
+}
+
 // Launch ...
 func (a *Application) Launch() error {
 	a.Exit = make(chan error)
@@ -251,6 +259,26 @@ func (a *Application) Find(id string) Renderer {
 
 // UnmarshalJSON ...
 func (a *Application) UnmarshalJSON(data []byte) error {
+
+	// temp := struct {
+	// 	Object string `json:"object"`
+	// }{}
+	// if err := json.Unmarshal(data, &temp); err != nil {
+	// 	return err
+	// }
+	// if temp.Object == "card" {
+
+	// } else if temp.Object == "bank_account" {
+	// 	var ba BankAccount
+	// 	if err := json.Unmarshal(data, &ba); err != nil {
+	// 		return err
+	// 	}
+	// 	d.BankAccount = &ba
+	// 	d.Card = nil
+	// } else {
+	// 	return errors.New("Invalid object value")
+	// }
+
 	var jApp map[string]interface{}
 	if err := json.Unmarshal(data, &jApp); err != nil {
 		fmt.Println(err)
@@ -272,8 +300,6 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 	}
 
 	a.MainView = addChild(mainview)
-
-	fmt.Printf("%+v\n", a.MainView)
 
 	// for k, v := range mainview.(map[string]interface{}) {
 	// 	fmt.Printf("  %s: %+v\n", k, v)
@@ -309,10 +335,11 @@ func addChild(i interface{}) Renderer {
 		return buildFieldset(i)
 	case "tree":
 		return buildTree(i)
-	case "treenode":
-		return buildTreeNode(i)
+	// case "treenode":
+	// 	return buildTreeNode(i)
+	default:
+		fmt.Printf("Unknown Type: %+v\n", xtype)
 	}
-	fmt.Printf("[error] %+v\n", xtype)
 	return nil
 }
 

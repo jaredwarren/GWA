@@ -6,11 +6,12 @@ import (
 )
 
 func TestJSON(t *testing.T) {
-
-	app := &Application{
+	op := &Application{
+		XType:       "app",
 		Name:        "my app",
 		Controllers: []*Controller{},
 		MainView: &Panel{
+			XType:     "panel",
 			Title:     "Panel Title!",
 			Shadow:    true,
 			Layout:    "hbox",
@@ -20,39 +21,48 @@ func TestJSON(t *testing.T) {
 			Styles:    map[string]string{"style-a": "red"},
 			Items: []Renderer{
 				&Panel{
+					XType:  "panel",
 					HTML:   "My panel t..1",
 					Docked: "top",
 				},
 				&Panel{
+					XType:  "panel",
 					HTML:   "My panel t..3",
 					Docked: "left",
 				},
 				&Panel{
+					XType:  "panel",
 					HTML:   "My panel t..4",
 					Docked: "bottom",
 				},
 				&Button{
+					XType:   "button",
 					Text:    "Click Here",
 					Handler: "btnClick",
 				},
 				&Button{
-					Text: "2 Here",
+					XType: "button",
+					Text:  "2 Here",
 					HandlerFn: func(id string) {
 
 					},
 				},
 				&Form{
+					XType:   "form",
 					Handler: "formSubmit",
 					Items: []Renderer{
 						&Fieldset{
+							XType:  "fieldset",
 							Legend: "Form Legend",
 							Items: []Renderer{
 								&Input{
+									XType: "input",
 									Label: "User Name:",
 									Name:  "username",
 									Type:  "text",
 								},
 								&Input{
+									XType: "input",
 									Label: "Send:",
 									Name:  "submit",
 									Type:  "submit",
@@ -62,6 +72,7 @@ func TestJSON(t *testing.T) {
 					},
 				},
 				&Tree{
+					XType:      "tree",
 					Docked:     "right",
 					ShowRoot:   true,
 					BranchIcon: "",
@@ -110,7 +121,7 @@ func TestJSON(t *testing.T) {
 		},
 	}
 
-	b, err := json.Marshal(app)
+	b, err := json.Marshal(op)
 	if err != nil {
 		t.Errorf("%+v\n", err)
 	}
@@ -120,17 +131,21 @@ func TestJSON(t *testing.T) {
 
 	// test backwards
 
-	app = &Application{}
-	err = json.Unmarshal(b, app)
+	newApp := &Application{}
+	err = json.Unmarshal(b, newApp)
 	if err != nil {
 		t.Errorf("%+v\n", err)
 	}
 
-	if app.MainView.(*Panel).Items[0].(*Panel).HTML != "My panel t..1" {
+	if newApp.MainView.(*Panel).Title != op.MainView.(*Panel).Title {
+		t.Errorf("main view panel\n")
+	}
+
+	if newApp.MainView.(*Panel).Items[0].(*Panel).HTML != op.MainView.(*Panel).Items[0].(*Panel).HTML {
 		t.Errorf("items off\n")
 	}
 
-	if app.MainView.(*Panel).Styles["style-a"] != "red" {
+	if newApp.MainView.(*Panel).Styles["style-a"] != op.MainView.(*Panel).Styles["style-a"] {
 		t.Errorf("mainpanel style wrong\n")
 	}
 
