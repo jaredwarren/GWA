@@ -114,16 +114,8 @@ func (h *Header) Render(w io.Writer) error {
 		items = append(items, h.Items...)
 	}
 
-	// // HTML
-	// if h.HTML != "" {
-	// 	items = append(items, &Innerhtml{
-	// 		HTML: h.HTML,
-	// 	})
-	// }
-
 	// TODO: if panel has "layout" set that up here
 	// // This layout should only apply to non-docked items!
-	fmt.Println("  7", len(items))
 
 	for _, i := range items {
 		c, ok := i.(Child)
@@ -132,16 +124,19 @@ func (h *Header) Render(w io.Writer) error {
 		}
 	}
 
-	fmt.Println("  8", len(items))
+	layout := &Layout{
+		Items: items,
+		Type:  "hbox",
+		Pack:  "center",
+	}
 
 	div := &DivContainer{
 		ID:      h.ID,
 		Classes: npClasses,
 		Styles:  styles,
 		// Items:   LayoutItems(items),
-		Items: items,
+		Items: Items{layout},
 	}
-	fmt.Printf("\n\nHEADER DIV:::::%+v\n\n", div)
 	return renderDiv(w, div)
 }
 
