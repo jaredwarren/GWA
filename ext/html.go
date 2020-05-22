@@ -19,8 +19,10 @@ func NewInnerhtml(title string) *Innerhtml {
 
 // Innerhtml ...
 type Innerhtml struct {
-	ID   string
-	HTML template.HTML
+	ID      string
+	HTML    template.HTML
+	Classes []string
+	Styles  map[string]string
 }
 
 // Render ...
@@ -29,9 +31,31 @@ func (h *Innerhtml) Render(w io.Writer) error {
 		h.ID = nextInnerhtmlID()
 	}
 
+	// copy styles
+	styles := map[string]string{}
+	if len(h.Styles) > 0 {
+		styles = h.Styles
+	}
+
+	// default classes
+	classess := map[string]bool{
+		"x-innerhtml": true,
+	}
+	// copy classes
+	for _, c := range h.Classes {
+		if _, ok := classess[c]; !ok {
+			classess[c] = true
+		}
+	}
+	npClasses := []string{}
+	for k := range classess {
+		npClasses = append(npClasses, k)
+	}
+
 	div := &DivContainer{
 		ID:      h.ID,
-		Classes: []string{"x-innerhtml"},
+		Classes: npClasses,
+		Styles:  styles,
 		Items: Items{&RawHTML{
 			HTML: h.HTML,
 		}}, // don't layout again just copy items

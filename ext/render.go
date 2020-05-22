@@ -55,7 +55,7 @@ func LayoutItems(oi Items) Items {
 	layout := &Layout{
 		Items: Items{},
 	}
-	var di Renderer
+	var di Dockable
 	for _, i := range oi {
 		// already find docked item, append rest to body and move on
 		if di != nil {
@@ -69,28 +69,26 @@ func LayoutItems(oi Items) Items {
 		if ok {
 			docked := d.GetDocked()
 			if docked != "" {
+				di = i.(Dockable)
 				switch docked {
 				case "top":
 					layout.Type = "hbox"
-					layout.Pack = "start"
-					// i goes first
+					di.SetStyle("width", "100%")
 				case "bottom":
 					layout.Type = "hbox"
-					layout.Pack = "end"
-					// i goes last
+					layout.Reverse = true
+					di.SetStyle("width", "100%")
 				case "left":
 					layout.Type = "vbox"
-					layout.Pack = "start"
-					// i goes first
+					di.SetStyle("height", "100%")
 				case "right":
 					layout.Type = "vbox"
-					layout.Pack = "end"
-					// i goes last
+					layout.Reverse = true
+					di.SetStyle("height", "100%")
 				default:
 					// what to do
 				}
 				layout.Align = "start" // should always be start?
-				di = i
 			} else {
 				bodyItems = append(bodyItems, i)
 			}
@@ -101,7 +99,8 @@ func LayoutItems(oi Items) Items {
 
 	// Nothing to layout
 	if di != nil {
-		layout.Items = Items{di}
+		i := di.(Renderer)
+		layout.Items = Items{i}
 		// Add body items to layout
 		if len(bodyItems) > 0 {
 			layout.Items = append(layout.Items, NewBody(bodyItems))
@@ -118,13 +117,16 @@ func renderDiv(w io.Writer, data *DivContainer) error {
 	// TODO: combine class and style into "Attributes"
 	// fmt.Println("\n\nrenderDiv:", len(data.Items))
 	// for _, i := range data.Items {
-	// 	fmt.Printf("   %+v\n", i)
+	// 	switch i.(type) {
+	// 	case *Panel:
+	// 		spew.Dump(i)
+	// 	}
 	// }
 	// fmt.Println("   --------")
 
 	return render(w, `<div id="{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
 			{{range $item := $.Items}}
-			{{Render $item}}
+			{{if $item}}{{Render $item}}{{else}}NULL---{{end}}
 			{{end}}</div>`, data)
 }
 
@@ -149,7 +151,7 @@ func render(w io.Writer, t string, data interface{}) error {
 	templates := template.Must(tpl, err)
 	err = templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		fmt.Printf("[E] execute error:%s - %+v - %+v\n", err, data, t)
+		fmt.Printf("[E] execute error:%s -\n", err)
 	}
 	return err
 }

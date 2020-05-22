@@ -104,6 +104,10 @@ func (h *Header) Render(w io.Writer) error {
 	if h.Title != "" {
 		title := &Innerhtml{
 			HTML: h.Title,
+			Styles: map[string]string{
+				"flex":       "1",
+				"text-align": "center",
+			},
 		}
 		items = append(items, title)
 	}
@@ -126,8 +130,9 @@ func (h *Header) Render(w io.Writer) error {
 
 	layout := &Layout{
 		Items: items,
-		Type:  "hbox",
+		Type:  "vbox",
 		Pack:  "center",
+		Align: "center",
 	}
 
 	div := &DivContainer{
@@ -148,6 +153,14 @@ func (h *Header) GetID() string {
 // GetDocked ...
 func (h *Header) GetDocked() string {
 	return h.Docked
+}
+
+// SetStyle ...
+func (h *Header) SetStyle(key, value string) {
+	if h.Styles == nil {
+		h.Styles = map[string]string{}
+	}
+	h.Styles[key] = value
 }
 
 func nextHeaderID() string {

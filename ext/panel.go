@@ -117,9 +117,6 @@ func (p *Panel) Render(w io.Writer) error {
 		if header.Docked == "" {
 			header.Docked = "top"
 		}
-
-		// TODO: if
-
 		items = append(items, header)
 	}
 
@@ -169,6 +166,14 @@ func nextPanelID() string {
 // GetDocked ...
 func (p *Panel) GetDocked() string {
 	return p.Docked
+}
+
+// SetStyle ...
+func (p *Panel) SetStyle(key, value string) {
+	if p.Styles == nil {
+		p.Styles = map[string]string{}
+	}
+	p.Styles[key] = value
 }
 
 // SetParent ...

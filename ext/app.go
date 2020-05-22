@@ -364,6 +364,7 @@ func find(id string, node Renderer) Renderer {
 // Dockable item that can be docked
 type Dockable interface {
 	GetDocked() string
+	SetStyle(key, value string)
 }
 
 // Child ...

@@ -21,7 +21,8 @@ type Layout struct {
 	ID      string // how to auto generate
 	Type    string // absolute, accordion, border, card, tab, hbox, vbox
 	Pack    string // start, end, center, space-between, space-arround, justify
-	Align   string // start, end, center, stretch
+	Align   string // start, end, center
+	Reverse bool   // reverse direction
 	Items   Items
 	Classes []string
 	Styles  map[string]string
@@ -53,25 +54,38 @@ func (l *Layout) Render(w io.Writer) error {
 	}
 	if l.Type == "hbox" {
 		styles["display"] = "flex"
-		if l.Pack == "start" {
-			styles["flex-direction"] = "column"
-		} else if l.Pack == "end" {
+		if l.Reverse {
 			styles["flex-direction"] = "column-reverse"
+		} else {
+			styles["flex-direction"] = "column"
 		}
 		classess["x-hbox"] = true
-		// styles["width"] = "100%" // or something like this!!
 	}
 
 	if l.Type == "vbox" {
 		styles["display"] = "flex"
-		if l.Pack == "start" {
-			styles["flex-direction"] = "row"
-		} else if l.Pack == "end" {
-			styles["flex-direction"] = "row-reverse"
-		}
 
+		if l.Reverse {
+			styles["flex-direction"] = "row-reverse"
+		} else {
+			styles["flex-direction"] = "row"
+		}
 		classess["x-vbox"] = true
-		// .Styles["height"] = "100%" // or something like this!!
+	}
+
+	if l.Pack != "" {
+		styles["justify-content"] = l.Pack
+	} // default?
+
+	switch l.Align {
+	case "start":
+		styles["align-items"] = "flex-start"
+	case "end":
+		styles["align-items"] = "flex-end"
+	case "center":
+		styles["align-items"] = "center"
+	default:
+		styles["align-items"] = "stretch"
 	}
 
 	nClasses := []string{}

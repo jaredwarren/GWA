@@ -68,6 +68,14 @@ func (f *Form) GetDocked() string {
 	return f.Docked
 }
 
+// SetStyle ...
+func (f *Form) SetStyle(key, value string) {
+	if f.Styles == nil {
+		f.Styles = map[string]string{}
+	}
+	f.Styles[key] = value
+}
+
 // MarshalJSON ...
 func (f *Form) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {

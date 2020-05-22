@@ -52,6 +52,14 @@ func (t *Tree) GetDocked() string {
 	return t.Docked
 }
 
+// SetStyle ...
+func (t *Tree) SetStyle(key, value string) {
+	if t.Styles == nil {
+		t.Styles = map[string]string{}
+	}
+	t.Styles[key] = value
+}
+
 // MarshalJSON ...
 func (t *Tree) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
