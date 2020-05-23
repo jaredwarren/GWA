@@ -113,23 +113,6 @@ func LayoutItems(oi Items) Items {
 	return Items{layout}
 }
 
-func renderDiv(w io.Writer, data *DivContainer) error {
-	// TODO: combine class and style into "Attributes"
-	// fmt.Println("\n\nrenderDiv:", len(data.Items))
-	// for _, i := range data.Items {
-	// 	switch i.(type) {
-	// 	case *Panel:
-	// 		spew.Dump(i)
-	// 	}
-	// }
-	// fmt.Println("   --------")
-
-	return render(w, `<div id="{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
-			{{range $item := $.Items}}
-			{{if $item}}{{Render $item}}{{else}}NULL---{{end}}
-			{{end}}</div>`, data)
-}
-
 func render(w io.Writer, t string, data interface{}) error {
 	tpl, err := template.New("base").Funcs(template.FuncMap{
 		"Render": func(item Renderer) template.HTML {
@@ -166,27 +149,42 @@ type DivContainer struct {
 	Attributes    map[string]template.HTMLAttr
 }
 
+// Render ...
+func (d *DivContainer) Render(w io.Writer) error {
+	// TODO: replace this with Render Element
+	return render(w, `<div id="{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
+			{{range $item := $.Items}}
+			{{if $item}}{{Render $item}}{{else}}NULL---{{end}}
+			{{end}}</div>`, d)
+}
+
 // Element gerneric div container
 type Element struct {
 	Name        string
 	SelfClosing bool
 	Attributes  map[string]template.HTMLAttr
-	InnerHTML   template.HTML
+	// InnerHTML   template.HTML
+	Items Items
 }
 
 // Render ...
 func (e *Element) Render(w io.Writer) error {
 	name := string(e.Name)
 
-	// Force Type attribute
-	if t, ok := e.Attributes["type"]; ok {
-		name = fmt.Sprintf("%s type=\"%s\"", name, t)
+	// Some Attributes will produce garbage if not added this way i.e. "type" & "onclick"
+	for k, val := range e.Attributes {
+		name = fmt.Sprintf("%s %s=\"%s\"", name, k, val)
 	}
 
 	if e.SelfClosing {
-		return render(w, fmt.Sprintf(`<%s {{range $k, $s:= $.Attributes}}{{$k}}="{{$s}}" {{end}}>`, name), e)
+		return render(w, fmt.Sprintf(`<%s>`, name), e)
 	}
-	return render(w, fmt.Sprintf(`<%s {{range $k, $s:= $.Attributes}}{{$k}}="{{$s}}" {{end}}>{{.InnerHTML}}</%s>`, name, name), e)
+
+	// TODO: I think I need to add Items to Element, and render those in the template
+
+	return render(w, fmt.Sprintf(`<%s>{{range $item := $.Items}}
+			{{if $item}}{{Render $item}}{{else}}NULL---{{end}}
+			{{end}}</%s>`, name, name), e)
 }
 
 // GetID ...

@@ -34,6 +34,7 @@ type Panel struct {
 	Height      int               `json:"height,omitempty"`
 	Items       Items             `json:"items,omitempty"`
 	Header      *Header           `json:"header,omitempty"`
+	Nav         *Nav              `json:"nav,omitempty"`
 	Body        *Body             `json:"body,omitempty"`
 	Border      template.CSS      `json:"border,omitempty"`
 	Docked      string            `json:"docked,omitempty"` // top, bottom, left, right, ''
@@ -99,6 +100,27 @@ func (p *Panel) Render(w io.Writer) error {
 	// ITEMS
 	items := Items{}
 
+	// NAV
+	var nav *Nav
+	if p.Title != "" {
+		if p.Nav == nil {
+			nav = NewNav(p.Title)
+		} else if p.Nav.Title == "" {
+			nav = p.Nav
+			nav.Title = p.Title
+			nav.Docked = "top"
+		} // else nav is all set, ignore Title attribute
+	} else if p.Nav != nil {
+		nav = p.Nav
+	} // else assume no nav
+	// append nav as docked item[0]
+	if nav != nil {
+		if nav.Docked == "" {
+			nav.Docked = "top"
+		}
+		items = append(items, nav)
+	}
+
 	// HEADER
 	var header *Header
 	if p.Title != "" {
@@ -154,7 +176,7 @@ func (p *Panel) Render(w io.Writer) error {
 		Styles:  styles,
 		Items:   LayoutItems(items),
 	}
-	return renderDiv(w, div)
+	return div.Render(w)
 }
 
 func nextPanelID() string {

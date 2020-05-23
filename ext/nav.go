@@ -7,22 +7,22 @@ import (
 )
 
 var (
-	headerID = 0
+	navID = 0
 )
 
-// NewHeader ...
-func NewHeader(title template.HTML) *Header {
-	return &Header{
-		ID:     nextHeaderID(),
+// NewNav ...
+func NewNav(title template.HTML) *Nav {
+	return &Nav{
+		ID:     nextNavID(),
 		Title:  title,
 		Border: template.CSS("1px solid lightgrey"),
 		Docked: "top",
 	}
 }
 
-// Header ...
+// Nav ...
 // TODO: I don't need all of this crap for container
-type Header struct {
+type Nav struct {
 	XType     string            `json:"xtype"`
 	ID        string            `json:"id,omitempty"` // how to auto generate
 	Title     template.HTML     `json:"title,omitempty"`
@@ -41,41 +41,45 @@ type Header struct {
 }
 
 // Render ...
-func (h *Header) Render(w io.Writer) error {
-	if h.ID == "" {
-		h.ID = nextHeaderID()
+func (n *Nav) Render(w io.Writer) error {
+	if n.ID == "" {
+		n.ID = nextNavID()
 	}
 	// default classes
 	classess := map[string]bool{
-		"x-panel": true,
+		"navbar":           true,
+		"navbar-expand-sm": true,
+		"navbar-dark":      true,
+		"bg-dar":           true,
 	}
 	// copy classes
-	for _, c := range h.Classes {
+	for _, c := range n.Classes {
 		if _, ok := classess[c]; !ok {
 			classess[c] = true
 		}
 	}
-	if h.Shadow {
+
+	if n.Shadow {
 		classess["x-shadow"] = true
 	}
 
 	// copy styles
 	styles := map[string]string{}
-	if len(h.Styles) > 0 {
-		styles = h.Styles
+	if len(n.Styles) > 0 {
+		styles = n.Styles
 	}
 
 	// append new styles based on p's properties
-	if h.Width != 0 && h.Docked != "top" && h.Docked != "bottom" {
-		styles["width"] = fmt.Sprintf("%dpx", h.Width)
+	if n.Width != 0 && n.Docked != "top" && n.Docked != "bottom" {
+		styles["width"] = fmt.Sprintf("%dpx", n.Width)
 		classess["x-widthed"] = true
 	}
-	if h.Height != 0 && h.Docked != "left" && h.Docked != "right" {
-		styles["height"] = fmt.Sprintf("%dpx", h.Height)
+	if n.Height != 0 && n.Docked != "left" && n.Docked != "right" {
+		styles["height"] = fmt.Sprintf("%dpx", n.Height)
 		classess["x-heighted"] = true
 	}
-	if h.Border != "" {
-		styles["border"] = string(h.Border)
+	if n.Border != "" {
+		styles["border"] = string(n.Border)
 		classess["x-managed-border"] = true
 	}
 
@@ -89,9 +93,9 @@ func (h *Header) Render(w io.Writer) error {
 	items := Items{}
 
 	// HEADER
-	if h.Title != "" {
+	if n.Title != "" {
 		title := &Innerhtml{
-			HTML: h.Title,
+			HTML: n.Title,
 			Styles: map[string]string{
 				"flex":       "1",
 				"text-align": "center",
@@ -102,8 +106,8 @@ func (h *Header) Render(w io.Writer) error {
 	// append title
 
 	// append rest of items
-	if len(h.Items) > 0 {
-		items = append(items, h.Items...)
+	if len(n.Items) > 0 {
+		items = append(items, n.Items...)
 	}
 
 	// TODO: if panel has "layout" set that up here
@@ -112,7 +116,7 @@ func (h *Header) Render(w io.Writer) error {
 	for _, i := range items {
 		c, ok := i.(Child)
 		if ok {
-			c.SetParent(h)
+			c.SetParent(n)
 		}
 	}
 
@@ -124,7 +128,7 @@ func (h *Header) Render(w io.Writer) error {
 	}
 
 	div := &DivContainer{
-		ID:      h.ID,
+		ID:      n.ID,
 		Classes: npClasses,
 		Styles:  styles,
 		Items:   Items{layout},
@@ -133,25 +137,25 @@ func (h *Header) Render(w io.Writer) error {
 }
 
 // GetID ...
-func (h *Header) GetID() string {
-	return h.ID
+func (n *Nav) GetID() string {
+	return n.ID
 }
 
 // GetDocked ...
-func (h *Header) GetDocked() string {
-	return h.Docked
+func (n *Nav) GetDocked() string {
+	return n.Docked
 }
 
 // SetStyle ...
-func (h *Header) SetStyle(key, value string) {
-	if h.Styles == nil {
-		h.Styles = map[string]string{}
+func (n *Nav) SetStyle(key, value string) {
+	if n.Styles == nil {
+		n.Styles = map[string]string{}
 	}
-	h.Styles[key] = value
+	n.Styles[key] = value
 }
 
-func nextHeaderID() string {
-	id := fmt.Sprintf("header-%d", headerID)
-	headerID++
+func nextNavID() string {
+	id := fmt.Sprintf("nav-%d", navID)
+	navID++
 	return id
 }

@@ -101,17 +101,20 @@ func load() *ext.Application {
 		MainView: &ext.Panel{
 			XType: "panel",
 			// Title: "Panel Title!",
-			Header: &ext.Header{
-				XType: "header",
-				Title: "header title",
-				Items: ext.Items{
-					&ext.Button{
-						XType: "button",
-						// Text:  "Click Here",
-						IconClass: "fad fa-window-close",
-						Handler:   "close",
-					},
-				},
+			// Header: &ext.Header{
+			// 	XType: "header",
+			// 	Title: "header title",
+			// 	Items: ext.Items{
+			// 		&ext.Button{
+			// 			XType: "button",
+			// 			// Text:  "Click Here",
+			// 			IconClass: "fad fa-window-close",
+			// 			Handler:   "close",
+			// 		},
+			// 	},
+			// },
+			Nav: &ext.Nav{
+				Title: "Nav Title",
 			},
 			Shadow: true,
 			Layout: "hbox",
@@ -133,9 +136,10 @@ func load() *ext.Application {
 					Docked: "bottom",
 				},
 				&ext.Button{
-					XType:   "button",
-					Text:    "Click Here",
-					Handler: "btnClick",
+					XType:     "button",
+					Text:      "Click Here",
+					Handler:   "btnClick",
+					IconClass: "fad fa-window-close",
 				},
 				&ext.Button{
 					XType: "button",

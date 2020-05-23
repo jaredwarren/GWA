@@ -170,8 +170,8 @@ func (f *Fieldset) Render(w io.Writer) error {
 	if f.Legend != "" {
 		// for now just use raw html
 		items = append(items, &Element{
-			Name:      "legend",
-			InnerHTML: f.Legend,
+			Name:  "legend",
+			Items: Items{&RawHTML{f.Legend}},
 		})
 	}
 	// TODO: layout items
@@ -186,8 +186,8 @@ func (f *Fieldset) Render(w io.Writer) error {
 			}
 
 			items = append(items, &Element{
-				Name:      "label",
-				InnerHTML: ii.Label,
+				Name:  "label",
+				Items: Items{&RawHTML{ii.Label}},
 				Attributes: map[string]template.HTMLAttr{
 					"for": template.HTMLAttr(ii.ID),
 				},

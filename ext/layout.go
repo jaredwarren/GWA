@@ -99,7 +99,7 @@ func (l *Layout) Render(w io.Writer) error {
 		Classes: nClasses,
 		Items:   l.Items, // don't layout again just copy items
 	}
-	return renderDiv(w, div)
+	return div.Render(w)
 }
 
 // GetID ...

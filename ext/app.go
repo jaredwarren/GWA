@@ -98,7 +98,7 @@ func (a *Application) Launch() error {
 	}
 	go func() {
 		// TODO: add https, stuff...
-		fmt.Printf("HTTP server listening on %q\n", addr)
+		fmt.Printf("HTTP server listening on http://%s\n", addr)
 		err := web.Server.ListenAndServe()
 		if err != nil {
 			fmt.Println("[E] http:", err)
@@ -146,16 +146,14 @@ func (a *Application) Launch() error {
 
 // Home ...
 func (a *Application) Home(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("HOME")
 	err := a.Render(w)
 	if err != nil {
-		fmt.Println("[[E]]:", err)
+		fmt.Println("[E]:", err)
 	}
 }
 
 // Close ...
 func (a *Application) Close() error {
-	fmt.Print("CLOSE")
 	var err error
 	if a.service != nil && a.service.Server != nil {
 		a.service.Server.Close()
@@ -197,7 +195,7 @@ func (a *Application) Render(w io.Writer) error {
 		Items:   items,
 	}
 	buf := new(bytes.Buffer)
-	err := renderDiv(buf, div)
+	err := div.Render(buf)
 	if err != nil {
 		fmt.Println("[E] render:", err)
 	}

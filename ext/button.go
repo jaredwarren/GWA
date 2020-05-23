@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"strings"
 )
 
 var (
@@ -12,14 +13,16 @@ var (
 
 // Button ...
 type Button struct {
-	XType     string        `json:"xtype"`
-	ID        string        `json:"id,omitempty"`
-	Text      template.HTML `json:"text,omitempty"`
-	Handler   template.JS   `json:"handler,omitempty"`
-	UI        string        `json:"ui,omitempty"` // TODO
-	IconClass string        `json:"iconClass,omitempty"`
-	Parent    Renderer      `json:"-"`
-	HandlerFn Handler       `json:"-"`
+	XType     string            `json:"xtype"`
+	ID        string            `json:"id,omitempty"`
+	Text      template.HTML     `json:"text,omitempty"`
+	Handler   template.JS       `json:"handler,omitempty"`
+	UI        string            `json:"ui,omitempty"` // TODO
+	IconClass string            `json:"iconClass,omitempty"`
+	Classes   []string          `json:"classes,omitempty"`
+	Styles    map[string]string `json:"styles,omitempty"`
+	Parent    Renderer          `json:"-"`
+	HandlerFn Handler           `json:"-"`
 }
 
 // Render ...
@@ -39,7 +42,60 @@ func (b *Button) Render(w io.Writer) error {
 		go ui.Bind(name, b.HandlerFn)
 	}
 
-	return renderTemplate(w, "button", b)
+	// default classes
+	classess := map[string]bool{
+		"x-panel": true,
+		"btn":     true,
+	}
+	if b.UI != "" {
+		bui := fmt.Sprintf("btn-%s", b.UI)
+		classess[bui] = true
+	}
+	// copy classes
+	for _, c := range b.Classes {
+		if _, ok := classess[c]; !ok {
+			classess[c] = true
+		}
+	}
+	// convert class back to array
+	npClasses := []string{}
+	for k := range classess {
+		npClasses = append(npClasses, k)
+	}
+
+	// Attributes
+	attrs := map[string]template.HTMLAttr{
+		"id":    template.HTMLAttr(b.ID),
+		"class": template.HTMLAttr(strings.Join(npClasses, " ")),
+	}
+
+	// Handler
+	if b.Handler != "" {
+		attrs["onclick"] = template.HTMLAttr(fmt.Sprintf("%s('%s')", b.Handler, b.ID))
+	}
+
+	buttonEl := &Element{
+		Name:       "button",
+		Attributes: attrs,
+	}
+
+	html := template.HTML("")
+
+	// IconClass
+	// TODO: add icon position
+	if b.IconClass != "" {
+		// TODO: convert iconClass and Text to Items
+		html = template.HTML(fmt.Sprintf("<i class=%q></i>", b.IconClass))
+	}
+
+	// Text
+	if b.Text != "" {
+		html += template.HTML(b.Text)
+	}
+
+	buttonEl.Items = Items{&RawHTML{html}}
+
+	return buttonEl.Render(w)
 }
 
 // GetID ...

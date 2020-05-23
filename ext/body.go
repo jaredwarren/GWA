@@ -41,7 +41,7 @@ func (b *Body) Render(w io.Writer) error {
 		},
 		Items: LayoutItems(b.Items),
 	}
-	return renderDiv(w, div)
+	return div.Render(w)
 }
 
 // GetID ...

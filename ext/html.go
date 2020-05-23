@@ -60,7 +60,7 @@ func (h *Innerhtml) Render(w io.Writer) error {
 			HTML: h.HTML,
 		}}, // don't layout again just copy items
 	}
-	return renderDiv(w, div)
+	return div.Render(w)
 }
 
 // GetID ...
