@@ -1,7 +1,6 @@
 package ext
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -13,14 +12,14 @@ var (
 
 // Button ...
 type Button struct {
-	XType     string
-	ID        string
-	Text      template.HTML
-	Handler   template.JS
-	UI        string // TODO
-	IconClass string
-	Parent    Renderer
-	HandlerFn Handler
+	XType     string        `json:"xtype"`
+	ID        string        `json:"id,omitempty"`
+	Text      template.HTML `json:"text,omitempty"`
+	Handler   template.JS   `json:"handler,omitempty"`
+	UI        string        `json:"ui,omitempty"` // TODO
+	IconClass string        `json:"iconClass,omitempty"`
+	Parent    Renderer      `json:"-"`
+	HandlerFn Handler       `json:"-"`
 }
 
 // Render ...
@@ -47,25 +46,6 @@ func (b *Button) GetID() string {
 // SetParent ...
 func (b *Button) SetParent(p Renderer) {
 	b.Parent = p
-}
-
-// MarshalJSON ...
-func (b *Button) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		XType     string        `json:"xtype"`
-		ID        string        `json:"id,omitempty"`
-		Text      template.HTML `json:"text,omitempty"`
-		Handler   template.JS   `json:"handler,omitempty"`
-		UI        string        `json:"ui,omitempty"`
-		IconClass string        `json:"iconClass,omitempty"`
-	}{
-		XType:     "button",
-		ID:        b.ID,
-		Text:      b.Text,
-		Handler:   b.Handler,
-		UI:        b.UI,
-		IconClass: b.IconClass,
-	})
 }
 
 func nextButtonID() string {

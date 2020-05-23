@@ -191,34 +191,6 @@ func (p *Panel) GetID() string {
 	return p.ID
 }
 
-// // MarshalJSON ...
-// func (p *Panel) MarshalJSON() ([]byte, error) {
-// 	result := map[string]interface{}{}
-// 	e := reflect.ValueOf(p).Elem()
-// 	for i := 0; i < e.NumField(); i++ {
-// 		// fmt.Println(varName, "->", , " ---- ")
-// 		varName := ""
-
-// 		omit := true
-
-// 		jsonTag := e.Type().Field(i).Tag.Get("json")
-// 		if jsonTag != "" {
-// 			tags := strings.Split(jsonTag, ",")
-// 			varName = tags[0]
-// 			if len(tags) > 1 && tags[1] == "omitempty" {
-
-// 			}
-// 		} else {
-// 			varName := lowerInitial(e.Type().Field(i).Name)
-// 		}
-
-// 		if e.Field(i).CanInterface() && varName != "" && omit {
-// 			result[varName] = e.Field(i).Interface()
-// 		}
-// 	}
-// 	return json.Marshal(result)
-// }
-
 func lowerInitial(str string) string {
 	for i, v := range str {
 		return string(unicode.ToUpper(v)) + str[i+1:]

@@ -159,38 +159,38 @@ func load() *ext.Application {
 						}
 					},
 				},
-				// &ext.Form{
-				// 	XType: "form",
-				// 	// Text:    "Click Here",
-				// 	// Handler: "btnClick",
-				// 	// Method: "post",
-				// 	// Action: "submit",
-				// 	Handler: "formSubmit",
-				// 	// Handler: func(w http.ResponseWriter, r *http.Request) {
-				// 	// 	fmt.Println("submit....")
-				// 	// },
+				&ext.Form{
+					XType: "form",
+					// Text:    "Click Here",
+					// Handler: "btnClick",
+					// Method: "post",
+					// Action: "submit",
+					Handler: "formSubmit",
+					// Handler: func(w http.ResponseWriter, r *http.Request) {
+					// 	fmt.Println("submit....")
+					// },
 
-				// 	Items: []ext.Renderer{
-				// 		&ext.Fieldset{
-				// 			XType:  "fieldset",
-				// 			Legend: "Form Legend",
-				// 			Items: []ext.Renderer{
-				// 				&ext.Input{
-				// 					XType: "input",
-				// 					Label: "User Name:",
-				// 					Name:  "username",
-				// 					Type:  "text",
-				// 				},
-				// 				&ext.Input{
-				// 					XType: "input",
-				// 					Label: "Send:",
-				// 					Name:  "submit",
-				// 					Type:  "submit",
-				// 				},
-				// 			},
-				// 		},
-				// 	},
-				// },
+					Items: []ext.Renderer{
+						&ext.Fieldset{
+							XType:  "fieldset",
+							Legend: "Form Legend",
+							Items: []ext.Renderer{
+								&ext.Input{
+									XType: "input",
+									Label: "User Name:",
+									Name:  "username",
+									Type:  "text",
+								},
+								&ext.Input{
+									XType: "input",
+									Label: "Send:",
+									Name:  "submit",
+									Type:  "submit",
+								},
+							},
+						},
+					},
+				},
 				&ext.Tree{
 					XType:      "tree",
 					Docked:     "right",

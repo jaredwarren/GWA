@@ -1,7 +1,6 @@
 package ext
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -14,17 +13,17 @@ var (
 
 // Form ...
 type Form struct {
-	XType     string
-	ID        string
-	Parent    Renderer
-	Docked    string
-	Classes   []string
-	Styles    map[string]string
-	Items     Items
-	Action    string
-	Method    string
-	Handler   string
-	HandlerFn FormHandler
+	XType     string            `json:"xtype"`
+	ID        string            `json:"id,omitempty"`
+	Parent    Renderer          `json:"-"`
+	Docked    string            `json:"docked,omitempty"`
+	Classes   []string          `json:"classes,omitempty"`
+	Styles    map[string]string `json:"styles,omitempty"`
+	Items     Items             `json:"items,omitempty"`
+	Action    string            `json:"action,omitempty"`
+	Method    string            `json:"method,omitempty"`
+	Handler   string            `json:"handler,omitempty"`
+	HandlerFn FormHandler       `json:"-"`
 	// TODO: success/fail handler, how to push info back to front?
 }
 
@@ -74,31 +73,6 @@ func (f *Form) SetStyle(key, value string) {
 		f.Styles = map[string]string{}
 	}
 	f.Styles[key] = value
-}
-
-// MarshalJSON ...
-func (f *Form) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		XType   string            `json:"xtype"`
-		ID      string            `json:"id,omitempty"`
-		Docked  string            `json:"docked,omitempty"`
-		Classes []string          `json:"classes,omitempty"`
-		Styles  map[string]string `json:"styles,omitempty"`
-		Items   Items             `json:"items,omitempty"`
-		Action  string            `json:"action,omitempty"`
-		Method  string            `json:"method,omitempty"`
-		Handler string            `json:"handler,omitempty"`
-	}{
-		XType:   "form",
-		ID:      f.ID,
-		Docked:  f.Docked,
-		Classes: f.Classes,
-		Styles:  f.Styles,
-		Items:   f.Items,
-		Action:  f.Action,
-		Method:  f.Method,
-		Handler: f.Handler,
-	})
 }
 
 func buildForm(i interface{}) *Form {
@@ -169,14 +143,14 @@ func nextFormID() string {
 
 // Fieldset ...
 type Fieldset struct {
-	XType   string
-	ID      string
-	Parent  Renderer
-	Docked  string
-	Classes []string
-	Styles  map[string]string
-	Legend  template.HTML
-	Items   Items
+	XType   string            `json:"xtype"`
+	ID      string            `json:"id,omitempty"`
+	Docked  string            `json:"docked,omitempty"`
+	Classes []string          `json:"classes,omitempty"`
+	Styles  map[string]string `json:"styles,omitempty"`
+	Legend  template.HTML     `json:"legend,omitempty"`
+	Items   Items             `json:"items,omitempty"`
+	Parent  Renderer          `json:"-"`
 }
 
 // Render ...
@@ -241,27 +215,6 @@ func (f *Fieldset) GetID() string {
 	return f.ID
 }
 
-// MarshalJSON ...
-func (f *Fieldset) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		XType   string            `json:"xtype"`
-		ID      string            `json:"id,omitempty"`
-		Docked  string            `json:"docked,omitempty"`
-		Classes []string          `json:"classes,omitempty"`
-		Styles  map[string]string `json:"styles,omitempty"`
-		Items   Items             `json:"items,omitempty"`
-		Legend  template.HTML     `json:"legend,omitempty"`
-	}{
-		XType:   "fieldset",
-		ID:      f.ID,
-		Docked:  f.Docked,
-		Classes: f.Classes,
-		Styles:  f.Styles,
-		Items:   f.Items,
-		Legend:  f.Legend,
-	})
-}
-
 func buildFieldset(i interface{}) *Fieldset {
 	ii := i.(map[string]interface{})
 
@@ -315,20 +268,20 @@ func buildFieldset(i interface{}) *Fieldset {
 
 // Input ...
 type Input struct {
-	XType        string
-	ID           string
-	Parent       Renderer
-	Classes      []string
-	Styles       map[string]string
-	Type         string
-	Name         string
-	Value        string
-	Attributes   map[string]template.HTMLAttr
-	Form         string
-	Disabled     bool
-	Autofocus    bool
-	Autocomplete string
-	Label        template.HTML
+	XType        string                       `json:"xtype"`
+	ID           string                       `json:"id,omitempty"`
+	Classes      []string                     `json:"classes,omitempty"`
+	Styles       map[string]string            `json:"styles,omitempty"`
+	Type         string                       `json:"type,omitempty"`
+	Name         string                       `json:"name,omitempty"`
+	Value        string                       `json:"value,omitempty"`
+	Attributes   map[string]template.HTMLAttr `json:"attributes,omitempty"`
+	Form         string                       `json:"form,omitempty"`
+	Disabled     bool                         `json:"disabled,omitempty"`
+	Autofocus    bool                         `json:"autofocus,omitempty"`
+	Autocomplete string                       `json:"autocomplete,omitempty"`
+	Label        template.HTML                `json:"label,omitempty"`
+	Parent       Renderer                     `json:"-"`
 }
 
 // Render ...
@@ -406,39 +359,6 @@ func nextInputID() string {
 // GetID ...
 func (i *Input) GetID() string {
 	return i.ID
-}
-
-// MarshalJSON ...
-func (i *Input) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		XType        string                       `json:"xtype"`
-		ID           string                       `json:"id,omitempty"`
-		Classes      []string                     `json:"classes,omitempty"`
-		Styles       map[string]string            `json:"styles,omitempty"`
-		Type         string                       `json:"type,omitempty"`
-		Name         string                       `json:"name,omitempty"`
-		Value        string                       `json:"value,omitempty"`
-		Attributes   map[string]template.HTMLAttr `json:"attributes,omitempty"`
-		Form         string                       `json:"form,omitempty"`
-		Disabled     bool                         `json:"disabled,omitempty"`
-		Autofocus    bool                         `json:"autofocus,omitempty"`
-		Autocomplete string                       `json:"autocomplete,omitempty"`
-		Label        template.HTML                `json:"label,omitempty"`
-	}{
-		XType:        "input",
-		ID:           i.ID,
-		Classes:      i.Classes,
-		Styles:       i.Styles,
-		Type:         i.Type,
-		Name:         i.Name,
-		Value:        i.Value,
-		Attributes:   i.Attributes,
-		Form:         i.Form,
-		Disabled:     i.Disabled,
-		Autofocus:    i.Autofocus,
-		Autocomplete: i.Autocomplete,
-		Label:        i.Label,
-	})
 }
 
 func buildInput(i interface{}) *Input {

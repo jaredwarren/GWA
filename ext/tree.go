@@ -1,7 +1,6 @@
 package ext
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 )
@@ -12,16 +11,16 @@ var (
 
 // Tree ...
 type Tree struct {
-	XType      string
-	ID         string
-	ShowRoot   bool
-	Parent     Renderer
-	Root       *TreeNode
-	BranchIcon string
-	LeafIcon   string
-	Docked     string
-	Classes    []string
-	Styles     map[string]string
+	XType      string            `json:"xtype"`
+	ID         string            `json:"id,omitempty"`
+	ShowRoot   bool              `json:"showRoot,omitempty"`
+	Root       *TreeNode         `json:"root,omitempty"`
+	BranchIcon string            `json:"branchIcon,omitempty"`
+	LeafIcon   string            `json:"leafIcon,omitempty"`
+	Docked     string            `json:"docked,omitempty"`
+	Classes    []string          `json:"classes,omitempty"`
+	Styles     map[string]string `json:"styles,omitempty"`
+	Parent     Renderer          `json:"-y"`
 }
 
 // Render ...
@@ -58,31 +57,6 @@ func (t *Tree) SetStyle(key, value string) {
 		t.Styles = map[string]string{}
 	}
 	t.Styles[key] = value
-}
-
-// MarshalJSON ...
-func (t *Tree) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		XType      string            `json:"xtype"`
-		ID         string            `json:"id,omitempty"`
-		ShowRoot   bool              `json:"showRoot,omitempty"`
-		Root       *TreeNode         `json:"root,omitempty"`
-		BranchIcon string            `json:"branchIcon,omitempty"`
-		LeafIcon   string            `json:"leafIcon,omitempty"`
-		Docked     string            `json:"docked,omitempty"`
-		Classes    []string          `json:"classes,omitempty"`
-		Styles     map[string]string `json:"styles,omitempty"`
-	}{
-		XType:      "tree",
-		ID:         t.ID,
-		ShowRoot:   t.ShowRoot,
-		Root:       t.Root,
-		BranchIcon: t.BranchIcon,
-		LeafIcon:   t.LeafIcon,
-		Docked:     t.Docked,
-		Classes:    t.Classes,
-		Styles:     t.Styles,
-	})
 }
 
 func buildTree(i interface{}) *Tree {
@@ -136,13 +110,13 @@ func buildTree(i interface{}) *Tree {
 
 // TreeNode ...
 type TreeNode struct {
-	ID   string
-	Text string
-	// Expanded  bool
-	Collapsed bool
-	Leaf      bool
-	IconClass string
-	Children  []*TreeNode
+	XType     string      `json:"xtype"`
+	ID        string      `json:"id,omitempty"`
+	Text      string      `json:"text,omitempty"`
+	Collapsed bool        `json:"collapsed,omitempty"`
+	Leaf      bool        `json:"leaf,omitempty"`
+	IconClass string      `json:"iconClass,omitempty"`
+	Children  []*TreeNode `json:"children,omitempty"`
 }
 
 // Render ...
@@ -162,27 +136,6 @@ func (tn *TreeNode) Render(w io.Writer) error {
 // GetID ...
 func (tn *TreeNode) GetID() string {
 	return tn.ID
-}
-
-// MarshalJSON ...
-func (tn *TreeNode) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		XType     string      `json:"xtype"`
-		ID        string      `json:"id,omitempty"`
-		Text      string      `json:"text,omitempty"`
-		Collapsed bool        `json:"collapsed,omitempty"`
-		Leaf      bool        `json:"leaf,omitempty"`
-		IconClass string      `json:"iconClass,omitempty"`
-		Children  []*TreeNode `json:"children,omitempty"`
-	}{
-		XType:     "treenode",
-		ID:        tn.ID,
-		Text:      tn.Text,
-		Collapsed: tn.Collapsed,
-		Leaf:      tn.Leaf,
-		IconClass: tn.IconClass,
-		Children:  tn.Children,
-	})
 }
 
 func buildTreeNode(i interface{}) *TreeNode {
