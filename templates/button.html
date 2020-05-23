@@ -1,4 +1,4 @@
 {{define "base"}}
-<button id="{{.ID}}" {{if .Handler}}onclick="{{.Handler}}('{{.ID}}')"{{end}} class="pure-button">{{if .IconClass}}<i class="{{.IconClass}}"></i>
+<button id="{{.ID}}" {{if .Handler}}onclick="{{.Handler}}('{{.ID}}')"{{end}} class="btn btn-{{.UI}}">{{if .IconClass}}<i class="{{.IconClass}}"></i>
     {{end}}{{.Text}}</button>
 {{end}}

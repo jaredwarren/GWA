@@ -28,6 +28,10 @@ func (b *Button) Render(w io.Writer) error {
 		b.ID = nextButtonID()
 	}
 
+	if b.UI == "" {
+		b.UI = "primary"
+	}
+
 	if b.HandlerFn != nil {
 		// TODO: fix id: remove '-'
 		name := fmt.Sprintf("%s_click", "todo_")
