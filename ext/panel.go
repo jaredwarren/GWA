@@ -134,7 +134,7 @@ func (p *Panel) Render(w io.Writer) error {
 	} else if p.Header != nil {
 		header = p.Header
 	} // else assume no header
-	// append header as docked item[0]
+	// append header as docked item[0] or item[1] if nav
 	if header != nil {
 		if header.Docked == "" {
 			header.Docked = "top"

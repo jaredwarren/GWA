@@ -10,8 +10,6 @@ import (
 
 // Controller ...
 type Controller struct {
-	// Name   string
-	// Tables []Table
 	Handlers     Handlers
 	FormHandlers FormHandlers
 	ui           lorca.UI
@@ -28,14 +26,6 @@ type Handler func(id string)
 
 // FormHandler ...
 type FormHandler func(w http.ResponseWriter, r *http.Request)
-
-// type Handler func(data string)
-
-// type Handler func(args map[string]interface{})
-
-// type Handler func(arg interface{})
-
-// type Handler func(args ...interface{})
 
 // Call ...
 func (h Handler) Call(args ...interface{}) {
@@ -55,7 +45,6 @@ func (c *Controller) Render(w io.Writer) error {
 
 	// currently nothing to render
 	return nil
-	// return renderTemplate(w, "controller", c)
 }
 
 // GetID ...

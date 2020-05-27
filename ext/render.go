@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"strings"
 )
 
 // Items ...
@@ -163,31 +164,37 @@ type Element struct {
 	Name        string
 	SelfClosing bool
 	Attributes  map[string]template.HTMLAttr
-	// InnerHTML   template.HTML
-	Items Items
+	Items       Items
 }
 
 // Render ...
 func (e *Element) Render(w io.Writer) error {
 	name := string(e.Name)
+	attrs := ""
 
 	// Some Attributes will produce garbage if not added this way i.e. "type" & "onclick"
 	for k, val := range e.Attributes {
-		name = fmt.Sprintf("%s %s=\"%s\"", name, k, val)
+		attrs = fmt.Sprintf("%s %s=\"%s\"", attrs, k, val)
 	}
 
 	if e.SelfClosing {
-		return render(w, fmt.Sprintf(`<%s>`, name), e)
+		return render(w, fmt.Sprintf(`<%s %s>`, name, attrs), e)
 	}
 
-	// TODO: I think I need to add Items to Element, and render those in the template
-
-	return render(w, fmt.Sprintf(`<%s>{{range $item := $.Items}}
+	return render(w, fmt.Sprintf(`<%s %s>{{range $item := $.Items}}
 			{{if $item}}{{Render $item}}{{else}}NULL---{{end}}
-			{{end}}</%s>`, name, name), e)
+			{{end}}</%s>`, name, attrs, name), e)
 }
 
 // GetID ...
 func (e *Element) GetID() string {
 	return ""
+}
+
+func styleToAttr(styles map[string]string) template.HTMLAttr {
+	sp := []string{}
+	for k, v := range styles {
+		sp = append(sp, fmt.Sprintf("%s:%s;", k, v))
+	}
+	return template.HTMLAttr(strings.Join(sp, " "))
 }

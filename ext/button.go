@@ -44,8 +44,7 @@ func (b *Button) Render(w io.Writer) error {
 
 	// default classes
 	classess := map[string]bool{
-		"x-panel": true,
-		"btn":     true,
+		"btn": true,
 	}
 	if b.UI != "" {
 		bui := fmt.Sprintf("btn-%s", b.UI)

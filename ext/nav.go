@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"strings"
 )
 
 var (
@@ -89,10 +90,9 @@ func (n *Nav) Render(w io.Writer) error {
 		npClasses = append(npClasses, k)
 	}
 
-	// ITEMS
 	items := Items{}
 
-	// HEADER
+	// Title
 	if n.Title != "" {
 		title := &Innerhtml{
 			HTML: n.Title,
@@ -103,16 +103,13 @@ func (n *Nav) Render(w io.Writer) error {
 		}
 		items = append(items, title)
 	}
-	// append title
 
 	// append rest of items
 	if len(n.Items) > 0 {
 		items = append(items, n.Items...)
 	}
 
-	// TODO: if panel has "layout" set that up here
-	// // This layout should only apply to non-docked items!
-
+	// update parent
 	for _, i := range items {
 		c, ok := i.(Child)
 		if ok {
@@ -120,20 +117,21 @@ func (n *Nav) Render(w io.Writer) error {
 		}
 	}
 
-	layout := &Layout{
-		Items: items,
-		Type:  "vbox",
-		Pack:  "center",
-		Align: "center",
+	// Attributes
+	attrs := map[string]template.HTMLAttr{
+		"id":    template.HTMLAttr(n.ID),
+		"class": template.HTMLAttr(strings.Join(npClasses, " ")),
+	}
+	if len(styles) > 0 {
+		attrs["style"] = styleToAttr(styles)
 	}
 
-	div := &DivContainer{
-		ID:      n.ID,
-		Classes: npClasses,
-		Styles:  styles,
-		Items:   Items{layout},
+	navEl := &Element{
+		Name:       "nav",
+		Attributes: attrs,
+		Items:      items,
 	}
-	return div.Render(w)
+	return navEl.Render(w)
 }
 
 // GetID ...

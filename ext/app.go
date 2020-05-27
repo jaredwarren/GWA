@@ -31,7 +31,6 @@ type Service struct {
 	Exit   chan error
 	Server *http.Server
 	Home   *url.URL
-	// Config      *WebConfig
 }
 
 // Application ...
@@ -43,9 +42,9 @@ type Application struct {
 	Height      int           `json:"height,omitempty"`
 	Controllers []*Controller `json:"-"`
 	Exit        chan error    `json:"-"`
-	service     *Service      `json:"-"`
-	cwd         string        `json:"-"`
-	ui          lorca.UI      `json:"-"`
+	service     *Service
+	cwd         string
+	ui          lorca.UI
 }
 
 // NewApp ...
@@ -245,7 +244,6 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 		a.Name = name.(string)
 	}
 
-	// fmt.Printf("%+v\n", a)
 	mainview, ok := jApp["mainview"]
 	if !ok || mainview == nil {
 		return fmt.Errorf("mainview missing")
