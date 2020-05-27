@@ -1,6 +1,6 @@
 {{define "base"}}
 
-<li>
+<li id="{{.ID}}">
 {{$numChildren := len .Children}}
 {{if gt $numChildren 0}}
     <span class="parent"><i class="fas fa-folder-open"></i> {{.Text}}</span>
@@ -10,7 +10,7 @@
         {{ end }}
     </ul>
 {{else}}
-<span>{{if ne .IconClass ""}}<i class="{{.IconClass}}"></i> {{end}}{{.Text}}</span>
+<span {{if .Handler}}onclick="{{.Handler}}('{{.ID}}')"{{end}}>{{if ne .IconClass ""}}<i class="{{.IconClass}}"></i> {{end}}{{.Text}}</span>
 {{end}}
 </li>
 

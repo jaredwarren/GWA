@@ -36,7 +36,15 @@ func (h Handler) Call(args ...interface{}) {
 func (c *Controller) Render(w io.Writer) error {
 	for name, f := range c.Handlers {
 		// for some reason this has to be async, I think it's because ui isn't running yet
-		go c.ui.Bind(name, f)
+		fmt.Println("bind - name:", name)
+		go func(name string, f Handler) {
+			err := c.ui.Bind(name, f)
+			if err != nil {
+				fmt.Println("BOUND ERROR - name:", name, err)
+			} else {
+				fmt.Println("BOUND - name:", name)
+			}
+		}(name, f)
 	}
 
 	for name, f := range c.FormHandlers {

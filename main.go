@@ -30,6 +30,9 @@ var (
 		"\n☐ \n",
 		"\n☐ replace all woff2 in pro.min.css https://kit-pro.fontawesome.com/releases/v5.13.0/webfonts/pro-fa-brands-400-5.12.0.woff2\n",
 		"\n☐ \n",
+		"\n☐ \n",
+		"\n☐ BUTTON click breaks tree, adds multiple script tags, delegate\n",
+		"\n☐ Tree Handler needs to propogate to all leaf(or all?) nodes\n",
 	}
 
 	// this is here to show that objects can be in a saparate file
@@ -52,6 +55,12 @@ var (
 					t.(*ext.Tree).Root.Text = "UPDATED"
 					app.Update(t)
 				}
+			},
+			"onPalm": func(id string) {
+				fmt.Println("onPalm:", id)
+			},
+			"onJet": func(id string) {
+				fmt.Println("onJet:", id)
 			},
 		},
 		FormHandlers: ext.FormHandlers{
@@ -204,42 +213,33 @@ func load() *ext.Application {
 					Root: &ext.TreeNode{
 						Text: "root",
 						// IconClass: "fas fa-folder-open",
-						Children: []*ext.TreeNode{
-							&ext.TreeNode{
-								Text:      "c1",
-								IconClass: "fas fa-fighter-jet",
-							},
-							&ext.TreeNode{
-								Text:      "c2",
-								IconClass: "fad fa-acorn",
-							},
-							&ext.TreeNode{
-								Text:      "c3",
-								IconClass: "fad fa-arrow-alt-from-right",
-							},
-							&ext.TreeNode{
-								Text:      "c4",
-								IconClass: "fad fa-tree-palm",
-							},
-							&ext.TreeNode{
-								Text: "c2",
-								Children: []*ext.TreeNode{
-									&ext.TreeNode{
-										Text:     "c2c1",
-										Children: []*ext.TreeNode{},
-									},
-								},
-							},
-							&ext.TreeNode{
-								Text: "c3",
-								Children: []*ext.TreeNode{
-									&ext.TreeNode{
-										Text:     "c3c1",
-										Children: []*ext.TreeNode{},
-									},
-								},
-							},
-						},
+						Children: []*ext.TreeNode{{
+							Text:      "c1",
+							IconClass: "fas fa-fighter-jet",
+							Handler:   "onJet",
+						}, {
+							Text:      "c2",
+							IconClass: "fad fa-acorn",
+						}, {
+							Text:      "c3",
+							IconClass: "fad fa-arrow-alt-from-right",
+						}, {
+							Text:      "c4",
+							IconClass: "fad fa-tree-palm",
+							Handler:   "onPalm",
+						}, {
+							Text: "c2",
+							Children: []*ext.TreeNode{{
+								Text:     "c2c1",
+								Children: []*ext.TreeNode{},
+							}},
+						}, {
+							Text: "c3",
+							Children: []*ext.TreeNode{{
+								Text:     "c3c1",
+								Children: []*ext.TreeNode{},
+							}},
+						}},
 					},
 				},
 			},

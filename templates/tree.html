@@ -4,7 +4,7 @@
     $(function () {
         $("#{{.ID}}").delegate(".parent", "click", function () {
             if ($(this).next('ul').css("visibility") == "hidden") {
-                $(this).next('ul').css('visibility', 'visible');
+                $(this).next('ul').css('visibility', '');
                 $(this).next('ul').css("height", 'auto');
                 $(this.firstElementChild).removeClass('fa-folder-plus');
                 $(this.firstElementChild).addClass('fa-folder-open');

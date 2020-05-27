@@ -1,4 +1,18 @@
 .x-tree{
     margin: 0px;
     box-sizing: border-box;
+    list-style: none;
+    padding-inline-start: 10px;
+}
+
+.x-tree ul, .x-tree li {
+    list-style: none;
+}
+
+.x-tree ul{
+    padding-inline-start: 10px;
+}
+
+.x-tree li > span {
+    cursor: pointer;
 }

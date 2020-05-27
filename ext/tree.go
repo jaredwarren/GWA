@@ -2,11 +2,13 @@ package ext
 
 import (
 	"fmt"
+	"html/template"
 	"io"
 )
 
 var (
-	treeID = 0
+	treeID     = 0
+	treeNodeID = 0
 )
 
 // Tree ...
@@ -17,6 +19,7 @@ type Tree struct {
 	Root       *TreeNode         `json:"root,omitempty"`
 	BranchIcon string            `json:"branchIcon,omitempty"`
 	LeafIcon   string            `json:"leafIcon,omitempty"`
+	Handler    template.JS       `json:"handler,omitempty"`
 	Docked     string            `json:"docked,omitempty"`
 	Classes    []string          `json:"classes,omitempty"`
 	Styles     map[string]string `json:"styles,omitempty"`
@@ -113,6 +116,7 @@ type TreeNode struct {
 	XType     string      `json:"xtype"`
 	ID        string      `json:"id,omitempty"`
 	Text      string      `json:"text,omitempty"`
+	Handler   template.JS `json:"handler,omitempty"`
 	Collapsed bool        `json:"collapsed,omitempty"`
 	Leaf      bool        `json:"leaf,omitempty"`
 	IconClass string      `json:"iconClass,omitempty"`
@@ -121,9 +125,9 @@ type TreeNode struct {
 
 // Render ...
 func (tn *TreeNode) Render(w io.Writer) error {
-	// if tn.ID == "" {
-	// 	tn.ID = nextTreeID()
-	// }
+	if tn.ID == "" {
+		tn.ID = nextTreeNodeID()
+	}
 	// copy styles
 	// styles := map[string]string{}
 	// if len(t.Styles) > 0 {
@@ -178,5 +182,11 @@ func buildTreeNode(i interface{}) *TreeNode {
 func nextTreeID() string {
 	id := fmt.Sprintf("tree-%d", treeID)
 	treeID++
+	return id
+}
+
+func nextTreeNodeID() string {
+	id := fmt.Sprintf("tree-node-%d", treeNodeID)
+	treeNodeID++
 	return id
 }
