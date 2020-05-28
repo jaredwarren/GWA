@@ -1,17 +1,15 @@
 {{define "base"}}
-
 <li id="{{.ID}}">
-{{$numChildren := len .Children}}
-{{if gt $numChildren 0}}
-    <span class="parent"><i class="fas fa-folder-open"></i> {{.Text}}</span>
-    <ul class="{{if .Collapsed}}collapsed{{else}}expanded{{end}}">
-        {{ range $key, $c := .Children }}
-        {{Render $c}}
-        {{ end }}
-    </ul>
-{{else}}
-<span {{if .Handler}}onclick="{{.Handler}}('{{.ID}}')"{{end}}>{{if ne .IconClass ""}}<i class="{{.IconClass}}"></i> {{end}}{{.Text}}</span>
-{{end}}
+    {{$numChildren := len .Children}}
+    {{if gt $numChildren 0}}
+        <span class="parent" onclick="toggleNode(this)"><i class="fas fa-folder-open"></i> {{.Text}}</span>
+        <ul class="{{if .Collapsed}}collapsed{{else}}expanded{{end}}">
+            {{ range $key, $c := .Children }}
+            {{Render $c}}
+            {{ end }}
+        </ul>
+    {{else}}
+    <span {{if .Handler}}onclick="{{.Handler}}('{{.ID}}')"{{end}}>{{if ne .IconClass ""}}<i class="{{.IconClass}}"></i> {{end}}{{.Text}}</span>
+    {{end}}
 </li>
-
 {{end}}

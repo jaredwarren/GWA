@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"strings"
 )
 
 var (
@@ -33,12 +34,12 @@ func (f *Form) Render(w io.Writer) error {
 		f.ID = nextFormID()
 	}
 
-	//
+	// default to post method
 	if f.Method == "" {
 		f.Method = "post"
 	}
 
-	//
+	// default action
 	if f.Action == "" {
 		f.Action = fmt.Sprintf("/submit/%s", f.Handler)
 	}
@@ -49,7 +50,43 @@ func (f *Form) Render(w io.Writer) error {
 	}
 	f.Classes = append(f.Classes, "x-form")
 	f.Styles["border"] = "1px solid red"
-	return renderTemplate(w, "form", f)
+
+	// Attributes
+	attrs := map[string]template.HTMLAttr{
+		"id":       template.HTMLAttr(f.ID),
+		"class":    template.HTMLAttr(strings.Join(f.GetClasses(), " ")),
+		"action":   template.HTMLAttr(f.Action),
+		"method":   template.HTMLAttr(f.Method),
+		"onsubmit": template.HTMLAttr(fmt.Sprintf("submitForm('%s', event)", f.ID)),
+	}
+	if len(f.Styles) > 0 {
+		attrs["style"] = styleToAttr(f.Styles)
+	}
+
+	navEl := &Element{
+		Name:       "form",
+		Attributes: attrs,
+		Items:      f.Items,
+	}
+	return navEl.Render(w)
+}
+
+// GetClasses ...
+func (f *Form) GetClasses() []string {
+	// default classes
+	classess := map[string]bool{}
+	// copy classes
+	for _, c := range f.Classes {
+		if _, ok := classess[c]; !ok {
+			classess[c] = true
+		}
+	}
+	// convert class back to array
+	npClasses := []string{}
+	for k := range classess {
+		npClasses = append(npClasses, k)
+	}
+	return npClasses
 }
 
 // GetID ...

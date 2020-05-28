@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"strings"
 )
 
 var (
@@ -19,7 +20,6 @@ type Tree struct {
 	Root       *TreeNode         `json:"root,omitempty"`
 	BranchIcon string            `json:"branchIcon,omitempty"`
 	LeafIcon   string            `json:"leafIcon,omitempty"`
-	Handler    template.JS       `json:"handler,omitempty"`
 	Docked     string            `json:"docked,omitempty"`
 	Classes    []string          `json:"classes,omitempty"`
 	Styles     map[string]string `json:"styles,omitempty"`
@@ -34,9 +34,56 @@ func (t *Tree) Render(w io.Writer) error {
 	if t.Styles == nil {
 		t.Styles = map[string]string{}
 	}
+
+	// default classes
 	t.Classes = append(t.Classes, "x-tree")
+	t.Classes = t.GetClasses()
+
 	t.Styles["border"] = "1px solid lightgrey"
-	return renderTemplate(w, "tree", t)
+
+	//
+	items := Items{}
+	if t.ShowRoot {
+		items = append(items, t.Root)
+	} else {
+		for _, i := range t.Root.Children {
+			items = append(items, i)
+		}
+	}
+
+	// Attributes
+	attrs := map[string]template.HTMLAttr{
+		"id":    template.HTMLAttr(t.ID),
+		"class": template.HTMLAttr(strings.Join(t.Classes, " ")),
+	}
+	if len(t.Styles) > 0 {
+		attrs["style"] = styleToAttr(t.Styles)
+	}
+
+	navEl := &Element{
+		Name:       "ul",
+		Attributes: attrs,
+		Items:      items,
+	}
+	return navEl.Render(w)
+}
+
+// GetClasses ...
+func (t *Tree) GetClasses() []string {
+	// default classes
+	classess := map[string]bool{}
+	// copy classes
+	for _, c := range t.Classes {
+		if _, ok := classess[c]; !ok {
+			classess[c] = true
+		}
+	}
+	// convert class back to array
+	npClasses := []string{}
+	for k := range classess {
+		npClasses = append(npClasses, k)
+	}
+	return npClasses
 }
 
 // GetID ...
@@ -128,11 +175,50 @@ func (tn *TreeNode) Render(w io.Writer) error {
 	if tn.ID == "" {
 		tn.ID = nextTreeNodeID()
 	}
-	// copy styles
-	// styles := map[string]string{}
+	items := Items{}
+
+	// Attributes
+	attrs := map[string]template.HTMLAttr{
+		"id": template.HTMLAttr(tn.ID),
+		// "class": template.HTMLAttr(strings.Join(t.Classes, " ")),
+	}
 	// if len(t.Styles) > 0 {
-	// 	styles = t.Styles
+	// 	attrs["style"] = styleToAttr(t.Styles)
 	// }
+
+	if len(tn.Children) > 0 {
+
+	} else {
+		leaf := &Element{
+			Name:       "span",
+			Attributes: map[string]template.HTMLAttr{},
+			Items:      Items{},
+		}
+		if tn.Handler != "" {
+			leaf.Attributes["onclick"] = template.HTMLAttr(fmt.Sprintf("%s('%s')", tn.Handler, tn.ID))
+		}
+
+		if tn.IconClass != "" {
+			leaf.Items = append(leaf.Items, &Element{
+				Name: "i",
+				Attributes: map[string]template.HTMLAttr{
+					"class": template.HTMLAttr(tn.IconClass),
+				},
+			})
+		}
+		if tn.Text != "" {
+			leaf.Items = append(leaf.Items, &RawHTML{template.HTML(tn.Text)})
+		}
+
+		items = append(items, leaf)
+	}
+
+	tnEl := &Element{
+		Name:       "li",
+		Attributes: attrs,
+		Items:      items,
+	}
+	return tnEl.Render(w)
 
 	return renderTemplate(w, "treenode", tn)
 }

@@ -22,17 +22,17 @@
     <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
         crossorigin="anonymous"></script> -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
-            integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
         integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
         crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
-    integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
-    crossorigin="anonymous"></script>
-    
-    
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
 
+
+    <!-- general.css -->
     <style type="text/css">
         body {
             margin: 0;
@@ -49,17 +49,15 @@
         }
     </style>
 
+    <!-- panel.css -->
     <style>
         .x-panel {
             border: 1px solid lightgrey;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-
             position: relative;
-
             box-sizing: border-box;
-
         }
 
         .x-shadow,
@@ -75,7 +73,6 @@
             text-align: center;
             padding: 4px;
         }
-
 
         .x-panel-body {
             overflow: auto;
@@ -96,7 +93,6 @@
             color: #111;
             color: var(--color);
         }
-
 
         .x-container {
             display: flex;
@@ -132,6 +128,8 @@
             left: 0;
         }
     </style>
+
+    <!-- button.css -->
     <style>
         .button-success,
         .button-error,
@@ -169,15 +167,13 @@
             align-items: center;
             justify-content: center;
         }
+
         button i {
-                padding: 0 6px 0 0;
+            padding: 0 6px 0 0;
         }
     </style>
 
-
-
-
-
+    <!-- general.js -->
     <script>
         function setCookie(name, value, days) {
             var expires = "";
@@ -200,6 +196,40 @@
         }
         function deleteCookie(name) {
             document.cookie = name + '=; Max-Age=-99999999;';
+        }
+    </script>
+
+    <!-- tree.js -->
+    <script>
+        function toggleNode(el) {
+            if ($(el).next('ul').css("visibility") == "hidden") {
+                $(el).next('ul').css('visibility', '');
+                $(el).next('ul').css("height", 'auto');
+                $(el.firstElementChild).removeClass('fa-folder-plus');
+                $(el.firstElementChild).addClass('fa-folder-open');
+            } else {
+                $(el).next('ul').css('visibility', 'hidden');
+                $(el).next('ul').css("height", '0px');
+                $(el.firstElementChild).removeClass('fa-folder-open');
+                $(el.firstElementChild).addClass('fa-folder-plus');
+            }
+        }
+    </script>
+
+    <!-- form.js -->
+    <script>
+        function submitForm(id, e) {
+            e.preventDefault();
+            var f = document.getElementById(id)
+            var form = $(f);
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (data) {
+                    alert(data);
+                }
+            });
         }
     </script>
 

@@ -31,7 +31,6 @@ var (
 		"\n☐ replace all woff2 in pro.min.css https://kit-pro.fontawesome.com/releases/v5.13.0/webfonts/pro-fa-brands-400-5.12.0.woff2\n",
 		"\n☐ \n",
 		"\n☐ \n",
-		"\n☐ BUTTON click breaks tree, adds multiple script tags, delegate\n",
 		"\n☐ Tree Handler needs to propogate to all leaf(or all?) nodes\n",
 	}
 
@@ -207,7 +206,7 @@ func load() *ext.Application {
 				&ext.Tree{
 					XType:      "tree",
 					Docked:     "right",
-					ShowRoot:   true,
+					ShowRoot:   false,
 					BranchIcon: "",
 					LeafIcon:   "",
 					Root: &ext.TreeNode{
