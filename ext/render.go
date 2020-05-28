@@ -198,3 +198,21 @@ func styleToAttr(styles map[string]string) template.HTMLAttr {
 	}
 	return template.HTMLAttr(strings.Join(sp, " "))
 }
+
+// getClasses ...
+func getClasses(c []string) []string {
+	// default classes
+	classess := map[string]bool{}
+	// copy classes
+	for _, c := range c {
+		if _, ok := classess[c]; !ok {
+			classess[c] = true
+		}
+	}
+	// convert class back to array
+	npClasses := []string{}
+	for k := range classess {
+		npClasses = append(npClasses, k)
+	}
+	return npClasses
+}

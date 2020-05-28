@@ -206,7 +206,7 @@ func load() *ext.Application {
 				&ext.Tree{
 					XType:      "tree",
 					Docked:     "right",
-					ShowRoot:   false,
+					ShowRoot:   true,
 					BranchIcon: "",
 					LeafIcon:   "",
 					Root: &ext.TreeNode{
