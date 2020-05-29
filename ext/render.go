@@ -22,6 +22,47 @@ func (i Items) Render(w io.Writer) error {
 	return nil
 }
 
+// Attributes ...
+type Attributes map[string]template.HTMLAttr
+
+// Styles ...
+type Styles map[string]string
+
+// ToAttr ...
+func (s Styles) ToAttr() template.HTMLAttr {
+	sp := []string{}
+	for k, v := range s {
+		sp = append(sp, fmt.Sprintf("%s:%s;", k, v))
+	}
+	return template.HTMLAttr(strings.Join(sp, " "))
+}
+
+// Classes ...
+type Classes []string
+
+// ToAttr ...
+func (c Classes) ToAttr() template.HTMLAttr {
+	classess := map[string]bool{}
+	// copy classes to map to prevent duplicates
+	for _, c := range c {
+		if _, ok := classess[c]; !ok {
+			classess[c] = true
+		}
+	}
+	// convert class back to array
+	npClasses := []string{}
+	for k := range classess {
+		npClasses = append(npClasses, k)
+	}
+
+	return template.HTMLAttr(strings.Join(npClasses, " "))
+}
+
+// Add ... not sure if this is a good idea or not
+func (c *Classes) Add(class string) {
+	*c = append(*c, class)
+}
+
 // Renderer an item that can be rendered
 type Renderer interface {
 	Render(w io.Writer) error
@@ -33,7 +74,10 @@ func renderTemplate(w io.Writer, t string, data interface{}) error {
 	funcMap := template.FuncMap{
 		"Render": func(item Renderer) template.HTML {
 			buf := new(bytes.Buffer)
-			item.Render(buf)
+			err := item.Render(buf)
+			if err != nil {
+				fmt.Printf("[E] renderTemplate:%s -> %+v\n", err, item)
+			}
 			return template.HTML(buf.String())
 		},
 	}
@@ -123,7 +167,7 @@ func render(w io.Writer, t string, data interface{}) error {
 			buf := new(bytes.Buffer)
 			err := item.Render(buf)
 			if err != nil {
-				fmt.Printf("[E] html Render:%s\n", err)
+				fmt.Printf("[E] html Render:%s -> %+v\n", err, item)
 			}
 			return template.HTML(buf.String())
 		},
@@ -161,15 +205,15 @@ func (d *DivContainer) Render(w io.Writer) error {
 
 // Element gerneric div container
 type Element struct {
-	Name        string
-	SelfClosing bool
-	Attributes  map[string]template.HTMLAttr
-	Items       Items
+	Name       string
+	Attributes map[string]template.HTMLAttr
+	Items      Items
+	Innerhtml  template.HTML
 }
 
 // Render ...
 func (e *Element) Render(w io.Writer) error {
-	name := string(e.Name)
+	name := strings.ToLower(e.Name)
 	attrs := ""
 
 	// Some Attributes will produce garbage if not added this way i.e. "type" & "onclick"
@@ -177,13 +221,40 @@ func (e *Element) Render(w io.Writer) error {
 		attrs = fmt.Sprintf("%s %s=\"%s\"", attrs, k, val)
 	}
 
-	if e.SelfClosing {
+	if isSelfClosing(name) {
 		return render(w, fmt.Sprintf(`<%s %s>`, name, attrs), e)
 	}
 
-	return render(w, fmt.Sprintf(`<%s %s>{{range $item := $.Items}}
-			{{if $item}}{{Render $item}}{{else}}NULL---{{end}}
-			{{end}}</%s>`, name, attrs, name), e)
+	if e.Innerhtml != "" {
+		_, err := fmt.Fprintf(w, `<%s %s>%s</%s>`, name, attrs, e.Innerhtml, name)
+		return err
+	}
+	return render(w, fmt.Sprintf(`<%s %s>{{range $item := $.Items}}{{if $item}}{{Render $item}}{{else}}NULL---{{end}}{{end}}</%s>`, name, attrs, name), e)
+}
+
+// List of self closing tags
+var closing = map[string]bool{
+	"area":   true,
+	"base":   true,
+	"br":     true,
+	"col":    true,
+	"embed":  true,
+	"hr":     true,
+	"img":    true,
+	"input":  true,
+	"link":   true,
+	"meta":   true,
+	"param":  true,
+	"source": true,
+	"track":  true,
+	"wbr":    true,
+}
+
+// check if node name is self closing
+func isSelfClosing(name string) bool {
+	// name = strings.ToLower(name)
+	_, ok := closing[name]
+	return ok
 }
 
 // GetID ...
@@ -191,28 +262,20 @@ func (e *Element) GetID() string {
 	return ""
 }
 
-func styleToAttr(styles map[string]string) template.HTMLAttr {
-	sp := []string{}
-	for k, v := range styles {
-		sp = append(sp, fmt.Sprintf("%s:%s;", k, v))
-	}
-	return template.HTMLAttr(strings.Join(sp, " "))
-}
-
-// getClasses ...
-func getClasses(c []string) []string {
-	// default classes
-	classess := map[string]bool{}
-	// copy classes
-	for _, c := range c {
-		if _, ok := classess[c]; !ok {
-			classess[c] = true
-		}
-	}
-	// convert class back to array
-	npClasses := []string{}
-	for k := range classess {
-		npClasses = append(npClasses, k)
-	}
-	return npClasses
-}
+// // getClasses ...
+// func getClasses(c []string) []string {
+// 	// default classes
+// 	classess := map[string]bool{}
+// 	// copy classes
+// 	for _, c := range c {
+// 		if _, ok := classess[c]; !ok {
+// 			classess[c] = true
+// 		}
+// 	}
+// 	// convert class back to array
+// 	npClasses := []string{}
+// 	for k := range classess {
+// 		npClasses = append(npClasses, k)
+// 	}
+// 	return npClasses
+// }

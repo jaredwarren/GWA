@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"strings"
 )
 
 var (
@@ -17,8 +16,14 @@ type Form struct {
 	XType     string            `json:"xtype"`
 	ID        string            `json:"id,omitempty"`
 	Parent    Renderer          `json:"-"`
-	Docked    string            `json:"docked,omitempty"`
-	Classes   []string          `json:"classes,omitempty"`
+	Width     int               `json:"width,omitempty"`
+	Height    int               `json:"height,omitempty"`
+	Layout    string            `json:"layout,omitempty"`
+	Border    template.CSS      `json:"border,omitempty"`
+	Docked    string            `json:"docked,omitempty"` // top, bottom, left, right, ''
+	Flex      string            `json:"flex,omitempty"`
+	Shadow    bool              `json:"shadow,omitempty"`
+	Classes   Classes           `json:"classes,omitempty"`
 	Styles    map[string]string `json:"styles,omitempty"`
 	Items     Items             `json:"items,omitempty"`
 	Action    string            `json:"action,omitempty"`
@@ -44,49 +49,86 @@ func (f *Form) Render(w io.Writer) error {
 		f.Action = fmt.Sprintf("/submit/%s", f.Handler)
 	}
 
-	// Default styles
-	if f.Styles == nil {
-		f.Styles = map[string]string{}
-	}
-	f.Classes = append(f.Classes, "x-form")
-	f.Styles["border"] = "1px solid red"
-
-	// Attributes
-	attrs := map[string]template.HTMLAttr{
-		"id":       template.HTMLAttr(f.ID),
-		"class":    template.HTMLAttr(strings.Join(f.GetClasses(), " ")),
-		"action":   template.HTMLAttr(f.Action),
-		"method":   template.HTMLAttr(f.Method),
-		"onsubmit": template.HTMLAttr(fmt.Sprintf("submitForm('%s', event)", f.ID)),
-	}
-	if len(f.Styles) > 0 {
-		attrs["style"] = styleToAttr(f.Styles)
-	}
-
-	navEl := &Element{
-		Name:       "form",
-		Attributes: attrs,
-		Items:      f.Items,
-	}
-	return navEl.Render(w)
-}
-
-// GetClasses ...
-func (f *Form) GetClasses() []string {
 	// default classes
-	classess := map[string]bool{}
+	classess := map[string]bool{
+		"x-form": true,
+	}
 	// copy classes
 	for _, c := range f.Classes {
 		if _, ok := classess[c]; !ok {
 			classess[c] = true
 		}
 	}
+	if f.Shadow {
+		classess["x-shadow"] = true
+	}
+
+	// copy styles
+	styles := Styles{}
+	if len(f.Styles) > 0 {
+		styles = f.Styles
+	}
+
+	// append new styles based on p's properties
+	// what if I want width to be 0px?
+	if f.Width != 0 && f.Docked != "top" && f.Docked != "bottom" {
+		styles["width"] = fmt.Sprintf("%dpx", f.Width)
+		classess["x-widthed"] = true
+	}
+	// what if I want height to be 0px?
+	if f.Height != 0 && f.Docked != "left" && f.Docked != "right" {
+		styles["height"] = fmt.Sprintf("%dpx", f.Height)
+		classess["x-heighted"] = true
+	}
+	if f.Border != "" {
+		styles["border"] = string(f.Border)
+		classess["x-managed-border"] = true
+	}
+
+	if f.Layout == "hbox" {
+		styles["flex-direction"] = "row"
+	} else {
+		styles["flex-direction"] = "column"
+	}
+
+	if f.Flex != "" {
+		styles["flex"] = f.Flex
+	}
+
 	// convert class back to array
 	npClasses := []string{}
 	for k := range classess {
 		npClasses = append(npClasses, k)
 	}
-	return npClasses
+
+	// ITEMS
+	items := Items{}
+	for _, i := range f.Items {
+		c, ok := i.(Child)
+		if ok {
+			c.SetParent(f)
+		}
+		items = append(items, i)
+	}
+
+	// Attributes
+	attrs := map[string]template.HTMLAttr{
+		"id":       template.HTMLAttr(f.ID),
+		"class":    f.Classes.ToAttr(),
+		"action":   template.HTMLAttr(f.Action),
+		"method":   template.HTMLAttr(f.Method),
+		"onsubmit": template.HTMLAttr(fmt.Sprintf("submitForm('%s', event)", f.ID)),
+	}
+	if len(f.Styles) > 0 {
+		attrs["style"] = styles.ToAttr()
+	}
+
+	navEl := &Element{
+		Name:       "form",
+		Attributes: attrs,
+		Items:      LayoutItems(items),
+	}
+	return navEl.Render(w)
 }
 
 // GetID ...
@@ -110,62 +152,6 @@ func (f *Form) SetStyle(key, value string) {
 		f.Styles = map[string]string{}
 	}
 	f.Styles[key] = value
-}
-
-func buildForm(i interface{}) *Form {
-	ii := i.(map[string]interface{})
-
-	p := &Form{}
-	if ID, ok := ii["id"]; ok {
-		p.ID = ID.(string)
-	}
-
-	if docked, ok := ii["docked"]; ok {
-		p.Docked = docked.(string)
-	}
-
-	if action, ok := ii["action"]; ok {
-		p.Action = action.(string)
-	}
-
-	if method, ok := ii["method"]; ok {
-		p.Method = method.(string)
-	}
-
-	if handler, ok := ii["handler"]; ok {
-		p.Handler = handler.(string)
-	}
-
-	if c, ok := ii["classes"]; ok {
-		jclass := c.([]interface{})
-		classes := make([]string, len(jclass))
-		for i, cl := range jclass {
-			classes[i] = cl.(string)
-		}
-		p.Classes = classes
-	}
-
-	if s, ok := ii["styles"]; ok {
-		jclass := s.(map[string]interface{})
-		styles := map[string]string{}
-		for i, cl := range jclass {
-			styles[i] = cl.(string)
-		}
-		p.Styles = styles
-	}
-
-	items := Items{}
-	if ii, ok := ii["items"]; ok {
-		is := ii.([]interface{})
-		for _, i := range is {
-			item := addChild(i)
-			items = append(items, item)
-		}
-	}
-
-	p.Items = items
-
-	return p
 }
 
 func nextFormID() string {
@@ -192,111 +178,32 @@ type Fieldset struct {
 
 // Render ...
 func (f *Fieldset) Render(w io.Writer) error {
-	// if f.ID == "" {
-	// 	f.ID = nextFormID()
-	// }
-
-	// if f.Styles == nil {
-	// 	f.Styles = map[string]string{}
-	// }
-	// f.Classes = append(f.Classes, "x-form")
-	// f.Styles["border"] = "1px solid lightgrey"
-
-	// TODO: add legend to items
 	items := Items{}
 	if f.Legend != "" {
-		// for now just use raw html
 		items = append(items, &Element{
 			Name:  "legend",
 			Items: Items{&RawHTML{f.Legend}},
 		})
 	}
-	// TODO: layout items
+
 	for _, i := range f.Items {
-
-		// append Label if any
-		ii, ok := i.(*Input)
-		if ok && ii.Label != "" {
-			// input.ID might not be set yet
-			if ii.ID == "" {
-				ii.ID = nextInputID()
-			}
-
-			items = append(items, &Element{
-				Name:  "label",
-				Items: Items{&RawHTML{ii.Label}},
-				Attributes: map[string]template.HTMLAttr{
-					"for": template.HTMLAttr(ii.ID),
-				},
-			})
+		c, ok := i.(Child)
+		if ok {
+			c.SetParent(f)
 		}
-
 		items = append(items, i)
 	}
 
-	div := &DivContainer{
-		// ID:      p.ID,
-		// Classes: npClasses,
-		// Styles:  styles,
-		Items: items,
+	navEl := &Element{
+		Name:  "fieldset",
+		Items: LayoutItems(items),
 	}
-
-	return render(w, `<fieldset>
-			{{range $item := $.Items}}
-			{{Render $item}}
-			{{end}}</fieldset>`, div)
+	return navEl.Render(w)
 }
 
 // GetID ...
 func (f *Fieldset) GetID() string {
 	return f.ID
-}
-
-func buildFieldset(i interface{}) *Fieldset {
-	ii := i.(map[string]interface{})
-
-	p := &Fieldset{}
-	if ID, ok := ii["id"]; ok {
-		p.ID = ID.(string)
-	}
-
-	if docked, ok := ii["docked"]; ok {
-		p.Docked = docked.(string)
-	}
-
-	if c, ok := ii["classes"]; ok {
-		jclass := c.([]interface{})
-		classes := make([]string, len(jclass))
-		for i, cl := range jclass {
-			classes[i] = cl.(string)
-		}
-		p.Classes = classes
-	}
-
-	if s, ok := ii["styles"]; ok {
-		jclass := s.(map[string]interface{})
-		styles := map[string]string{}
-		for i, cl := range jclass {
-			styles[i] = cl.(string)
-		}
-		p.Styles = styles
-	}
-
-	items := []Renderer{}
-	if ii, ok := ii["items"]; ok {
-		is := ii.([]interface{})
-		for _, i := range is {
-			item := addChild(i)
-			items = append(items, item)
-		}
-	}
-
-	if legend, ok := ii["legend"]; ok {
-		p.Legend = template.HTML(legend.(string))
-	}
-
-	p.Items = items
-	return p
 }
 
 /*
@@ -326,12 +233,6 @@ func (i *Input) Render(w io.Writer) error {
 	if i.ID == "" {
 		i.ID = nextInputID()
 	}
-
-	// if f.Styles == nil {
-	// 	f.Styles = map[string]string{}
-	// }
-	// f.Classes = append(f.Classes, "x-form")
-	// f.Styles["border"] = "1px solid lightgrey"
 
 	// TODO: validate attributes based on type
 
@@ -379,12 +280,29 @@ func (i *Input) Render(w io.Writer) error {
 		i.Attributes["form"] = template.HTMLAttr(i.Form)
 	} // TODO: else get from parent form?
 
-	e := &Element{
-		Name:        "input",
-		Attributes:  i.Attributes,
-		SelfClosing: false,
+	items := Items{}
+	if i.Label != "" {
+		items = append(items, &Element{
+			Name: "label",
+			// Items: Items{&RawHTML{i.Label}},
+			Innerhtml: i.Label,
+		})
 	}
-	return e.Render(w)
+
+	var e *Element
+	if i.Type == "textarea" {
+		e = &Element{
+			Name:       "textarea",
+			Attributes: i.Attributes,
+		}
+	} else {
+		e = &Element{
+			Name:       "input",
+			Attributes: i.Attributes,
+		}
+	}
+	items = append(items, e)
+	return items.Render(w)
 }
 
 func nextInputID() string {
@@ -396,74 +314,4 @@ func nextInputID() string {
 // GetID ...
 func (i *Input) GetID() string {
 	return i.ID
-}
-
-func buildInput(i interface{}) *Input {
-	ii := i.(map[string]interface{})
-
-	p := &Input{}
-	if ID, ok := ii["id"]; ok {
-		p.ID = ID.(string)
-	}
-
-	if t, ok := ii["type"]; ok {
-		p.Type = t.(string)
-	}
-
-	if name, ok := ii["name"]; ok {
-		p.Name = name.(string)
-	}
-
-	if value, ok := ii["value"]; ok {
-		p.Value = value.(string)
-	}
-
-	if form, ok := ii["form"]; ok {
-		p.Form = form.(string)
-	}
-
-	if disabled, ok := ii["disabled"]; ok {
-		p.Disabled = disabled.(bool)
-	}
-
-	if autofocus, ok := ii["autofocus"]; ok {
-		p.Autofocus = autofocus.(bool)
-	}
-
-	if autocomplete, ok := ii["autocomplete"]; ok {
-		p.Autocomplete = autocomplete.(string)
-	}
-
-	if label, ok := ii["label"]; ok {
-		p.Label = template.HTML(label.(string))
-	}
-
-	if c, ok := ii["classes"]; ok {
-		jclass := c.([]interface{})
-		classes := make([]string, len(jclass))
-		for i, cl := range jclass {
-			classes[i] = cl.(string)
-		}
-		p.Classes = classes
-	}
-
-	if s, ok := ii["styles"]; ok {
-		jclass := s.(map[string]interface{})
-		styles := map[string]string{}
-		for i, cl := range jclass {
-			styles[i] = cl.(string)
-		}
-		p.Styles = styles
-	}
-
-	if s, ok := ii["attributes"]; ok {
-		jclass := s.(map[string]interface{})
-		attributes := map[string]template.HTMLAttr{}
-		for i, cl := range jclass {
-			attributes[i] = template.HTMLAttr(cl.(string))
-		}
-		p.Attributes = attributes
-	}
-
-	return p
 }

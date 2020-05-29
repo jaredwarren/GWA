@@ -16,3 +16,16 @@
 .x-tree li > span {
     cursor: pointer;
 }
+
+
+.x-tree i {
+    padding: 4px;
+}
+
+
+.x-tree li.leaf {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 4px;
+}

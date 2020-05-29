@@ -55,11 +55,11 @@ var (
 					app.Update(t)
 				}
 			},
-			"onPalm": func(id string) {
-				fmt.Println("onPalm:", id)
+			"logout": func(id string) {
+				fmt.Println("logout:", id)
 			},
-			"onJet": func(id string) {
-				fmt.Println("onJet:", id)
+			"onTableSelect": func(id string) {
+				fmt.Println("onTableSelect:", id)
 			},
 		},
 		FormHandlers: ext.FormHandlers{
@@ -108,114 +108,36 @@ func load() *ext.Application {
 		},
 		MainView: &ext.Panel{
 			XType: "panel",
-			// Title: "Panel Title!",
-			// Header: &ext.Header{
-			// 	XType: "header",
-			// 	Title: "header title",
-			// 	Items: ext.Items{
-			// 		&ext.Button{
-			// 			XType: "button",
-			// 			// Text:  "Click Here",
-			// 			IconClass: "fad fa-window-close",
-			// 			Handler:   "close",
-			// 		},
-			// 	},
-			// },
 			Nav: &ext.Nav{
 				Title: "Nav Title",
+				Items: ext.Items{
+					&ext.Button{
+						XType:     "button",
+						Text:      "",
+						Handler:   "logout",
+						IconClass: "fad fa-sign-out",
+					},
+				},
 			},
-			Shadow: true,
-			Layout: "hbox",
-			HTML:   "test",
-			Items: []ext.Renderer{
-				&ext.Panel{
-					XType:  "panel",
-					HTML:   "My panel text...1",
-					Docked: "top",
-				},
-				&ext.Panel{
-					XType:  "panel",
-					HTML:   "My panel text...3",
-					Docked: "left",
-				},
-				&ext.Panel{
-					XType:  "panel",
-					HTML:   "My panel text...4",
-					Docked: "bottom",
-				},
-				&ext.Button{
-					XType:     "button",
-					Text:      "Click Here",
-					Handler:   "btnClick",
-					IconClass: "fad fa-window-close",
-				},
-				&ext.Button{
-					XType: "button",
-					Text:  "2 Here",
-					HandlerFn: func(id string) {
-						fmt.Print("Button 2 Clicked:")
-						fmt.Printf("   %+v\n", id)
-
-						// Button update test
-						btn := app.Find(id)
-						if btn != nil {
-							btn.(*ext.Button).Text = "Clicked!!!"
-							app.Update(btn)
-						}
-
-						// Update Tree Test
-						t := app.Find("tree-0")
-						if t != nil {
-							t.(*ext.Tree).Root.Text = "UPDATED"
-							app.Update(t)
-						}
-					},
-				},
-				&ext.Form{
-					XType: "form",
-					// Text:    "Click Here",
-					// Handler: "btnClick",
-					// Method: "post",
-					// Action: "submit",
-					Handler: "formSubmit",
-					// Handler: func(w http.ResponseWriter, r *http.Request) {
-					// 	fmt.Println("submit....")
-					// },
-
-					Items: []ext.Renderer{
-						&ext.Fieldset{
-							XType:  "fieldset",
-							Legend: "Form Legend",
-							Items: []ext.Renderer{
-								&ext.Input{
-									XType: "input",
-									Label: "User Name:",
-									Name:  "username",
-									Type:  "text",
-								},
-								&ext.Input{
-									XType: "input",
-									Label: "Send:",
-									Name:  "submit",
-									Type:  "submit",
-								},
-							},
-						},
-					},
-				},
+			// Shadow: true,
+			// Layout: "hbox",
+			// HTML:   "test",
+			Items: ext.Items{
 				&ext.Tree{
-					XType:      "tree",
-					Docked:     "right",
-					ShowRoot:   true,
-					BranchIcon: "",
-					LeafIcon:   "",
+					XType:    "tree",
+					Docked:   "left",
+					ShowRoot: true,
+					Width:    300,
+					// BranchIcon: "",
+					// LeafIcon:   "",
+					// ParentIcon: "",
 					Root: &ext.TreeNode{
 						Text: "root",
 						// IconClass: "fas fa-folder-open",
 						Children: []*ext.TreeNode{{
-							Text:      "c1",
-							IconClass: "fas fa-fighter-jet",
-							Handler:   "onJet",
+							Text:      "account_deletion_requests",
+							IconClass: "fad fa-table",
+							Handler:   "onTableSelect",
 						}, {
 							Text:      "c2",
 							IconClass: "fad fa-acorn",
@@ -241,6 +163,111 @@ func load() *ext.Application {
 						}},
 					},
 				},
+
+				&ext.Form{
+					XType: "form",
+					// Docked: "top",
+					// Text:    "Click Here",
+					// Handler: "btnClick",
+					// Method: "post",
+					// Action: "submit",
+					Handler: "formSubmit",
+					// Handler: func(w http.ResponseWriter, r *http.Request) {
+					// 	fmt.Println("submit....")
+					// },
+
+					Items: ext.Items{
+						&ext.Panel{
+							XType: "panel",
+							// HTML:   "My panel text...1",
+							Docked: "bottom",
+							Layout: "hbox",
+							Items: ext.Items{
+								&ext.Button{
+									XType:     "button",
+									Text:      "Run",
+									Handler:   "btnClick",
+									IconClass: "far fa-play",
+								},
+								&ext.Input{
+									XType: "input",
+									Label: "limit:",
+									Name:  "limit",
+									Type:  "number",
+								},
+								&ext.Input{
+									XType: "input",
+									Label: "Show All:",
+									Name:  "show_all",
+									Type:  "checkbox",
+								},
+								&ext.Button{
+									XType:     "button",
+									Text:      "Click Here",
+									Handler:   "btnClick",
+									IconClass: "fad fa-window-close",
+								},
+							},
+						},
+						&ext.Fieldset{
+							XType:  "fieldset",
+							Legend: "Form Legend",
+							Items: ext.Items{
+								&ext.Input{
+									XType: "input",
+									Label: "User Name:",
+									Name:  "username",
+									Type:  "textarea",
+								},
+								&ext.Input{
+									XType: "input",
+									Label: "Send:",
+									Name:  "submit",
+									Type:  "submit",
+								},
+							},
+						},
+					},
+				},
+
+				// &ext.Panel{
+				// 	XType:  "panel",
+				// 	HTML:   "TABLE",
+				// 	Docked: "left",
+				// },
+				// &ext.Panel{
+				// 	XType:  "panel",
+				// 	HTML:   "My panel text...4",
+				// 	Docked: "bottom",
+				// },
+				// &ext.Button{
+				// 	XType:     "button",
+				// 	Text:      "Click Here",
+				// 	Handler:   "btnClick",
+				// 	IconClass: "fad fa-window-close",
+				// },
+				// &ext.Button{
+				// 	XType: "button",
+				// 	Text:  "2 Here",
+				// 	HandlerFn: func(id string) {
+				// 		fmt.Print("Button 2 Clicked:")
+				// 		fmt.Printf("   %+v\n", id)
+
+				// 		// Button update test
+				// 		btn := app.Find(id)
+				// 		if btn != nil {
+				// 			btn.(*ext.Button).Text = "Clicked!!!"
+				// 			app.Update(btn)
+				// 		}
+
+				// 		// Update Tree Test
+				// 		t := app.Find("tree-0")
+				// 		if t != nil {
+				// 			t.(*ext.Tree).Root.Text = "UPDATED"
+				// 			app.Update(t)
+				// 		}
+				// 	},
+				// },
 			},
 		},
 	}

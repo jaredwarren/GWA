@@ -41,7 +41,14 @@ func (b *Body) Render(w io.Writer) error {
 		},
 		Items: LayoutItems(b.Items),
 	}
-	return div.Render(w)
+	err := div.Render(w)
+	if err != nil {
+		for _, i := range b.Items {
+			fmt.Printf(" - [e]%+v\n", i)
+		}
+	}
+
+	return err
 }
 
 // GetID ...

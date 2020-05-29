@@ -38,7 +38,7 @@ type Panel struct {
 	Body        *Body             `json:"body,omitempty"`
 	Border      template.CSS      `json:"border,omitempty"`
 	Docked      string            `json:"docked,omitempty"` // top, bottom, left, right, ''
-	Flex        int               `json:"flex,omitempty"`
+	Flex        string            `json:"flex,omitempty"`
 	Shadow      bool              `json:"shadow,omitempty"`
 	Closable    bool              `json:"closable,omitempty"`
 	Collapsable bool              `json:"collapsable,omitempty"`
@@ -89,6 +89,16 @@ func (p *Panel) Render(w io.Writer) error {
 	if p.Border != "" {
 		styles["border"] = string(p.Border)
 		classess["x-managed-border"] = true
+	}
+
+	if p.Layout == "hbox" {
+		styles["flex-direction"] = "row"
+	} else {
+		styles["flex-direction"] = "column"
+	}
+
+	if p.Flex != "" {
+		styles["flex"] = p.Flex
 	}
 
 	// convert class back to array
@@ -159,9 +169,6 @@ func (p *Panel) Render(w io.Writer) error {
 			HTML: p.HTML,
 		})
 	}
-
-	// TODO: if panel has "layout" set that up here
-	// // This layout should only apply to non-docked items!
 
 	for _, i := range items {
 		c, ok := i.(Child)
@@ -269,7 +276,7 @@ func buildPanel(i interface{}) *Panel {
 		p.Docked = docked.(string)
 	}
 	if flex, ok := ii["flex"]; ok {
-		p.Flex = flex.(int)
+		p.Flex = flex.(string)
 	}
 
 	if shadow, ok := ii["shadow"]; ok {

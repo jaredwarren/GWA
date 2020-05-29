@@ -14,16 +14,19 @@ var (
 
 // Tree ...
 type Tree struct {
-	XType      string            `json:"xtype"`
-	ID         string            `json:"id,omitempty"`
-	ShowRoot   bool              `json:"showRoot,omitempty"`
-	Root       *TreeNode         `json:"root,omitempty"`
-	BranchIcon string            `json:"branchIcon,omitempty"`
-	LeafIcon   string            `json:"leafIcon,omitempty"`
-	Docked     string            `json:"docked,omitempty"`
-	Classes    []string          `json:"classes,omitempty"`
-	Styles     map[string]string `json:"styles,omitempty"`
-	Parent     Renderer          `json:"-y"`
+	XType      string    `json:"xtype"`
+	ID         string    `json:"id,omitempty"`
+	ShowRoot   bool      `json:"showRoot,omitempty"`
+	Root       *TreeNode `json:"root,omitempty"`
+	Width      int       `json:"width,omitempty"`
+	Height     int       `json:"height,omitempty"`
+	BranchIcon string    `json:"branchIcon,omitempty"`
+	LeafIcon   string    `json:"leafIcon,omitempty"`
+	ParentIcon string    `json:"parentIcon,omitempty"`
+	Docked     string    `json:"docked,omitempty"`
+	Classes    Classes   `json:"classes,omitempty"`
+	Styles     Styles    `json:"styles,omitempty"`
+	Parent     Renderer  `json:"-"`
 }
 
 // Render ...
@@ -32,14 +35,19 @@ func (t *Tree) Render(w io.Writer) error {
 		t.ID = nextTreeID()
 	}
 	if t.Styles == nil {
-		t.Styles = map[string]string{}
+		t.Styles = Styles{}
+	}
+	t.Styles["border"] = "1px solid lightgrey"
+	if t.Width != 0 && t.Docked != "top" && t.Docked != "bottom" {
+		t.Styles["width"] = fmt.Sprintf("%dpx", t.Width)
+	}
+	// what if I want height to be 0px?
+	if t.Height != 0 && t.Docked != "left" && t.Docked != "right" {
+		t.Styles["height"] = fmt.Sprintf("%dpx", t.Height)
 	}
 
 	// default classes
 	t.Classes = append(t.Classes, "x-tree")
-	t.Classes = getClasses(t.Classes)
-
-	t.Styles["border"] = "1px solid lightgrey"
 
 	//
 	items := Items{}
@@ -52,12 +60,12 @@ func (t *Tree) Render(w io.Writer) error {
 	}
 
 	// Attributes
-	attrs := map[string]template.HTMLAttr{
+	attrs := Attributes{
 		"id":    template.HTMLAttr(t.ID),
-		"class": template.HTMLAttr(strings.Join(t.Classes, " ")),
+		"class": t.Classes.ToAttr(),
 	}
 	if len(t.Styles) > 0 {
-		attrs["style"] = styleToAttr(t.Styles)
+		attrs["style"] = t.Styles.ToAttr()
 	}
 
 	navEl := &Element{
@@ -112,21 +120,23 @@ func (tn *TreeNode) Render(w io.Writer) error {
 	items := Items{}
 
 	// Attributes
-	attrs := map[string]template.HTMLAttr{
+	attrs := Attributes{
 		"id": template.HTMLAttr(tn.ID),
 	}
+
+	classes := []string{}
 
 	if len(tn.Children) > 0 {
 		// add parent label
 		leaf := &Element{
 			Name: "span",
-			Attributes: map[string]template.HTMLAttr{
+			Attributes: Attributes{
 				"class":   "parent",
 				"onclick": "toggleNode(this)",
 			},
 			Items: Items{&Element{
 				Name: "i",
-				Attributes: map[string]template.HTMLAttr{
+				Attributes: Attributes{
 					"class": "fas fa-folder-open",
 				},
 			},
@@ -135,10 +145,29 @@ func (tn *TreeNode) Render(w io.Writer) error {
 		}
 		items = append(items, leaf)
 
+		// Search
+		if tn.Search {
+			search := &Element{
+				Name: "div",
+				Attributes: Attributes{
+					"style": "display: flex; flex-direction: row; align-items: center;",
+				},
+				Items: Items{&Element{
+					Name: "i",
+					Attributes: Attributes{
+						"class": "fas fa-folder-open",
+					},
+				},
+					&RawHTML{template.HTML(tn.Text)},
+				},
+			}
+			items = append(items, search)
+		}
+
 		// add sub-list
 		list := &Element{
 			Name:       "ul",
-			Attributes: map[string]template.HTMLAttr{},
+			Attributes: Attributes{},
 			Items:      Items{},
 		}
 		if tn.Collapsed {
@@ -153,7 +182,7 @@ func (tn *TreeNode) Render(w io.Writer) error {
 	} else {
 		leaf := &Element{
 			Name:       "span",
-			Attributes: map[string]template.HTMLAttr{},
+			Attributes: Attributes{},
 			Items:      Items{},
 		}
 		if tn.Handler != "" {
@@ -163,17 +192,44 @@ func (tn *TreeNode) Render(w io.Writer) error {
 		if tn.IconClass != "" {
 			leaf.Items = append(leaf.Items, &Element{
 				Name: "i",
-				Attributes: map[string]template.HTMLAttr{
+				Attributes: Attributes{
 					"class": template.HTMLAttr(tn.IconClass),
 				},
 			})
 		}
+
+		// add leaf text
 		if tn.Text != "" {
 			leaf.Items = append(leaf.Items, &RawHTML{template.HTML(tn.Text)})
 		}
 
 		items = append(items, leaf)
+
+		// test other stuff in leav
+		items = append(items, &Element{
+			Name: "span",
+			Items: Items{
+				&Element{
+					Name: "a",
+					Attributes: Attributes{
+						"href": template.HTMLAttr("#"),
+					},
+					Innerhtml: template.HTML(`<i class="fas fa-key"></i>`),
+				},
+				&Element{
+					Name: "a",
+					Attributes: Attributes{
+						"href": template.HTMLAttr("#"),
+					},
+					Innerhtml: template.HTML(`<i class="fas fa-info-circle"></i>`),
+				},
+			},
+		})
+
+		classes = append(classes, "leaf")
 	}
+
+	attrs["class"] = template.HTMLAttr(strings.Join(classes, " "))
 
 	tnEl := &Element{
 		Name:       "li",

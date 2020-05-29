@@ -65,7 +65,7 @@ func (n *Nav) Render(w io.Writer) error {
 	}
 
 	// copy styles
-	styles := map[string]string{}
+	styles := Styles{}
 	if len(n.Styles) > 0 {
 		styles = n.Styles
 	}
@@ -123,7 +123,7 @@ func (n *Nav) Render(w io.Writer) error {
 		"class": template.HTMLAttr(strings.Join(npClasses, " ")),
 	}
 	if len(styles) > 0 {
-		attrs["style"] = styleToAttr(styles)
+		attrs["style"] = styles.ToAttr()
 	}
 
 	navEl := &Element{
