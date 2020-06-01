@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"strings"
 )
 
 var (
@@ -107,9 +106,10 @@ type TreeNode struct {
 	Handler   template.JS `json:"handler,omitempty"`
 	Collapsed bool        `json:"collapsed,omitempty"`
 	Leaf      bool        `json:"leaf,omitempty"`
-	Search    bool        `json:"search,omitempty"`
+	Search    *Search     `json:"search,omitempty"`
 	IconClass string      `json:"iconClass,omitempty"`
 	Children  []*TreeNode `json:"children,omitempty"`
+	Items     Items       `json:"items,omitempty"`
 }
 
 // Render ...
@@ -117,6 +117,16 @@ func (tn *TreeNode) Render(w io.Writer) error {
 	if tn.ID == "" {
 		tn.ID = nextTreeNodeID()
 	}
+
+	if len(tn.Children) > 0 {
+		return tn.RenderParent(w)
+	}
+
+	return tn.RenderLeaf(w)
+}
+
+// RenderParent ...
+func (tn *TreeNode) RenderParent(w io.Writer) error {
 	items := Items{}
 
 	// Attributes
@@ -124,117 +134,111 @@ func (tn *TreeNode) Render(w io.Writer) error {
 		"id": template.HTMLAttr(tn.ID),
 	}
 
-	classes := []string{}
-
-	if len(tn.Children) > 0 {
-		// add parent label
-		leaf := &Element{
-			Name: "span",
+	// add parent label
+	leaf := &Element{
+		Name: "span",
+		Attributes: Attributes{
+			"class":   "parent",
+			"onclick": "toggleNode(this)",
+		},
+		Items: Items{&Element{
+			Name: "i",
 			Attributes: Attributes{
-				"class":   "parent",
-				"onclick": "toggleNode(this)",
+				"class": "fas fa-folder-open",
 			},
-			Items: Items{&Element{
-				Name: "i",
-				Attributes: Attributes{
-					"class": "fas fa-folder-open",
-				},
-			},
-				&RawHTML{template.HTML(tn.Text)},
-			},
-		}
-		items = append(items, leaf)
+		},
+			&RawHTML{template.HTML(tn.Text)},
+		},
+	}
+	items = append(items, leaf)
 
-		// Search
-		if tn.Search {
-			search := &Element{
-				Name: "div",
-				Attributes: Attributes{
-					"style": "display: flex; flex-direction: row; align-items: center;",
-				},
-				Items: Items{&Element{
-					Name: "i",
-					Attributes: Attributes{
-						"class": "fas fa-folder-open",
-					},
-				},
-					&RawHTML{template.HTML(tn.Text)},
-				},
-			}
-			items = append(items, search)
-		}
-
-		// add sub-list
-		list := &Element{
-			Name:       "ul",
-			Attributes: Attributes{},
-			Items:      Items{},
-		}
-		if tn.Collapsed {
-			list.Attributes["class"] = "collapsed"
-		} else {
-			list.Attributes["class"] = "expanded"
-		}
-		for _, i := range tn.Children {
-			list.Items = append(list.Items, i)
-		}
-		items = append(items, list)
-	} else {
-		leaf := &Element{
-			Name:       "span",
-			Attributes: Attributes{},
-			Items:      Items{},
-		}
-		if tn.Handler != "" {
-			leaf.Attributes["onclick"] = template.HTMLAttr(fmt.Sprintf("%s('%s')", tn.Handler, tn.ID))
-		}
-
-		if tn.IconClass != "" {
-			leaf.Items = append(leaf.Items, &Element{
-				Name: "i",
-				Attributes: Attributes{
-					"class": template.HTMLAttr(tn.IconClass),
-				},
-			})
-		}
-
-		// add leaf text
-		if tn.Text != "" {
-			leaf.Items = append(leaf.Items, &RawHTML{template.HTML(tn.Text)})
-		}
-
-		items = append(items, leaf)
-
-		// test other stuff in leav
-		items = append(items, &Element{
-			Name: "span",
-			Items: Items{
-				&Element{
-					Name: "a",
-					Attributes: Attributes{
-						"href": template.HTMLAttr("#"),
-					},
-					Innerhtml: template.HTML(`<i class="fas fa-key"></i>`),
-				},
-				&Element{
-					Name: "a",
-					Attributes: Attributes{
-						"href": template.HTMLAttr("#"),
-					},
-					Innerhtml: template.HTML(`<i class="fas fa-info-circle"></i>`),
-				},
-			},
-		})
-
-		classes = append(classes, "leaf")
+	// Search
+	if tn.Search != nil {
+		items = append(items, tn.Search)
 	}
 
-	attrs["class"] = template.HTMLAttr(strings.Join(classes, " "))
+	// add sub-list
+	list := &Element{
+		Name:       "ul",
+		Attributes: Attributes{},
+		Items:      Items{},
+	}
+	if tn.Collapsed {
+		list.Attributes["class"] = "collapsed"
+	} else {
+		list.Attributes["class"] = "expanded"
+	}
+	for _, i := range tn.Children {
+		list.Items = append(list.Items, i)
+	}
+	items = append(items, list)
 
 	tnEl := &Element{
 		Name:       "li",
 		Attributes: attrs,
 		Items:      items,
+	}
+	return tnEl.Render(w)
+}
+
+// RenderLeaf ...
+func (tn *TreeNode) RenderLeaf(w io.Writer) error {
+	// Attributes
+	attrs := Attributes{
+		"id": template.HTMLAttr(tn.ID),
+	}
+	leaf := &Element{
+		Name: "span",
+		Attributes: Attributes{
+			"class": "x-hbox",
+		},
+		Items: Items{},
+	}
+	if tn.Handler != "" {
+		leaf.Attributes["onclick"] = template.HTMLAttr(fmt.Sprintf("%s('%s')", tn.Handler, tn.ID))
+	}
+
+	// if tn.IconClass != "" {
+	leaf.Items = append(leaf.Items, &Element{
+		Name: "i",
+		Attributes: Attributes{
+			"class": template.HTMLAttr(tn.IconClass),
+		},
+	})
+	// }
+
+	// add leaf text
+	if tn.Text != "" {
+		leaf.Items = append(leaf.Items, &Element{
+			Name: "span",
+			Attributes: Attributes{
+				"style": "align-self:center", // TODO: fix this!!!
+			},
+			Innerhtml: template.HTML(tn.Text),
+		})
+
+	}
+
+	// items := Items{leaf}
+	// Add other items
+	extra := &Element{
+		Name: "span",
+		Attributes: Attributes{
+			"class": "x-hbox",
+		},
+		Items: Items{},
+	}
+	for _, i := range tn.Items {
+		extra.Items = append(extra.Items, i)
+	}
+
+	classes := Classes{"leaf"}
+	attrs["class"] = classes.ToAttr()
+
+	tnEl := &Element{
+		Name:       "li",
+		Attributes: attrs,
+		Items:      Items{leaf, extra},
 	}
 	return tnEl.Render(w)
 }
@@ -254,4 +258,46 @@ func nextTreeNodeID() string {
 	id := fmt.Sprintf("tree-node-%d", treeNodeID)
 	treeNodeID++
 	return id
+}
+
+/**
+*
+ */
+
+// Search ...
+type Search struct {
+	XType   string      `json:"xtype"`
+	ID      string      `json:"id,omitempty"`
+	Text    string      `json:"text,omitempty"`
+	Handler template.JS `json:"handler,omitempty"`
+}
+
+// Render ...
+func (s *Search) Render(w io.Writer) error {
+	// if tn.ID == "" {
+	// 	tn.ID = nextTreeNodeID()
+	// }
+
+	search := &Element{
+		Name: "div",
+		Attributes: Attributes{
+			"style": "display: flex; flex-direction: row; align-items: center;",
+		},
+		Items: Items{
+			&Input{},
+			&Button{
+				Classes:   Classes{"button-xsmall", "pure-button"},
+				Styles:    Styles{"visibility": "hidden"},
+				Handler:   "clearSearch",
+				IconClass: "fad fa-times-circle",
+			},
+		},
+	}
+
+	return search.Render(w)
+}
+
+// GetID ...
+func (s *Search) GetID() string {
+	return s.ID
 }

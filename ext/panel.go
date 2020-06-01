@@ -24,28 +24,28 @@ func NewPanel() *Panel {
 
 // Panel ...
 type Panel struct {
-	ID          string            `json:"id,omitempty"`
-	XType       string            `json:"xtype,omitempty"`
-	Title       template.HTML     `json:"title,omitempty"`
-	IconClass   string            `json:"iconClass,omitempty"`
-	Layout      string            `json:"layout,omitempty"`
-	HTML        template.HTML     `json:"html,omitempty"`
-	Width       int               `json:"width,omitempty"`
-	Height      int               `json:"height,omitempty"`
-	Items       Items             `json:"items,omitempty"`
-	Header      *Header           `json:"header,omitempty"`
-	Nav         *Nav              `json:"nav,omitempty"`
-	Body        *Body             `json:"body,omitempty"`
-	Border      template.CSS      `json:"border,omitempty"`
-	Docked      string            `json:"docked,omitempty"` // top, bottom, left, right, ''
-	Flex        string            `json:"flex,omitempty"`
-	Shadow      bool              `json:"shadow,omitempty"`
-	Closable    bool              `json:"closable,omitempty"`
-	Collapsable bool              `json:"collapsable,omitempty"`
-	Classes     []string          `json:"classes,omitempty"`
-	Styles      map[string]string `json:"styles,omitempty"`
-	Controller  *Controller       `json:"-"`
-	Parent      Renderer          `json:"-"`
+	ID          string        `json:"id,omitempty"`
+	XType       string        `json:"xtype,omitempty"`
+	Title       template.HTML `json:"title,omitempty"`
+	IconClass   string        `json:"iconClass,omitempty"`
+	Layout      string        `json:"layout,omitempty"`
+	HTML        template.HTML `json:"html,omitempty"`
+	Width       int           `json:"width,omitempty"`
+	Height      int           `json:"height,omitempty"`
+	Items       Items         `json:"items,omitempty"`
+	Header      *Header       `json:"header,omitempty"`
+	Nav         *Nav          `json:"nav,omitempty"`
+	Body        Renderer      `json:"body,omitempty"`
+	Border      template.CSS  `json:"border,omitempty"`
+	Docked      string        `json:"docked,omitempty"` // top, bottom, left, right, ''
+	Flex        string        `json:"flex,omitempty"`
+	Shadow      bool          `json:"shadow,omitempty"`
+	Closable    bool          `json:"closable,omitempty"`
+	Collapsable bool          `json:"collapsable,omitempty"`
+	Classes     Classes       `json:"classes,omitempty"`
+	Styles      Styles        `json:"styles,omitempty"`
+	Controller  *Controller   `json:"-"`
+	Parent      Renderer      `json:"-"`
 	// RenderTo  string // type???
 }
 
@@ -56,17 +56,9 @@ func (p *Panel) Render(w io.Writer) error {
 	}
 
 	// default classes
-	classess := map[string]bool{
-		"x-panel": true,
-	}
-	// copy classes
-	for _, c := range p.Classes {
-		if _, ok := classess[c]; !ok {
-			classess[c] = true
-		}
-	}
+	p.Classes.Add("x-panel")
 	if p.Shadow {
-		classess["x-shadow"] = true
+		p.Classes.Add("x-shadow")
 	}
 
 	// copy styles
@@ -79,32 +71,28 @@ func (p *Panel) Render(w io.Writer) error {
 	// what if I want width to be 0px?
 	if p.Width != 0 && p.Docked != "top" && p.Docked != "bottom" {
 		styles["width"] = fmt.Sprintf("%dpx", p.Width)
-		classess["x-widthed"] = true
+		p.Classes.Add("x-widthed")
 	}
 	// what if I want height to be 0px?
 	if p.Height != 0 && p.Docked != "left" && p.Docked != "right" {
 		styles["height"] = fmt.Sprintf("%dpx", p.Height)
-		classess["x-heighted"] = true
+		p.Classes.Add("x-heighted")
 	}
 	if p.Border != "" {
 		styles["border"] = string(p.Border)
-		classess["x-managed-border"] = true
+		p.Classes.Add("x-managed-border")
 	}
 
 	if p.Layout == "hbox" {
 		styles["flex-direction"] = "row"
+		// p.Classes.Add("x-vbox")
 	} else {
+		// p.Classes.Add("x-hbox")
 		styles["flex-direction"] = "column"
 	}
 
 	if p.Flex != "" {
 		styles["flex"] = p.Flex
-	}
-
-	// convert class back to array
-	npClasses := []string{}
-	for k := range classess {
-		npClasses = append(npClasses, k)
 	}
 
 	// ITEMS
@@ -179,7 +167,7 @@ func (p *Panel) Render(w io.Writer) error {
 
 	div := &DivContainer{
 		ID:      p.ID,
-		Classes: npClasses,
+		Classes: p.Classes,
 		Styles:  styles,
 		Items:   LayoutItems(items),
 	}
@@ -264,9 +252,9 @@ func buildPanel(i interface{}) *Panel {
 		p.Header = addChild(header).(*Header)
 	}
 
-	if body, ok := ii["body"]; ok {
-		p.Body = addChild(body).(*Body)
-	}
+	// if body, ok := ii["body"]; ok {
+	// 	p.Body = addChild(body).(*DivContainer)
+	// }
 
 	if border, ok := ii["border"]; ok {
 		p.Border = template.CSS(border.(string))

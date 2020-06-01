@@ -16,13 +16,6 @@ type List struct {
 	Columns []*Column
 }
 
-// Column ...
-type Column struct {
-	Text      string
-	DataIndex string
-	Width     int
-}
-
 // Store ...
 type Store struct {
 }

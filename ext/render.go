@@ -22,6 +22,10 @@ func (i Items) Render(w io.Writer) error {
 	return nil
 }
 
+/**
+* Attributes
+ */
+
 // Attributes ...
 type Attributes map[string]template.HTMLAttr
 
@@ -36,6 +40,10 @@ func (s Styles) ToAttr() template.HTMLAttr {
 	}
 	return template.HTMLAttr(strings.Join(sp, " "))
 }
+
+/**
+* Classes
+ */
 
 // Classes ...
 type Classes []string
@@ -62,6 +70,58 @@ func (c Classes) ToAttr() template.HTMLAttr {
 func (c *Classes) Add(class string) {
 	*c = append(*c, class)
 }
+
+// Len ...
+func (c *Classes) Len() int {
+	return len(*c)
+}
+
+/**
+* Events
+* https://developer.mozilla.org/en-US/docs/Web/Events
+ */
+
+// Events ...
+type Events map[string]*Event
+
+// Event ...
+type Event struct {
+	Name      string            `json:"name,omitempty"`
+	Handler   template.HTMLAttr `json:"handler,omitempty"`
+	HandlerFn func()            `json:"handlerfn,omitempty"`
+}
+
+// ToAttr prepend 'on' to event name e.g. "click" -> "onclick"
+func (e Events) ToAttr() map[string]template.HTMLAttr {
+	o := map[string]template.HTMLAttr{}
+	for n, v := range e {
+		nn := fmt.Sprintf("on%s", n)
+		o[nn] = v.Handler
+	}
+	return o
+}
+
+/**
+* Data
+* https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
+ */
+
+// Data ...
+type Data map[string]template.HTMLAttr
+
+// ToAttr prepend 'data-' to name
+func (d Data) ToAttr() map[string]template.HTMLAttr {
+	o := map[string]template.HTMLAttr{}
+	for n, v := range d {
+		nn := fmt.Sprintf("data-%s", n)
+		o[nn] = v
+	}
+	return o
+}
+
+/**
+*
+ */
 
 // Renderer an item that can be rendered
 type Renderer interface {
@@ -184,23 +244,46 @@ func render(w io.Writer, t string, data interface{}) error {
 	return err
 }
 
+// NewBody ...
+func NewBody(items Items) *DivContainer {
+	return &DivContainer{
+		Classes: []string{
+			"x-panel-body",
+			"x-body-wrap-el",
+			"x-panel-body-wrap-el",
+			"x-container-body-wrap-el",
+			"x-component-body-wrap-el",
+		},
+		Items: LayoutItems(items),
+	}
+}
+
 // DivContainer gerneric div container
 type DivContainer struct {
 	ID            string
 	Items         Items
 	ContainerType string
-	Classes       []string
-	Styles        map[string]string
-	Attributes    map[string]template.HTMLAttr
+	Classes       Classes
+	Styles        Styles
+	Attributes    Attributes
 }
 
 // Render ...
 func (d *DivContainer) Render(w io.Writer) error {
-	// TODO: replace this with Render Element
-	return render(w, `<div id="{{.ID}}" class="{{range $c:= $.Classes}}{{$c}} {{end}}" style="{{range $k, $s:= $.Styles}}{{$k}}:{{$s}}; {{end}}">
-			{{range $item := $.Items}}
-			{{if $item}}{{Render $item}}{{else}}NULL---{{end}}
-			{{end}}</div>`, d)
+	el := &Element{
+		Name: "div",
+		Attributes: Attributes{
+			"class": d.Classes.ToAttr(),
+			"style": d.Styles.ToAttr(),
+		},
+		Items: d.Items,
+	}
+	return el.Render(w)
+}
+
+// GetID ...
+func (d *DivContainer) GetID() string {
+	return d.ID
 }
 
 // Element gerneric div container
@@ -213,10 +296,13 @@ type Element struct {
 
 // Render ...
 func (e *Element) Render(w io.Writer) error {
+	if e.Name == "" {
+		e.Name = "div"
+	}
 	name := strings.ToLower(e.Name)
-	attrs := ""
 
 	// Some Attributes will produce garbage if not added this way i.e. "type" & "onclick"
+	attrs := ""
 	for k, val := range e.Attributes {
 		attrs = fmt.Sprintf("%s %s=\"%s\"", attrs, k, val)
 	}
@@ -229,6 +315,7 @@ func (e *Element) Render(w io.Writer) error {
 		_, err := fmt.Fprintf(w, `<%s %s>%s</%s>`, name, attrs, e.Innerhtml, name)
 		return err
 	}
+
 	return render(w, fmt.Sprintf(`<%s %s>{{range $item := $.Items}}{{if $item}}{{Render $item}}{{else}}NULL---{{end}}{{end}}</%s>`, name, attrs, name), e)
 }
 
@@ -252,7 +339,6 @@ var closing = map[string]bool{
 
 // check if node name is self closing
 func isSelfClosing(name string) bool {
-	// name = strings.ToLower(name)
 	_, ok := closing[name]
 	return ok
 }
@@ -261,21 +347,3 @@ func isSelfClosing(name string) bool {
 func (e *Element) GetID() string {
 	return ""
 }
-
-// // getClasses ...
-// func getClasses(c []string) []string {
-// 	// default classes
-// 	classess := map[string]bool{}
-// 	// copy classes
-// 	for _, c := range c {
-// 		if _, ok := classess[c]; !ok {
-// 			classess[c] = true
-// 		}
-// 	}
-// 	// convert class back to array
-// 	npClasses := []string{}
-// 	for k := range classess {
-// 		npClasses = append(npClasses, k)
-// 	}
-// 	return npClasses
-// }

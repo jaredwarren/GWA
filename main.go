@@ -109,7 +109,8 @@ func load() *ext.Application {
 		MainView: &ext.Panel{
 			XType: "panel",
 			Nav: &ext.Nav{
-				Title: "Nav Title",
+				Title:  "Nav Title",
+				Shadow: true,
 				Items: ext.Items{
 					&ext.Button{
 						XType:     "button",
@@ -141,15 +142,27 @@ func load() *ext.Application {
 						}, {
 							Text:      "c2",
 							IconClass: "fad fa-acorn",
+							Items: ext.Items{
+								&ext.Button{
+									UI:        "none",
+									IconClass: "far fa-key",
+									Handler:   "key",
+								},
+								&ext.Button{
+									UI:        "none",
+									IconClass: "far fa-info-circle",
+									Handler:   "info",
+								},
+							},
 						}, {
-							Text:      "c3",
-							IconClass: "fad fa-arrow-alt-from-right",
+							Text: "|c3",
+							// IconClass: "fad fa-arrow-alt-from-right",
 						}, {
-							Text:      "c4",
+							Text:      "|c4",
 							IconClass: "fad fa-tree-palm",
 							Handler:   "onPalm",
 						}, {
-							Text: "c2",
+							Text: `<i class="fad fa-database"></i> Bladehq`,
 							Children: []*ext.TreeNode{{
 								Text:     "c2c1",
 								Children: []*ext.TreeNode{},
@@ -178,10 +191,10 @@ func load() *ext.Application {
 
 					Items: ext.Items{
 						&ext.Panel{
-							XType: "panel",
-							// HTML:   "My panel text...1",
-							Docked: "bottom",
-							Layout: "hbox",
+							XType:   "panel",
+							Docked:  "bottom",
+							Layout:  "hbox",
+							Classes: ext.Classes{"toolbar"},
 							Items: ext.Items{
 								&ext.Button{
 									XType:     "button",
@@ -194,6 +207,14 @@ func load() *ext.Application {
 									Label: "limit:",
 									Name:  "limit",
 									Type:  "number",
+									Data: ext.Data{
+										"dname": "v",
+									},
+									Events: ext.Events{
+										"keyup": &ext.Event{
+											Handler: "limitChange",
+										},
+									},
 								},
 								&ext.Input{
 									XType: "input",
@@ -228,6 +249,40 @@ func load() *ext.Application {
 							},
 						},
 					},
+				},
+
+				&ext.Table{
+					Title: "Table data",
+					// Header: ext.TableHeader{{{
+					// 	Innerhtml: "asdf",
+					// 	Attributes: ext.Attributes{
+					// 		"colspan": "3",
+					// 	},
+					// }}},
+					Header: ext.TableHeader{{{
+						Innerhtml: "ID",
+						DataIndex: "id",
+					}, {
+						Innerhtml: "Select",
+						DataIndex: "select",
+					}, {
+						Innerhtml: "Something",
+						DataIndex: "something",
+					}}},
+					Footer: ext.TableFooter{{
+						Innerhtml: "asdf",
+						Attributes: ext.Attributes{
+							"colspan": "3",
+						},
+					}},
+					Data: ext.Rows{{
+						"id": 1,
+						"select": &ext.Button{
+							IconClass: "fad fa-times-circle",
+							UI:        "none",
+						},
+						"something": "something...",
+					}},
 				},
 
 				// &ext.Panel{

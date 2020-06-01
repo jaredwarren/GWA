@@ -95,11 +95,8 @@ func (n *Nav) Render(w io.Writer) error {
 	// Title
 	if n.Title != "" {
 		title := &Innerhtml{
-			HTML: n.Title,
-			Styles: map[string]string{
-				"flex":       "1",
-				"text-align": "center",
-			},
+			HTML:    n.Title,
+			Classes: Classes{"title"},
 		}
 		items = append(items, title)
 	}

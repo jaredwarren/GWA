@@ -33,6 +33,13 @@
         integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
         crossorigin="anonymous"></script> -->
 
+    <!-- nav.css -->
+    <style>
+        nav .title {
+            flex: 1;
+            text-align: center;
+        }
+    </style>
 
     <!-- general.css -->
     <style type="text/css">
@@ -64,8 +71,8 @@
 
         .x-shadow,
         .x-floated {
-            -webkit-box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.4);
-            box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.4);
+            -webkit-box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.4);
+            box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.4);
         }
 
         .x-panelheader {
@@ -122,6 +129,16 @@
             height: 100%;
         }
 
+        .x-hbox {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .x-vbox {
+            display: flex;
+            flex-direction: column;
+        }
+
         .x-viewport {
             position: absolute;
             top: 0;
@@ -130,6 +147,32 @@
             left: 0;
         }
     </style>
+
+    <!-- general.js -->
+    <script>
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+        function deleteCookie(name) {
+            document.cookie = name + '=; Max-Age=-99999999;';
+        }
+    </script>
 
     <!-- button.css -->
     <style>
@@ -162,45 +205,52 @@
             /* this is a light blue */
         }
 
+        .button-none {
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+
         button {
             width: fit-content;
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            margin: 6px;
+            margin: 4px;
+            padding: 4px;
         }
 
-        button i {
-            padding: 0 6px 0 0;
+        .button-none:hover {
+            background: none;
+        }
+
+        .button-none:focus {
+            background: none;
+        }
+
+        button *:nth-child(2) {
+            padding: 0 0 0 6px;
+        }
+
+        .pure-button {
+            padding: 2px 4px;
         }
     </style>
 
-    <!-- general.js -->
-    <script>
-        function setCookie(name, value, days) {
-            var expires = "";
-            if (days) {
-                var date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toUTCString();
-            }
-            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    <style>
+        .toolbar > *{
+            align-self: center;
+            margin: 4px;
         }
-        function getCookie(name) {
-            var nameEQ = name + "=";
-            var ca = document.cookie.split(';');
-            for (var i = 0; i < ca.length; i++) {
-                var c = ca[i];
-                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-            }
-            return null;
+         .toolbar label{
+            align-self: center;
+            margin: 4px 0 4px 4px;
         }
-        function deleteCookie(name) {
-            document.cookie = name + '=; Max-Age=-99999999;';
-        }
-    </script>
+    </style>
+
+
 
     <!-- tree.js -->
     <script>

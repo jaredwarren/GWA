@@ -32,12 +32,12 @@ func d(p Renderer, depth int) {
 		for _, i := range p.(*Layout).Items {
 			d(i, depth+1)
 		}
-	case "*ext.Body":
-		fmt.Print("| ", "Body", p.(*Body).ID)
-		fmt.Println("")
-		for _, i := range p.(*Body).Items {
-			d(i, depth+1)
-		}
+	// case "*ext.Body":
+	// 	fmt.Print("| ", "Body", p.(*DivContainer).ID)
+	// 	fmt.Println("")
+	// 	for _, i := range p.(*DivContainer).Items {
+	// 		d(i, depth+1)
+	// 	}
 	case "*ext.Header":
 		fmt.Print("| ", "Header", p.(*Header).ID)
 		fmt.Println("::", p.(*Header).Title)

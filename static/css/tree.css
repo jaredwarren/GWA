@@ -13,19 +13,26 @@
     padding-inline-start: 10px;
 }
 
+.x-tree li{
+    display: flex;
+    flex-direction: column;
+}
+
 .x-tree li > span {
     cursor: pointer;
 }
 
+.x-tree li.leaf:hover, .x-tree .parent:hover {
+    background: lightgrey;
+}
 
 .x-tree i {
     padding: 4px;
+    min-height: 21px;
 }
-
 
 .x-tree li.leaf {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 4px;
 }

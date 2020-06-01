@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"strings"
 )
 
 var (
@@ -12,16 +13,17 @@ var (
 
 // Button ...
 type Button struct {
-	XType     string        `json:"xtype"`
-	ID        string        `json:"id,omitempty"`
-	Text      template.HTML `json:"text,omitempty"`
-	Handler   template.JS   `json:"handler,omitempty"`
-	UI        string        `json:"ui,omitempty"` // TODO
-	IconClass string        `json:"iconClass,omitempty"`
-	Classes   Classes       `json:"classes,omitempty"`
-	Styles    Styles        `json:"styles,omitempty"`
-	Parent    Renderer      `json:"-"`
-	HandlerFn Handler       `json:"-"`
+	XType        string        `json:"xtype"`
+	ID           string        `json:"id,omitempty"`
+	Text         template.HTML `json:"text,omitempty"`
+	Handler      template.JS   `json:"handler,omitempty"`
+	UI           string        `json:"ui,omitempty"` // TODO
+	IconClass    string        `json:"iconClass,omitempty"`
+	IconPosition string        `json:"iconPosition,omitempty"`
+	Classes      Classes       `json:"classes,omitempty"`
+	Styles       Styles        `json:"styles,omitempty"`
+	Parent       Renderer      `json:"-"`
+	HandlerFn    Handler       `json:"-"`
 }
 
 // Render ...
@@ -40,13 +42,13 @@ func (b *Button) Render(w io.Writer) error {
 	}
 
 	// default classes
-	b.Classes.Add("btn")
+	b.Classes.Add("pure-button")
 
 	// UI
 	if b.UI == "" {
 		b.UI = "primary"
 	}
-	b.Classes.Add(fmt.Sprintf("btn-%s", b.UI))
+	b.Classes.Add(fmt.Sprintf("button-%s", b.UI))
 
 	// Attributes
 	attrs := map[string]template.HTMLAttr{
@@ -54,9 +56,18 @@ func (b *Button) Render(w io.Writer) error {
 		"class": b.Classes.ToAttr(),
 	}
 
-	// TODO: add property for icon position (top: flex-direction column, ...)
-	b.Styles["flex-direction"] = "row"
 	b.Styles["display"] = "flex"
+	ip := strings.ToLower(b.IconPosition)
+	switch ip {
+	case "top":
+		b.Styles["flex-direction"] = "column"
+	case "bottom":
+		b.Styles["flex-direction"] = "column-reverse"
+	case "right":
+		b.Styles["flex-direction"] = "row-reverse"
+	default:
+		b.Styles["flex-direction"] = "row"
+	}
 
 	if len(b.Styles) > 0 {
 		attrs["style"] = b.Styles.ToAttr()
@@ -81,7 +92,10 @@ func (b *Button) Render(w io.Writer) error {
 
 	// Text
 	if b.Text != "" {
-		items = append(items, &RawHTML{template.HTML(b.Text)})
+		items = append(items, &Element{
+			Name:      "span",
+			Innerhtml: template.HTML(b.Text),
+		})
 	}
 
 	buttonEl := &Element{

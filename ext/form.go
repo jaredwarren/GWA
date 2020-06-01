@@ -212,20 +212,22 @@ func (f *Fieldset) GetID() string {
 
 // Input ...
 type Input struct {
-	XType        string                       `json:"xtype"`
-	ID           string                       `json:"id,omitempty"`
-	Classes      []string                     `json:"classes,omitempty"`
-	Styles       map[string]string            `json:"styles,omitempty"`
-	Type         string                       `json:"type,omitempty"`
-	Name         string                       `json:"name,omitempty"`
-	Value        string                       `json:"value,omitempty"`
-	Attributes   map[string]template.HTMLAttr `json:"attributes,omitempty"`
-	Form         string                       `json:"form,omitempty"`
-	Disabled     bool                         `json:"disabled,omitempty"`
-	Autofocus    bool                         `json:"autofocus,omitempty"`
-	Autocomplete string                       `json:"autocomplete,omitempty"`
-	Label        template.HTML                `json:"label,omitempty"`
-	Parent       Renderer                     `json:"-"`
+	XType        string        `json:"xtype"`
+	ID           string        `json:"id,omitempty"`
+	Classes      Classes       `json:"classes,omitempty"`
+	Styles       Styles        `json:"styles,omitempty"`
+	Type         string        `json:"type,omitempty"`
+	Name         string        `json:"name,omitempty"`
+	Value        string        `json:"value,omitempty"`
+	Attributes   Attributes    `json:"attributes,omitempty"`
+	Events       Events        `json:"events,omitempty"`
+	Data         Data          `json:"data,omitempty"`
+	Form         string        `json:"form,omitempty"`
+	Disabled     bool          `json:"disabled,omitempty"`
+	Autofocus    bool          `json:"autofocus,omitempty"`
+	Autocomplete string        `json:"autocomplete,omitempty"`
+	Label        template.HTML `json:"label,omitempty"`
+	Parent       Renderer      `json:"-"`
 }
 
 // Render ...
@@ -245,8 +247,8 @@ func (i *Input) Render(w io.Writer) error {
 
 	// Type
 	if i.Type == "" {
-		// required, default?
-		panic("wtf")
+		// required, default text??
+		panic("type required")
 	}
 	i.Attributes["type"] = template.HTMLAttr(i.Type)
 
@@ -280,27 +282,37 @@ func (i *Input) Render(w io.Writer) error {
 		i.Attributes["form"] = template.HTMLAttr(i.Form)
 	} // TODO: else get from parent form?
 
+	// Add Events
+	eattr := i.Events.ToAttr()
+	for n, e := range eattr {
+		i.Attributes[n] = e
+	}
+
+	// Add Data
+	dAttrs := i.Data.ToAttr()
+	for n, v := range dAttrs {
+		i.Attributes[n] = v
+	}
+
+	// Label
 	items := Items{}
 	if i.Label != "" {
 		items = append(items, &Element{
-			Name: "label",
-			// Items: Items{&RawHTML{i.Label}},
+			Name:      "label",
 			Innerhtml: i.Label,
 		})
 	}
 
-	var e *Element
-	if i.Type == "textarea" {
-		e = &Element{
-			Name:       "textarea",
-			Attributes: i.Attributes,
-		}
-	} else {
-		e = &Element{
-			Name:       "input",
-			Attributes: i.Attributes,
-		}
+	e := &Element{
+		Name:       "input",
+		Attributes: i.Attributes,
 	}
+
+	// override name for textarea
+	if i.Type == "textarea" {
+		e.Name = "textarea"
+	}
+
 	items = append(items, e)
 	return items.Render(w)
 }
