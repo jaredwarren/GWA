@@ -10,29 +10,6 @@ import (
 )
 
 var (
-	// TODO ...
-	TODO = []string{
-		"\n☐ json to panel (use xtype)",         // big problem with functions
-		"\n☐ make header 'docked'",              // I think this is done, but header template needs cleaned up
-		"\n☐ fix things so they work in test\n", // almost done
-		// "\n☐ make 'app' class that's full-screen, merge with native app\n",
-		// "\n☐ figure a good way to load item from file\n", // done?
-		"\n☐ figure a way to re-attach to web service (keep running in backgorund (might have to be saparate app))\n",
-		"\n☐ Figure a way to update single panel without page reload!!!\n",
-		"\n☐ figure way to make controller work -> pass ui to controller, ui.bind?\n",
-		"\n☐ store (get data from ui.bind->ui.eval? or ajax, something...)\n",
-		"\n☐ fix handler problem with type (might have to make all the same!), wonder if I can override json marshaller?, if not then what?\n",
-		"\n☐ create FORM and figure good way to submit to controller\n",
-		"\n☐ create multiple sessions/instances of app\n",
-		"\n☐ create multiple windows\n",
-		"\n☐ save app state, have to do manually\n",
-		"\n☐ Look for template e.g. panel.html\n",
-		"\n☐ \n",
-		"\n☐ replace all woff2 in pro.min.css https://kit-pro.fontawesome.com/releases/v5.13.0/webfonts/pro-fa-brands-400-5.12.0.woff2\n",
-		"\n☐ \n",
-		"\n☐ \n",
-		"\n☐ Tree Handler needs to propogate to all leaf(or all?) nodes\n",
-	}
 
 	// this is here to show that objects can be in a saparate file
 	mainController = &ext.Controller{
