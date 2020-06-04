@@ -347,3 +347,30 @@ func isSelfClosing(name string) bool {
 func (e *Element) GetID() string {
 	return ""
 }
+
+/**
+*
+ */
+
+// Spacer ...
+type Spacer struct {
+	Type string // vertical or horizontal, TODO: figure out how to guess, based on parent orintation
+	// TODO: add other style/class stuff
+}
+
+// Render ...
+func (s *Spacer) Render(w io.Writer) error {
+	sp := &Element{
+		Name: "span",
+		Attributes: Attributes{
+			"style": "border-left:1px solid darkgray; margin: 0 4px;",
+		},
+		Innerhtml: "&nbsp;",
+	}
+	return sp.Render(w)
+}
+
+// GetID ...
+func (s *Spacer) GetID() string {
+	return ""
+}

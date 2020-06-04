@@ -19,6 +19,8 @@ type Form struct {
 	Width     int               `json:"width,omitempty"`
 	Height    int               `json:"height,omitempty"`
 	Layout    string            `json:"layout,omitempty"`
+	Resizable bool              `json:"resizable,omitempty"`
+	Resize    string            `json:"resize,omitempty"`
 	Border    template.CSS      `json:"border,omitempty"`
 	Docked    string            `json:"docked,omitempty"` // top, bottom, left, right, ''
 	Flex      string            `json:"flex,omitempty"`
@@ -38,6 +40,8 @@ func (f *Form) Render(w io.Writer) error {
 	if f.ID == "" {
 		f.ID = nextFormID()
 	}
+
+	// TODO: find a way to make form use same logic as panel, so there isn't duplicate code
 
 	// default to post method
 	if f.Method == "" {
@@ -95,6 +99,12 @@ func (f *Form) Render(w io.Writer) error {
 		styles["flex"] = f.Flex
 	}
 
+	if f.Resizable {
+		styles["resize"] = "both"
+	} else if f.Resize != "" {
+		styles["resize"] = f.Resize
+	}
+
 	// convert class back to array
 	npClasses := []string{}
 	for k := range classess {
@@ -119,7 +129,7 @@ func (f *Form) Render(w io.Writer) error {
 		"method":   template.HTMLAttr(f.Method),
 		"onsubmit": template.HTMLAttr(fmt.Sprintf("submitForm('%s', event)", f.ID)),
 	}
-	if len(f.Styles) > 0 {
+	if len(styles) > 0 {
 		attrs["style"] = styles.ToAttr()
 	}
 
@@ -166,14 +176,16 @@ func nextFormID() string {
 
 // Fieldset ...
 type Fieldset struct {
-	XType   string            `json:"xtype"`
-	ID      string            `json:"id,omitempty"`
-	Docked  string            `json:"docked,omitempty"`
-	Classes []string          `json:"classes,omitempty"`
-	Styles  map[string]string `json:"styles,omitempty"`
-	Legend  template.HTML     `json:"legend,omitempty"`
-	Items   Items             `json:"items,omitempty"`
-	Parent  Renderer          `json:"-"`
+	XType     string            `json:"xtype"`
+	ID        string            `json:"id,omitempty"`
+	Docked    string            `json:"docked,omitempty"`
+	Classes   []string          `json:"classes,omitempty"`
+	Styles    map[string]string `json:"styles,omitempty"`
+	Resizable bool              `json:"resizable,omitempty"`
+	Resize    string            `json:"resize,omitempty"`
+	Legend    template.HTML     `json:"legend,omitempty"`
+	Items     Items             `json:"items,omitempty"`
+	Parent    Renderer          `json:"-"`
 }
 
 // Render ...
@@ -186,6 +198,19 @@ func (f *Fieldset) Render(w io.Writer) error {
 		})
 	}
 
+	// copy styles
+	styles := Styles{}
+	if len(f.Styles) > 0 {
+		styles = f.Styles
+	}
+	if f.Resizable {
+		styles["resize"] = "both"
+		styles["overflow"] = "auto" // needs to be anything but "visible"
+	} else if f.Resize != "" {
+		styles["resize"] = f.Resize
+		styles["overflow"] = "auto"
+	}
+
 	for _, i := range f.Items {
 		c, ok := i.(Child)
 		if ok {
@@ -195,7 +220,10 @@ func (f *Fieldset) Render(w io.Writer) error {
 	}
 
 	navEl := &Element{
-		Name:  "fieldset",
+		Name: "fieldset",
+		Attributes: Attributes{
+			"style": styles.ToAttr(),
+		},
 		Items: LayoutItems(items),
 	}
 	return navEl.Render(w)
@@ -298,8 +326,9 @@ func (i *Input) Render(w io.Writer) error {
 	items := Items{}
 	if i.Label != "" {
 		items = append(items, &Element{
-			Name:      "label",
-			Innerhtml: i.Label,
+			Name:       "label",
+			Attributes: Attributes{"for": template.HTMLAttr(i.ID)},
+			Innerhtml:  i.Label,
 		})
 	}
 

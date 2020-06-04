@@ -124,56 +124,62 @@ func load() *ext.Application {
 			// Layout: "hbox",
 			// HTML:   "test",
 			Items: ext.Items{
-				&ext.Tree{
-					XType:    "tree",
-					Docked:   "left",
-					ShowRoot: true,
-					Width:    300,
-					// BranchIcon: "",
-					// LeafIcon:   "",
-					// ParentIcon: "",
-					Root: &ext.TreeNode{
-						Text: "root",
-						// IconClass: "fas fa-folder-open",
-						Children: []*ext.TreeNode{{
-							Text:      "account_deletion_requests",
-							IconClass: "fad fa-table",
-							Handler:   "onTableSelect",
-						}, {
-							Text:      "c2",
-							IconClass: "fad fa-acorn",
-							Items: ext.Items{
-								&ext.Button{
-									UI:        "none",
-									IconClass: "far fa-key",
-									Handler:   "key",
-								},
-								&ext.Button{
-									UI:        "none",
-									IconClass: "far fa-info-circle",
-									Handler:   "info",
-								},
+				&ext.Panel{
+					Docked:      "left",
+					Collapsible: true,
+					Collapsed:   true,
+					Title:       "tree panel title",
+					Items: ext.Items{
+						&ext.Tree{
+							XType:    "tree",
+							ShowRoot: true,
+							Width:    300,
+							Title:    "Tree Stuff",
+							// BranchIcon: "",
+							// LeafIcon:   "",
+							// ParentIcon: "",
+							Root: &ext.TreeNode{
+								Text: "root",
+								// IconClass: "fas fa-folder-open",
+								Children: []*ext.TreeNode{{
+									Text:      "account_deletion_requests",
+									IconClass: "fad fa-table",
+									Handler:   "onTableSelect",
+								}, {
+									Text:      "c2",
+									IconClass: "fad fa-acorn",
+									Items: ext.Items{
+										&ext.Button{
+											UI:        "none",
+											IconClass: "far fa-key",
+											Handler:   "key",
+										},
+										&ext.Button{
+											UI:        "none",
+											IconClass: "far fa-info-circle",
+											Handler:   "info",
+										},
+									},
+								}, {
+									Text: "|c3",
+									// IconClass: "fad fa-arrow-alt-from-right",
+								}, {
+									Text:      "|c4",
+									IconClass: "fad fa-tree-palm",
+									Handler:   "onPalm",
+								}, {
+									Text: `<i class="fad fa-database"></i> Bladehq`,
+									Children: []*ext.TreeNode{{
+										Text: "c2c1",
+									}},
+								}, {
+									Text: "c3",
+									Children: []*ext.TreeNode{{
+										Text: "c3c1",
+									}},
+								}},
 							},
-						}, {
-							Text: "|c3",
-							// IconClass: "fad fa-arrow-alt-from-right",
-						}, {
-							Text:      "|c4",
-							IconClass: "fad fa-tree-palm",
-							Handler:   "onPalm",
-						}, {
-							Text: `<i class="fad fa-database"></i> Bladehq`,
-							Children: []*ext.TreeNode{{
-								Text:     "c2c1",
-								Children: []*ext.TreeNode{},
-							}},
-						}, {
-							Text: "c3",
-							Children: []*ext.TreeNode{{
-								Text:     "c3c1",
-								Children: []*ext.TreeNode{},
-							}},
-						}},
+						},
 					},
 				},
 
@@ -184,6 +190,7 @@ func load() *ext.Application {
 					// Handler: "btnClick",
 					// Method: "post",
 					// Action: "submit",
+					Resize:  "vertical",
 					Handler: "formSubmit",
 					// Handler: func(w http.ResponseWriter, r *http.Request) {
 					// 	fmt.Println("submit....")
@@ -191,9 +198,10 @@ func load() *ext.Application {
 
 					Items: ext.Items{
 						&ext.Panel{
-							XType:   "panel",
-							Docked:  "bottom",
-							Layout:  "hbox",
+							XType:  "panel",
+							Docked: "bottom",
+							Layout: "hbox",
+							// Resize:  "vertical",
 							Classes: ext.Classes{"toolbar"},
 							Items: ext.Items{
 								&ext.Button{
@@ -201,7 +209,9 @@ func load() *ext.Application {
 									Text:      "Run",
 									Handler:   "btnClick",
 									IconClass: "far fa-play",
+									Classes:   ext.Classes{"button-success", "pure-button"},
 								},
+								&ext.Spacer{},
 								&ext.Input{
 									XType: "input",
 									Label: "limit:",
@@ -233,6 +243,7 @@ func load() *ext.Application {
 						&ext.Fieldset{
 							XType:  "fieldset",
 							Legend: "Form Legend",
+							Resize: "vertical",
 							Items: ext.Items{
 								&ext.Input{
 									XType: "input",
@@ -266,15 +277,22 @@ func load() *ext.Application {
 						Innerhtml: "Select",
 						DataIndex: "select",
 					}, {
-						Innerhtml: "Something",
+						Innerhtml: ` <a class="button-xsmall pure-button button-success"
+          href="/{{$.SelectedDB}}/run?query={{$.Query}}&sortdir=ASC&sortname={{$c}};"><i
+            class="fas fa-sort-amount-up-alt"></i></a>
+        <a class="button-xsmall pure-button button-success"
+          href="/{{$.SelectedDB}}/run?query={{$.Query}}&sortdir=DESC&sortname={{$c}};"> <i
+            class="fas fa-sort-amount-down"></i></a>
+        <button class="button-xsmall pure-button button-secondary" onclick="search('{{$c}}')"><i
+            class="fas fa-search"></i></button>`,
 						DataIndex: "something",
 					}}},
-					Footer: ext.TableFooter{{
+					Footer: ext.TableFooter{{{
 						Innerhtml: "asdf",
 						Attributes: ext.Attributes{
 							"colspan": "3",
 						},
-					}},
+					}}},
 					Data: ext.Rows{{
 						"id": 1,
 						"select": &ext.Button{

@@ -13,19 +13,21 @@ var (
 
 // Tree ...
 type Tree struct {
-	XType      string    `json:"xtype"`
-	ID         string    `json:"id,omitempty"`
-	ShowRoot   bool      `json:"showRoot,omitempty"`
-	Root       *TreeNode `json:"root,omitempty"`
-	Width      int       `json:"width,omitempty"`
-	Height     int       `json:"height,omitempty"`
-	BranchIcon string    `json:"branchIcon,omitempty"`
-	LeafIcon   string    `json:"leafIcon,omitempty"`
-	ParentIcon string    `json:"parentIcon,omitempty"`
-	Docked     string    `json:"docked,omitempty"`
-	Classes    Classes   `json:"classes,omitempty"`
-	Styles     Styles    `json:"styles,omitempty"`
-	Parent     Renderer  `json:"-"`
+	XType      string        `json:"xtype"`
+	ID         string        `json:"id,omitempty"`
+	Title      template.HTML `json:"title,omitempty"`
+	ShowRoot   bool          `json:"showRoot,omitempty"`
+	Header     *Header       `json:"header,omitempty"`
+	Root       *TreeNode     `json:"root,omitempty"`
+	Width      int           `json:"width,omitempty"`
+	Height     int           `json:"height,omitempty"`
+	BranchIcon string        `json:"branchIcon,omitempty"`
+	LeafIcon   string        `json:"leafIcon,omitempty"`
+	ParentIcon string        `json:"parentIcon,omitempty"`
+	Docked     string        `json:"docked,omitempty"`
+	Classes    Classes       `json:"classes,omitempty"`
+	Styles     Styles        `json:"styles,omitempty"`
+	Parent     Renderer      `json:"-"`
 }
 
 // Render ...
@@ -33,6 +35,7 @@ func (t *Tree) Render(w io.Writer) error {
 	if t.ID == "" {
 		t.ID = nextTreeID()
 	}
+
 	if t.Styles == nil {
 		t.Styles = Styles{}
 	}
@@ -50,6 +53,30 @@ func (t *Tree) Render(w io.Writer) error {
 
 	//
 	items := Items{}
+
+	// HEADER
+	var header *Header
+	if t.Title != "" {
+		if t.Header == nil {
+			// TODO: I don't like the "NewHeader" fn
+			header = NewHeader(t.Title)
+		} else if t.Header.Title == "" {
+			header = t.Header
+			header.Title = t.Title
+			header.Docked = "top"
+		} // else header is all set, ignore Title attribute
+	} else if t.Header != nil {
+		header = t.Header
+	} // else assume no header
+
+	// append header as docked item[0]
+	if header != nil {
+		if header.Docked == "" {
+			header.Docked = "top"
+		}
+		items = append(items, header)
+	}
+
 	if t.ShowRoot {
 		items = append(items, t.Root)
 	} else {

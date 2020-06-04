@@ -32,6 +32,10 @@ type Panel struct {
 	HTML        template.HTML `json:"html,omitempty"`
 	Width       int           `json:"width,omitempty"`
 	Height      int           `json:"height,omitempty"`
+	Resizable   bool          `json:"resizable,omitempty"`
+	Resize      string        `json:"resize,omitempty"`
+	Collapsible bool          `json:"collapsible,omitempty"`
+	Collapsed   bool          `json:"collapsed,omitempty"`
 	Items       Items         `json:"items,omitempty"`
 	Header      *Header       `json:"header,omitempty"`
 	Nav         *Nav          `json:"nav,omitempty"`
@@ -95,33 +99,31 @@ func (p *Panel) Render(w io.Writer) error {
 		styles["flex"] = p.Flex
 	}
 
+	if p.Resizable {
+		styles["resize"] = "both"
+	} else if p.Resize != "" {
+		styles["resize"] = p.Resize
+	}
+
 	// ITEMS
 	items := Items{}
 
 	// NAV
-	var nav *Nav
-	if p.Title != "" {
-		if p.Nav == nil {
-			nav = NewNav(p.Title)
-		} else if p.Nav.Title == "" {
-			nav = p.Nav
-			nav.Title = p.Title
-			nav.Docked = "top"
-		} // else nav is all set, ignore Title attribute
-	} else if p.Nav != nil {
-		nav = p.Nav
-	} // else assume no nav
-	// append nav as docked item[0]
-	if nav != nil {
-		if nav.Docked == "" {
-			nav.Docked = "top"
+	if p.Nav != nil {
+		if p.Title != "" {
+			p.Nav.Title = p.Title
 		}
-		items = append(items, nav)
+		if p.Nav.Docked == "" {
+			p.Nav.Docked = "top"
+		}
+		// append nav as docked item[0]
+		items = append(items, p.Nav)
 	}
 
 	// HEADER
 	var header *Header
 	if p.Title != "" {
+		// TODO: if nav has title don't add to header???
 		if p.Header == nil {
 			header = NewHeader(p.Title)
 		} else if p.Header.Title == "" {
@@ -132,6 +134,44 @@ func (p *Panel) Render(w io.Writer) error {
 	} else if p.Header != nil {
 		header = p.Header
 	} // else assume no header
+
+	// Collapsed
+	if p.Collapsible || p.Collapsed {
+		if header == nil {
+			header = NewHeader("&nbsp;")
+		}
+		header.Items = append(header.Items, &Button{
+			Handler:   "collapsePanel",
+			IconClass: "far fa-angle-left",
+		})
+
+		collapsedPanel := &Panel{
+			Docked: "right",
+			Items: Items{&Button{
+				Handler:   "expandPanel",
+				IconClass: "far fa-angle-right",
+			}},
+		}
+
+		if p.Collapsed {
+			// collapsedPanel.Styles = Styles{
+			// 	"display": "flex",
+			// }
+			// styles["display"] = "none"
+
+			p.Classes.Add("collapsed")
+
+		} else {
+			p.Classes.Add("expanded")
+			collapsedPanel.Styles = Styles{
+				"display": "none",
+			}
+		}
+
+		// TODO: add title vertically?
+		items = append(items, collapsedPanel)
+	}
+
 	// append header as docked item[0] or item[1] if nav
 	if header != nil {
 		if header.Docked == "" {

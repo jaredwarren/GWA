@@ -146,6 +146,10 @@
             right: 0;
             left: 0;
         }
+
+        .x-panel.collapsed>.x-vbox>.x-panel-body:nth-child(2) {
+            display: none;
+        }
     </style>
 
     <!-- general.js -->
@@ -238,13 +242,24 @@
             padding: 2px 4px;
         }
     </style>
+    <script>
+        function collapsePanel(id) {
+            debugger;
+            console.log("TODO: colapse panel:", id);
+        }
+        function expandPanel(id) {
+            debugger;
+            console.log("TODO: colapse panel:", id);
+        }
+    </script>
 
     <style>
-        .toolbar > *{
+        .toolbar>* {
             align-self: center;
             margin: 4px;
         }
-         .toolbar label{
+
+        .toolbar label {
             align-self: center;
             margin: 4px 0 4px 4px;
         }

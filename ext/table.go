@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"strings"
 )
 
 var (
-	tableID     = 0
-	tableNodeID = 0
+	tableID = 0
 )
 
 // Table ...
@@ -45,7 +45,6 @@ func (t *Table) Render(w io.Writer) error {
 			Items: Items{},
 		}
 
-		//
 		if len(t.Header) > 0 {
 			for _, hr := range t.Header {
 				for _, hc := range hr {
@@ -93,9 +92,13 @@ func (t *Table) Render(w io.Writer) error {
 		}
 		bodyItems = append(bodyItems, row)
 	}
-
-	// TODO:if body is empty add something?
-
+	if len(bodyItems) == 0 {
+		emptyTableEl := &Element{
+			Name:      "div",
+			Innerhtml: "No Data",
+		}
+		return emptyTableEl.Render(w)
+	}
 	body := &Element{
 		Name:  "tbody",
 		Items: bodyItems,
@@ -114,6 +117,7 @@ func (t *Table) Render(w io.Writer) error {
 					headerCells = append(headerCells, &Element{
 						Name:       "th",
 						Innerhtml:  hc.Innerhtml,
+						Items:      hc.Items,
 						Attributes: hc.Attributes,
 					})
 				}
@@ -127,9 +131,10 @@ func (t *Table) Render(w io.Writer) error {
 			hr := t.Data[0]
 			headerCells := Items{}
 			for k := range hr {
+				label := strings.Title(k)
 				headerCells = append(headerCells, &Element{
 					Name:      "th",
-					Innerhtml: template.HTML(k),
+					Innerhtml: template.HTML(label),
 				})
 			}
 			headerRows = append(headerRows, &Element{
@@ -141,73 +146,41 @@ func (t *Table) Render(w io.Writer) error {
 		thead.Items = headerRows
 	}
 
-	//
-
-	// var hr *Element
-	// if len(t.Columns) > 0 {
-	// 	hr = &Element{
-	// 		Name:  "tr",
-	// 		Items: Items{},
-	// 	}
-	// 	for _, colData := range t.Columns {
-	// 		hr.Items = append(hr.Items, &Element{
-	// 			Name:  "th",
-	// 			Items: Items{&RawHTML{template.HTML(colData.Text)}},
-	// 		})
-	// 	}
-	// } else if len(t.Header) > 0 {
-	// 	// just use header directly assume it's got right number of columns
-	// } else if len(t.Data) > 0 {
-	// 	hr = &Element{
-	// 		Name:  "tr",
-	// 		Items: Items{},
-	// 	}
-	// 	for k := range t.Data[0] {
-	// 		hr.Items = append(hr.Items, &RawHTML{template.HTML(k)})
-	// 	}
-	// } // else no data
-
 	// FOOT
-	fi := Items{}
+	footerRows := Items{}
 	if len(t.Footer) > 0 {
-		// TODO: fix this to handle multiple footer rows
-		fr := &Element{
-			Name:  "tr",
-			Items: Items{},
-		}
-		for _, f := range t.Footer {
-			fr.Items = append(fr.Items, &Element{
-				Name:       "td",
-				Attributes: f.Attributes,
-				Innerhtml:  f.Innerhtml,
+		for _, hr := range t.Footer {
+			footerCells := Items{}
+			for _, hc := range hr {
+				footerCells = append(footerCells, &Element{
+					Name:       "th",
+					Innerhtml:  hc.Innerhtml,
+					Attributes: hc.Attributes,
+				})
+			}
+			footerRows = append(footerRows, &Element{
+				Name:  "tr",
+				Items: footerCells,
 			})
 		}
-		fi = append(fi, fr)
 	}
-	fmt.Printf(" - %+v\n", t.Footer)
 	tfoot := &Element{
 		Name:  "tfoot",
-		Items: fi,
-	}
-
-	//
-	items := Items{
-		thead,
-		body,
-		tfoot,
-	}
-
-	// Attributes
-	attrs := Attributes{
-		"id":    template.HTMLAttr(t.ID),
-		"class": t.Classes.ToAttr(),
-		"style": t.Styles.ToAttr(),
+		Items: footerRows,
 	}
 
 	navEl := &Element{
-		Name:       "table",
-		Attributes: attrs,
-		Items:      items,
+		Name: "table",
+		Attributes: Attributes{
+			"id":    template.HTMLAttr(t.ID),
+			"class": t.Classes.ToAttr(),
+			"style": t.Styles.ToAttr(),
+		},
+		Items: Items{
+			thead,
+			body,
+			tfoot,
+		},
 	}
 	return navEl.Render(w)
 }
@@ -250,6 +223,7 @@ type HeaderCell struct {
 	Innerhtml  template.HTML
 	Attributes map[string]template.HTMLAttr
 	DataIndex  string
+	Items      Items
 }
 
 /**
@@ -257,7 +231,18 @@ type HeaderCell struct {
  */
 
 // TableFooter ..
-type TableFooter []*Cell
+type TableFooter []FooterRow
+
+// FooterRow ...
+type FooterRow []FooterCell
+
+// FooterCell ...
+type FooterCell struct {
+	Innerhtml  template.HTML
+	Attributes map[string]template.HTMLAttr
+	DataIndex  string
+	Items      Items
+}
 
 /**
 * Columns
