@@ -9,6 +9,10 @@ import (
 	"github.com/jaredwarren/goext/ext"
 )
 
+type Button struct {
+	Handler func()
+}
+
 var (
 
 	// this is here to show that objects can be in a saparate file
