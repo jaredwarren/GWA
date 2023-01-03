@@ -12,16 +12,13 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/zserge/lorca"
 )
 
 var (
 	// for now make the stupid thing global
 	web *Service
-	ui  lorca.UI
 )
 
 // Service basic web service
@@ -35,16 +32,16 @@ type Service struct {
 
 // Application ...
 type Application struct {
+	// TODO: add xtype when marshal/unmarshal
 	XType       string        `json:"xtype"`
 	Name        string        `json:"name"`
 	MainView    Renderer      `json:"mainview"`
+	Head        *Head         `json:"head"`
 	Width       int           `json:"width,omitempty"`
 	Height      int           `json:"height,omitempty"`
 	Controllers []*Controller `json:"-"`
 	Exit        chan error    `json:"-"`
 	service     *Service
-	cwd         string
-	ui          lorca.UI
 }
 
 // NewApp ...
@@ -106,38 +103,6 @@ func (a *Application) Launch() error {
 	}()
 	a.service = web
 
-	// Setup UI
-	uiArgs := []string{}
-	width := 500
-	if a.Width > 0 {
-		width = a.Width
-	}
-	height := 500
-	if a.Height > 0 {
-		height = a.Height
-	}
-
-	var err error
-	ui, err = lorca.New("", "", width, height, uiArgs...)
-	if err != nil {
-		fmt.Println("[E] ui.New", err)
-	}
-	a.ui = ui
-
-	// TODO:
-	// use ui.Bind("counterAdd", c.Add)? for call backs???
-
-	// run ui
-	err = ui.Load(a.service.Home.String())
-	if err != nil {
-		fmt.Println("[E] ui.load", err)
-	}
-
-	go func() {
-		<-ui.Done()
-		a.Exit <- fmt.Errorf("UI Closed")
-	}()
-
 	done := <-a.Exit
 	a.Close()
 	return done
@@ -156,9 +121,6 @@ func (a *Application) Close() error {
 	var err error
 	if a.service != nil && a.service.Server != nil {
 		a.service.Server.Close()
-	}
-	if a.ui != nil {
-		err = a.ui.Close()
 	}
 	return err
 }
@@ -181,14 +143,15 @@ func (a *Application) Render(w io.Writer) error {
 	items := Items{}
 	// set controllers ui, so ui.Bind works
 	for _, c := range a.Controllers {
-		c.ui = a.ui
+		// c.ui = a.ui
 		items = append(items, c)
 	}
 
 	// render main view
 	items = append(items, a.MainView)
+	// TODO: wrap items in new "body" element
 	div := &DivContainer{
-		ID:      fmt.Sprintf("app"),
+		ID:      "app",
 		Classes: []string{"x-viewport"},
 		Styles:  map[string]string{},
 		Items:   items,
@@ -196,30 +159,37 @@ func (a *Application) Render(w io.Writer) error {
 	buf := new(bytes.Buffer)
 	err := div.Render(buf)
 	if err != nil {
-		fmt.Println("[E] render:", err)
+		fmt.Println("[E] render body:", err)
+	}
+
+	headBuf := new(bytes.Buffer)
+	err = a.Head.Render(headBuf)
+	if err != nil {
+		fmt.Println("[E] render head:", err)
 	}
 
 	// render full html
 	return renderTemplate(w, "base", &struct {
 		Title string
 		Body  template.HTML
+		Head  template.HTML
 	}{
 		Title: a.Name,
 		Body:  template.HTML(buf.String()),
+		Head:  template.HTML(headBuf.String()),
 	})
 }
 
 // Update ...
 func (a *Application) Update(r Renderer) error {
-	buf := new(bytes.Buffer)
-	err := r.Render(buf)
-	if err != nil {
-		return err
-	}
-	js := strings.Replace(buf.String(), "\n", "", -1)
-	js = strings.Replace(js, "'", "\\'", -1)
-	js = fmt.Sprintf(`document.getElementById('%s').outerHTML = '%s';`, r.GetID(), js)
-	a.ui.Eval(js)
+	// buf := new(bytes.Buffer)
+	// err := r.Render(buf)
+	// if err != nil {
+	// 	return err
+	// }
+	// js := strings.Replace(buf.String(), "\n", "", -1)
+	// js = strings.Replace(js, "'", "\\'", -1)
+	// js = fmt.Sprintf(`document.getElementById('%s').outerHTML = '%s';`, r.GetID(), js)
 	return nil
 }
 
@@ -237,7 +207,7 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 	}
 
 	if xtype, ok := jApp["xtype"]; !ok || xtype != "app" {
-		return fmt.Errorf("Root must be app")
+		return fmt.Errorf("root must be app")
 	}
 
 	if name, ok := jApp["name"]; ok {

@@ -2,21 +2,20 @@ package ext
 
 import (
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
-
-	"github.com/zserge/lorca"
 )
 
 // Controller ...
 type Controller struct {
 	Handlers     Handlers
 	FormHandlers FormHandlers
-	ui           lorca.UI
+	// ui           lorca.UI
 }
 
 // Handlers ...
-type Handlers map[string]Handler
+type Handlers map[string]template.JS
 
 // FormHandlers ...
 type FormHandlers map[string]FormHandler
@@ -34,22 +33,16 @@ func (h Handler) Call(args ...interface{}) {
 
 // Render ...
 func (c *Controller) Render(w io.Writer) error {
-	for name, f := range c.Handlers {
-		// for some reason this has to be async, I think it's because ui isn't running yet
-		go func(name string, f Handler) {
-			err := c.ui.Bind(name, f)
-			if err != nil {
-				fmt.Println("BOUND ERROR - name:", name, err)
-			}
-		}(name, f)
+
+	var innerJS template.JS
+	for k, h := range c.Handlers {
+		innerJS = innerJS + template.JS(fmt.Sprintf(`const %s = function (...args) {%s}`, k, h))
+	}
+	buttonEl := &Script{
+		InnerJS: innerJS,
 	}
 
-	for name, f := range c.FormHandlers {
-		web.Mux.HandleFunc(fmt.Sprintf("/submit/%s", name), f).Methods("POST")
-	}
-
-	// currently nothing to render
-	return nil
+	return buttonEl.Render(w)
 }
 
 // GetID ...

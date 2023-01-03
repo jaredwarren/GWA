@@ -17,13 +17,14 @@ type Button struct {
 	ID           string        `json:"id,omitempty"`
 	Text         template.HTML `json:"text,omitempty"`
 	Handler      template.JS   `json:"handler,omitempty"`
-	UI           string        `json:"ui,omitempty"` // TODO
-	IconClass    string        `json:"iconClass,omitempty"`
-	IconPosition string        `json:"iconPosition,omitempty"`
-	Classes      Classes       `json:"classes,omitempty"`
-	Styles       Styles        `json:"styles,omitempty"`
-	Parent       Renderer      `json:"-"`
-	HandlerFn    Handler       `json:"-"`
+	OnClick      string
+	UI           string   `json:"ui,omitempty"` // TODO
+	IconClass    string   `json:"iconClass,omitempty"`
+	IconPosition string   `json:"iconPosition,omitempty"`
+	Classes      Classes  `json:"classes,omitempty"`
+	Styles       Styles   `json:"styles,omitempty"`
+	Parent       Renderer `json:"-"`
+	HandlerFn    Handler  `json:"-"`
 }
 
 // Render ...
@@ -35,10 +36,10 @@ func (b *Button) Render(w io.Writer) error {
 	b.Styles = Styles{}
 
 	if b.HandlerFn != nil {
-		// TODO: fix id: remove '-'
-		name := fmt.Sprintf("%s_click", "todo_")
-		b.Handler = template.JS(name)
-		go ui.Bind(name, b.HandlerFn)
+		// // TODO: fix id: remove '-'
+		// name := fmt.Sprintf("%s_click", "todo_")
+		// b.Handler = template.JS(name)
+		// go ui.Bind(name, b.HandlerFn)
 	}
 
 	// default classes
@@ -74,8 +75,11 @@ func (b *Button) Render(w io.Writer) error {
 	}
 
 	// Handler
+	if b.OnClick != "" {
+		b.Handler = template.JS(fmt.Sprintf("%s(event, this);", b.OnClick))
+	}
 	if b.Handler != "" {
-		attrs["onclick"] = template.HTMLAttr(fmt.Sprintf("%s('%s')", b.Handler, b.ID))
+		attrs["onclick"] = template.HTMLAttr(b.Handler)
 	}
 
 	items := Items{}

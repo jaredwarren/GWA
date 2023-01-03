@@ -1,13 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	"github.com/jaredwarren/goext/ext"
-	v2 "github.com/jaredwarren/goext/v2"
 )
 
 type Button struct {
@@ -19,30 +17,36 @@ var (
 	// this is here to show that objects can be in a saparate file
 	mainController = &ext.Controller{
 		Handlers: ext.Handlers{
-			"btnClick": func(id string) {
-				fmt.Print("Button Clicked:")
-				fmt.Printf("   %+v\n", id)
+			// "btnClick": func(id string) {
+			// 	fmt.Print("Button Clicked:")
+			// 	fmt.Printf("   %+v\n", id)
 
-				// Button update test
-				btn := app.Find(id)
-				if btn != nil {
-					btn.(*ext.Button).Text = "Clicked!!!"
-					app.Update(btn)
-				}
+			// 	// Button update test
+			// 	btn := app.Find(id)
+			// 	if btn != nil {
+			// 		btn.(*ext.Button).Text = "Clicked!!!"
+			// 		app.Update(btn)
+			// 	}
 
-				// Update Tree Test
-				t := app.Find("tree-0")
-				if t != nil {
-					t.(*ext.Tree).Root.Text = "UPDATED"
-					app.Update(t)
-				}
-			},
-			"logout": func(id string) {
-				fmt.Println("logout:", id)
-			},
-			"onTableSelect": func(id string) {
-				fmt.Println("onTableSelect:", id)
-			},
+			// 	// Update Tree Test
+			// 	t := app.Find("tree-0")
+			// 	if t != nil {
+			// 		t.(*ext.Tree).Root.Text = "UPDATED"
+			// 		app.Update(t)
+			// 	}
+			// },
+			// "logout": func(id string) {
+			// 	fmt.Println("logout:", id)
+			// },
+			// "onTableSelect": func(id string) {
+			// 	fmt.Println("onTableSelect:", id)
+			// },
+			"btnClick": `
+			debugger;
+		for (let i = 0; i < args.length; i++) {
+ 			console.log(args[i]);
+		}
+		`,
 		},
 		FormHandlers: ext.FormHandlers{
 			"formSubmit": func(w http.ResponseWriter, r *http.Request) {
@@ -54,13 +58,6 @@ var (
 )
 
 func main() {
-	if true {
-		v2.Load()
-		fmt.Println("Bye...")
-		return
-	}
-	// app = loadFromJSON()
-
 	app = load()
 
 	done := app.Launch()
@@ -71,27 +68,21 @@ func main() {
 	}
 }
 
-func loadFromJSON() *ext.Application {
-	dat, err := ioutil.ReadFile("./app.json")
-	app := &ext.Application{}
-	err = json.Unmarshal(dat, app)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	app.Controllers = []*ext.Controller{
-		mainController,
-	}
-
-	return app
-}
-
 func load() *ext.Application {
 	return &ext.Application{
 		XType: "app",
 		Name:  "my app",
 		Controllers: []*ext.Controller{
 			mainController,
+		},
+		Head: &ext.Head{
+			Items: ext.Items{
+				&ext.Script{
+					Src: url.URL{
+						Path: "/static/js/test.js",
+					},
+				},
+			},
 		},
 		MainView: &ext.Panel{
 			XType: "panel",
@@ -101,8 +92,14 @@ func load() *ext.Application {
 				Items: ext.Items{
 					&ext.Button{
 						XType:     "button",
-						Text:      "",
-						Handler:   "logout",
+						Text:      "alert....",
+						Handler:   `alert('hello');`,
+						IconClass: "fad fa-sign-out",
+					},
+					&ext.Button{
+						XType:     "button",
+						Text:      "hello....",
+						OnClick:   `btnClick`,
 						IconClass: "fad fa-sign-out",
 					},
 				},
