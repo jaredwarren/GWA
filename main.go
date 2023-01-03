@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/jaredwarren/goext/ext"
+	v2 "github.com/jaredwarren/goext/v2"
 )
 
 type Button struct {
@@ -53,6 +54,11 @@ var (
 )
 
 func main() {
+	if true {
+		v2.Load()
+		fmt.Println("Bye...")
+		return
+	}
 	// app = loadFromJSON()
 
 	app = load()
