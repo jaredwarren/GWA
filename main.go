@@ -81,7 +81,7 @@ func load() *ext.Application {
 			Items: []ext.NavItem{
 				&ext.NavBrand{
 					Image: &ext.Image{
-						Src:    "https://images.pexels.com/photos/406014/pexels-photo-406014.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+						Src:    "https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg",
 						Height: "20px",
 					},
 					Title: "this is my brand",
