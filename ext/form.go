@@ -35,6 +35,10 @@ type Form struct {
 	// TODO: success/fail handler, how to push info back to front?
 }
 
+func (f *Form) RenderString() string {
+	return "TODO: Application"
+}
+
 // Render ...
 func (f *Form) Render(w io.Writer) error {
 	if f.ID == "" {
@@ -188,6 +192,10 @@ type Fieldset struct {
 	Parent    Renderer          `json:"-"`
 }
 
+func (f *Fieldset) RenderString() string {
+	return "TODO: Application"
+}
+
 // Render ...
 func (f *Fieldset) Render(w io.Writer) error {
 	items := Items{}
@@ -256,6 +264,10 @@ type Input struct {
 	Autocomplete string        `json:"autocomplete,omitempty"`
 	Label        template.HTML `json:"label,omitempty"`
 	Parent       Renderer      `json:"-"`
+}
+
+func (i *Input) RenderString() string {
+	return "TODO: Application"
 }
 
 // Render ...

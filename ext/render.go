@@ -126,7 +126,8 @@ func (d Data) ToAttr() map[string]template.HTMLAttr {
 // Renderer an item that can be rendered
 type Renderer interface {
 	Render(w io.Writer) error
-	GetID() string
+	// RenderString() string
+	// GetID() string
 }
 
 // Render a template

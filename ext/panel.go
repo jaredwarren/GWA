@@ -38,18 +38,18 @@ type Panel struct {
 	Collapsed   bool          `json:"collapsed,omitempty"`
 	Items       Items         `json:"items,omitempty"`
 	Header      *Header       `json:"header,omitempty"`
-	Nav         *Nav          `json:"nav,omitempty"`
-	Body        Renderer      `json:"body,omitempty"`
-	Border      template.CSS  `json:"border,omitempty"`
-	Docked      string        `json:"docked,omitempty"` // top, bottom, left, right, ''
-	Flex        string        `json:"flex,omitempty"`
-	Shadow      bool          `json:"shadow,omitempty"`
-	Closable    bool          `json:"closable,omitempty"`
-	Collapsable bool          `json:"collapsable,omitempty"`
-	Classes     Classes       `json:"classes,omitempty"`
-	Styles      Styles        `json:"styles,omitempty"`
-	Controller  *Controller   `json:"-"`
-	Parent      Renderer      `json:"-"`
+	// Nav         *Nav          `json:"nav,omitempty"`
+	Body        Renderer     `json:"body,omitempty"`
+	Border      template.CSS `json:"border,omitempty"`
+	Docked      string       `json:"docked,omitempty"` // top, bottom, left, right, ''
+	Flex        string       `json:"flex,omitempty"`
+	Shadow      bool         `json:"shadow,omitempty"`
+	Closable    bool         `json:"closable,omitempty"`
+	Collapsable bool         `json:"collapsable,omitempty"`
+	Classes     Classes      `json:"classes,omitempty"`
+	Styles      Styles       `json:"styles,omitempty"`
+	Controller  *Controller  `json:"-"`
+	Parent      Renderer     `json:"-"`
 	// RenderTo  string // type???
 }
 
@@ -109,16 +109,16 @@ func (p *Panel) Render(w io.Writer) error {
 	items := Items{}
 
 	// NAV
-	if p.Nav != nil {
-		if p.Title != "" {
-			p.Nav.Title = p.Title
-		}
-		if p.Nav.Docked == "" {
-			p.Nav.Docked = "top"
-		}
-		// append nav as docked item[0]
-		items = append(items, p.Nav)
-	}
+	// if p.Nav != nil {
+	// 	if p.Title != "" {
+	// 		p.Nav.Title = p.Title
+	// 	}
+	// 	if p.Nav.Docked == "" {
+	// 		p.Nav.Docked = "top"
+	// 	}
+	// 	// append nav as docked item[0]
+	// 	items = append(items, p.Nav)
+	// }
 
 	// HEADER
 	var header *Header

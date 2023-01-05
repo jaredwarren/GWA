@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"github.com/jaredwarren/goext/ext"
 )
@@ -75,35 +74,94 @@ func load() *ext.Application {
 		Controllers: []*ext.Controller{
 			mainController,
 		},
-		Head: &ext.Head{
-			Items: ext.Items{
-				&ext.Script{
-					Src: url.URL{
-						Path: "/static/js/test.js",
+		Nav: &ext.Nav{
+			Title:  "Nav Title",
+			Shadow: true,
+			Theme:  ext.ThemeDark,
+			Items: []ext.NavItem{
+				&ext.NavBrand{
+					Image: &ext.Image{
+						Src:    "https://images.pexels.com/photos/406014/pexels-photo-406014.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+						Height: "20px",
 					},
+					Title: "this is my brand",
+					Href:  "#",
 				},
+			},
+			// Items: ext.Items{
+			// 	&ext.Button{
+			// 		XType:     "button",
+			// 		Text:      "alert....",
+			// 		Handler:   `alert('hello');`,
+			// 		IconClass: "fad fa-sign-out",
+			// 	},
+			// 	&ext.Button{
+			// 		XType:     "button",
+			// 		Text:      "hello....",
+			// 		OnClick:   `btnClick`,
+			// 		IconClass: "fad fa-sign-out",
+			// 	},
+			// },
+		},
+		Head: &ext.Head{
+			Title: "this is the title",
+			// TODO: some of these can be made "default"
+			Items: ext.Items{
+				// <meta>
+				&ext.Meta{
+					Charset: "utf-8",
+				},
+				&ext.Meta{
+					Name:    "viewport",
+					Content: "width=device-width, initial-scale=1, shrink-to-fit=no",
+				},
+				&ext.Meta{
+					HttpEquiv: "Content-Type",
+					Content:   "text/html; charset=utf-8",
+				},
+				ext.CSSLink("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"),
+				&ext.Link{
+					Href:        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css",
+					Integrity:   "sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD",
+					Crossorigin: "anonymous",
+				},
+
+				&ext.Script{
+					Src:         "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js",
+					Integrity:   "sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN",
+					Crossorigin: "anonymous",
+				},
+				// CSS
+				// ext.CSSLink("/static/css/pro.min.css"),
+				// ext.CSSLink("/static/css/pure-min.css"),
+				// &ext.Link{
+				// 	Href:        "https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css",
+				// 	Integrity:   "sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk",
+				// 	Crossorigin: "anonymous",
+				// },
+				// &ext.Link{
+				// 	Href: "/static/css/tree.css",
+				// },
+				// ext.CSSLink("/static/css/stuff.css"),
+				// JS
+				// &ext.Script{
+				// 	Src:         "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js",
+				// 	Integrity:   "sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=",
+				// 	Crossorigin: "anonymous",
+				// },
+
+				// Extra
+				// 		&ext.Style{
+				// 			Body: `nav .title {
+				//     flex: 1;
+				//     text-align: center;
+				// }`,
+				// 		},
+				&ext.Script{Src: "/static/js/test.js"},
 			},
 		},
 		MainView: &ext.Panel{
 			XType: "panel",
-			Nav: &ext.Nav{
-				Title:  "Nav Title",
-				Shadow: true,
-				Items: ext.Items{
-					&ext.Button{
-						XType:     "button",
-						Text:      "alert....",
-						Handler:   `alert('hello');`,
-						IconClass: "fad fa-sign-out",
-					},
-					&ext.Button{
-						XType:     "button",
-						Text:      "hello....",
-						OnClick:   `btnClick`,
-						IconClass: "fad fa-sign-out",
-					},
-				},
-			},
 			// Shadow: true,
 			// Layout: "hbox",
 			// HTML:   "test",

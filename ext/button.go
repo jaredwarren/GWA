@@ -17,14 +17,18 @@ type Button struct {
 	ID           string        `json:"id,omitempty"`
 	Text         template.HTML `json:"text,omitempty"`
 	Handler      template.JS   `json:"handler,omitempty"`
-	OnClick      string
-	UI           string   `json:"ui,omitempty"` // TODO
-	IconClass    string   `json:"iconClass,omitempty"`
-	IconPosition string   `json:"iconPosition,omitempty"`
-	Classes      Classes  `json:"classes,omitempty"`
-	Styles       Styles   `json:"styles,omitempty"`
-	Parent       Renderer `json:"-"`
-	HandlerFn    Handler  `json:"-"`
+	OnClick      string        `json:"onClick,omitempty"`
+	UI           string        `json:"ui,omitempty"` // TODO
+	IconClass    string        `json:"iconClass,omitempty"`
+	IconPosition string        `json:"iconPosition,omitempty"`
+	Classes      Classes       `json:"classes,omitempty"`
+	Styles       Styles        `json:"styles,omitempty"`
+	Parent       Renderer      `json:"-"`
+	HandlerFn    Handler       `json:"-"`
+}
+
+func (b *Button) RenderString() string {
+	return "TODO: Application"
 }
 
 // Render ...

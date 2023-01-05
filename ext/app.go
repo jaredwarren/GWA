@@ -36,6 +36,7 @@ type Application struct {
 	XType       string        `json:"xtype"`
 	Name        string        `json:"name"`
 	MainView    Renderer      `json:"mainview"`
+	Nav         *Nav          `json:"nav,omitempty"`
 	Head        *Head         `json:"head"`
 	Width       int           `json:"width,omitempty"`
 	Height      int           `json:"height,omitempty"`
@@ -139,6 +140,9 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 // Render ...
+func (a *Application) RenderString() string {
+	return "TODO: Application"
+}
 func (a *Application) Render(w io.Writer) error {
 	items := Items{}
 	// set controllers ui, so ui.Bind works
@@ -146,6 +150,10 @@ func (a *Application) Render(w io.Writer) error {
 		// c.ui = a.ui
 		items = append(items, c)
 	}
+
+	// if a.Nav != nil {
+	// 	items = append(items, a.Nav)
+	// }
 
 	// render main view
 	items = append(items, a.MainView)
@@ -162,21 +170,33 @@ func (a *Application) Render(w io.Writer) error {
 		fmt.Println("[E] render body:", err)
 	}
 
+	if a.Head.Title == "" {
+		a.Head.Title = a.Name
+	}
+
 	headBuf := new(bytes.Buffer)
 	err = a.Head.Render(headBuf)
 	if err != nil {
 		fmt.Println("[E] render head:", err)
 	}
 
+	navBuf := new(bytes.Buffer)
+	if a.Nav != nil {
+		err = a.Nav.Render(navBuf)
+		if err != nil {
+			fmt.Println("[E] render head:", err)
+		}
+	}
+
 	// render full html
 	return renderTemplate(w, "base", &struct {
-		Title string
-		Body  template.HTML
-		Head  template.HTML
+		Body template.HTML
+		Nav  template.HTML
+		Head template.HTML
 	}{
-		Title: a.Name,
-		Body:  template.HTML(buf.String()),
-		Head:  template.HTML(headBuf.String()),
+		Body: template.HTML(buf.String()),
+		Nav:  template.HTML(navBuf.String()),
+		Head: template.HTML(headBuf.String()),
 	})
 }
 
@@ -254,21 +274,22 @@ func addChild(i interface{}) Renderer {
 }
 
 func find(id string, node Renderer) Renderer {
-	ni, ok := node.(Parent)
-	if !ok {
-		return nil
-	}
-	items := ni.GetChildren()
-	for _, i := range items {
-		if i.GetID() == id {
-			return i
-		}
-		r := find(id, i)
-		if r != nil {
-			return r
-		}
-	}
-	return nil
+	panic("oops")
+	// ni, ok := node.(Parent)
+	// if !ok {
+	// 	return nil
+	// }
+	// items := ni.GetChildren()
+	// for _, i := range items {
+	// 	if i.GetID() == id {
+	// 		return i
+	// 	}
+	// 	r := find(id, i)
+	// 	if r != nil {
+	// 		return r
+	// 	}
+	// }
+	// return nil
 }
 
 // Dockable item that can be docked

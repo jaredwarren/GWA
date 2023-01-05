@@ -4,43 +4,41 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"net/url"
 )
 
 type ScriptType string // string for now...
 
 // Script gerneric div container
 type Script struct {
-	Type    ScriptType
-	Src     url.URL
-	InnerJS template.JS
+	Type        ScriptType
+	Src         string
+	Integrity   string
+	Crossorigin string
+	InnerJS     template.JS
 }
 
 // Render ...
 func (s *Script) Render(w io.Writer) error {
-	name := "script"
-
 	attrs := ""
 
-	src := s.Src.String()
+	src := s.Src
 	if src != "" {
 		s.InnerJS = ""
-		attrs = fmt.Sprintf("%s %s=\"%s\"", attrs, "src", src)
+		attrs = attrs + fmt.Sprintf(` src="%s"`, src)
 	}
 
 	if s.Type != "" {
-		attrs = fmt.Sprintf("%s %s=\"%s\"", attrs, "type", s.Type)
+		attrs = attrs + fmt.Sprintf(` type="%s"`, s.Type)
 	}
 
-	_, err := fmt.Fprintf(w, `<%s %s>%s</%s>`, name, attrs, s.InnerJS, name)
+	if s.Integrity != "" {
+		attrs = attrs + fmt.Sprintf(` integrity="%s"`, s.Integrity)
+	}
+
+	if s.Crossorigin != "" {
+		attrs = attrs + fmt.Sprintf(` crossorigin="%s"`, s.Crossorigin)
+	}
+
+	_, err := fmt.Fprintf(w, `<script%s>%s</script>`, attrs, s.InnerJS)
 	return err
-	// if s.InnerJS != "" {
-	// }
-
-	// return render(w, fmt.Sprintf(`<%s %s>{{range $item := $.Items}}{{if $item}}{{Render $item}}{{else}}NULL---{{end}}{{end}}</%s>`, name, attrs, name), e)
-}
-
-// GetID ...
-func (s *Script) GetID() string {
-	return ""
 }
