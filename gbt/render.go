@@ -1,4 +1,4 @@
-package ext
+package gbt
 
 import (
 	"bytes"
@@ -12,14 +12,12 @@ import (
 type Items []Renderer
 
 // Render ...
-func (i Items) Render(w io.Writer) error {
-	for _, item := range i {
-		err := item.Render(w)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func (i Items) Render() Stringer {
+	return renderToHTML(`{{range $item := .}}
+	{{if $item}}
+	{{$item.Render}}
+	{{end}}
+	{{end}}`, i)
 }
 
 /**
@@ -27,18 +25,26 @@ func (i Items) Render(w io.Writer) error {
  */
 
 // Attributes ...
-type Attributes map[string]template.HTMLAttr
+type Attributes map[string]Stringer
+
+func (a *Attributes) Render() Stringer {
+	al := ""
+	for k, v := range *a {
+		al = al + fmt.Sprintf(` %s="%s"`, k, v)
+	}
+	return template.HTMLAttr(strings.TrimSpace(al))
+}
 
 // Styles ...
 type Styles map[string]string
 
 // ToAttr ...
-func (s Styles) ToAttr() template.HTMLAttr {
+func (s Styles) ToAttr() string {
 	sp := []string{}
 	for k, v := range s {
 		sp = append(sp, fmt.Sprintf("%s:%s;", k, v))
 	}
-	return template.HTMLAttr(strings.Join(sp, " "))
+	return strings.Join(sp, " ")
 }
 
 /**
@@ -49,7 +55,7 @@ func (s Styles) ToAttr() template.HTMLAttr {
 type Classes []string
 
 // ToAttr ...
-func (c Classes) ToAttr() template.HTMLAttr {
+func (c Classes) ToAttr() string {
 	classess := map[string]bool{}
 	// copy classes to map to prevent duplicates
 	for _, c := range c {
@@ -63,7 +69,7 @@ func (c Classes) ToAttr() template.HTMLAttr {
 		npClasses = append(npClasses, k)
 	}
 
-	return template.HTMLAttr(strings.Join(npClasses, " "))
+	return strings.Join(npClasses, " ")
 }
 
 // Add ... not sure if this is a good idea or not
@@ -74,6 +80,10 @@ func (c *Classes) Add(class string) {
 // Len ...
 func (c *Classes) Len() int {
 	return len(*c)
+}
+
+func (c Classes) Render() Stringer {
+	return template.HTMLAttr(strings.Join(c, " "))
 }
 
 /**
@@ -123,31 +133,58 @@ func (d Data) ToAttr() map[string]template.HTMLAttr {
 *
  */
 
+// Allow string, template.HTML, etc
+type Stringer any
+
 // Renderer an item that can be rendered
 type Renderer interface {
-	Render(w io.Writer) error
-	// RenderString() string
-	// GetID() string
+	Render() Stringer
 }
 
 // Render a template
 func renderTemplate(w io.Writer, t string, data interface{}) error {
-	funcMap := template.FuncMap{
-		"Render": func(item Renderer) template.HTML {
-			buf := new(bytes.Buffer)
-			err := item.Render(buf)
-			if err != nil {
-				fmt.Printf("[E] renderTemplate:%s -> %+v\n", err, item)
-			}
-			return template.HTML(buf.String())
-		},
-	}
-	tpl, err := template.New("base").Funcs(funcMap).ParseFiles(fmt.Sprintf("templates/%s.html", t))
+	// funcMap := template.FuncMap{
+	// 	"Render": func(item Renderer) template.HTML {
+	// 		buf := new(bytes.Buffer)
+	// 		err := item.Render(buf)
+	// 		if err != nil {
+	// 			fmt.Printf("[E] renderTemplate:%s -> %+v\n", err, item)
+	// 		}
+	// 		return template.HTML(buf.String())
+	// 	},
+	// }
+	// tpl, err := template.New("base").Funcs(funcMap).ParseFiles(fmt.Sprintf("templates/%s.html", t))
+	// if err != nil {
+	// 	fmt.Printf("[E] %s parse error:%s\n", t, err)
+	// }
+	// templates := template.Must(tpl, err)
+	// return templates.ExecuteTemplate(w, "base", data)
+	return fmt.Errorf("deprecated")
+}
+
+// func renderToString() string {
+
+// 	return ""
+// }
+
+func renderToHTML(tmp string, data any) template.HTML {
+	t := template.New("")
+	t, err := t.Parse(tmp)
 	if err != nil {
-		fmt.Printf("[E] %s parse error:%s\n", t, err)
+		fmt.Println("[E] parse error:", err)
+		return template.HTML(err.Error())
 	}
-	templates := template.Must(tpl, err)
-	return templates.ExecuteTemplate(w, "base", data)
+
+	buf := new(bytes.Buffer)
+	err = t.Execute(buf, data)
+	if err != nil {
+		fmt.Println("[E] execute error:", err)
+		fmt.Println(tmp)
+		fmt.Printf("%+v\n", data)
+		return template.HTML(err.Error())
+	}
+
+	return template.HTML(buf.String())
 }
 
 // LayoutItems ...
@@ -219,32 +256,6 @@ func LayoutItems(oi Items) Items {
 	return Items{layout}
 }
 
-func render(w io.Writer, t string, data interface{}) error {
-	tpl, err := template.New("base").Funcs(template.FuncMap{
-		"Render": func(item Renderer) template.HTML {
-			if item == nil {
-				return template.HTML("NULL ITEM")
-			}
-			buf := new(bytes.Buffer)
-			err := item.Render(buf)
-			if err != nil {
-				fmt.Printf("[E] html Render:%s -> %+v\n", err, item)
-			}
-			return template.HTML(buf.String())
-		},
-	}).Parse(t)
-	if err != nil {
-		fmt.Printf("[E] parse error:%s\n", err)
-	}
-
-	templates := template.Must(tpl, err)
-	err = templates.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		fmt.Printf("[E] execute error:%s -\n", err)
-	}
-	return err
-}
-
 // NewBody ...
 func NewBody(items Items) *DivContainer {
 	return &DivContainer{
@@ -270,7 +281,7 @@ type DivContainer struct {
 }
 
 // Render ...
-func (d *DivContainer) Render(w io.Writer) error {
+func (d *DivContainer) Render() Stringer {
 	el := &Element{
 		Name: "div",
 		Attributes: Attributes{
@@ -279,7 +290,7 @@ func (d *DivContainer) Render(w io.Writer) error {
 		},
 		Items: d.Items,
 	}
-	return el.Render(w)
+	return el.Render()
 }
 
 // GetID ...
@@ -289,35 +300,37 @@ func (d *DivContainer) GetID() string {
 
 // Element gerneric div container
 type Element struct {
-	Name       string
-	Attributes map[string]template.HTMLAttr
-	Items      Items
-	Innerhtml  template.HTML
+	Name string
+	Attributes
+	Classes
+	Items
+	InnerHTML template.HTML
 }
 
 // Render ...
-func (e *Element) Render(w io.Writer) error {
+func (e *Element) Render() Stringer {
 	if e.Name == "" {
 		e.Name = "div"
 	}
 	name := strings.ToLower(e.Name)
 
-	// Some Attributes will produce garbage if not added this way i.e. "type" & "onclick"
-	attrs := ""
-	for k, val := range e.Attributes {
-		attrs = fmt.Sprintf("%s %s=\"%s\"", attrs, k, val)
+	if e.Attributes == nil {
+		e.Attributes = Attributes{}
+	}
+
+	if _, ok := e.Attributes["class"]; !ok {
+		e.Attributes["class"] = e.Classes.Render()
 	}
 
 	if isSelfClosing(name) {
-		return render(w, fmt.Sprintf(`<%s %s>`, name, attrs), e)
+		return renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>`, name), e)
 	}
 
-	if e.Innerhtml != "" {
-		_, err := fmt.Fprintf(w, `<%s %s>%s</%s>`, name, attrs, e.Innerhtml, name)
-		return err
+	if e.InnerHTML != "" {
+		return renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>{{.InnerHTML}}</%s>`, name, name), e)
 	}
 
-	return render(w, fmt.Sprintf(`<%s %s>{{range $item := $.Items}}{{if $item}}{{Render $item}}{{else}}NULL---{{end}}{{end}}</%s>`, name, attrs, name), e)
+	return renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>{{.Items.Render}}</%s>`, name, name), e)
 }
 
 // List of self closing tags
@@ -360,15 +373,15 @@ type Spacer struct {
 }
 
 // Render ...
-func (s *Spacer) Render(w io.Writer) error {
+func (s *Spacer) Render() Stringer {
 	sp := &Element{
 		Name: "span",
 		Attributes: Attributes{
 			"style": "border-left:1px solid darkgray; margin: 0 4px;",
 		},
-		Innerhtml: "&nbsp;",
+		InnerHTML: "&nbsp;",
 	}
-	return sp.Render(w)
+	return sp.Render()
 }
 
 // GetID ...

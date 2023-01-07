@@ -1,11 +1,8 @@
-package ext
+package gbt
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"html/template"
-	"io"
 	"mime"
 	"net/http"
 	"net/url"
@@ -111,9 +108,10 @@ func (a *Application) Launch() error {
 
 // Home ...
 func (a *Application) Home(w http.ResponseWriter, r *http.Request) {
-	err := a.Render(w)
+	h := a.Render()
+	_, err := fmt.Fprint(w, h)
 	if err != nil {
-		fmt.Println("[E]:", err)
+		fmt.Println("[E] print err:", err)
 	}
 }
 
@@ -140,20 +138,13 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 // Render ...
-func (a *Application) RenderString() string {
-	return "TODO: Application"
-}
-func (a *Application) Render(w io.Writer) error {
+func (a *Application) Render() Stringer {
 	items := Items{}
 	// set controllers ui, so ui.Bind works
 	for _, c := range a.Controllers {
 		// c.ui = a.ui
 		items = append(items, c)
 	}
-
-	// if a.Nav != nil {
-	// 	items = append(items, a.Nav)
-	// }
 
 	// render main view
 	items = append(items, a.MainView)
@@ -164,39 +155,24 @@ func (a *Application) Render(w io.Writer) error {
 		Styles:  map[string]string{},
 		Items:   items,
 	}
-	buf := new(bytes.Buffer)
-	err := div.Render(buf)
-	if err != nil {
-		fmt.Println("[E] render body:", err)
-	}
 
 	if a.Head.Title == "" {
 		a.Head.Title = a.Name
 	}
 
-	headBuf := new(bytes.Buffer)
-	err = a.Head.Render(headBuf)
-	if err != nil {
-		fmt.Println("[E] render head:", err)
-	}
-
-	navBuf := new(bytes.Buffer)
-	if a.Nav != nil {
-		err = a.Nav.Render(navBuf)
-		if err != nil {
-			fmt.Println("[E] render head:", err)
-		}
-	}
-
-	// render full html
-	return renderTemplate(w, "base", &struct {
-		Body template.HTML
-		Nav  template.HTML
-		Head template.HTML
-	}{
-		Body: template.HTML(buf.String()),
-		Nav:  template.HTML(navBuf.String()),
-		Head: template.HTML(headBuf.String()),
+	return renderToHTML(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    {{.Head.Render}}
+</head>
+<body>
+    {{.Nav.Render}}
+    {{.Body.Render}}
+</body>
+</html>`, map[string]any{
+		"Head": a.Head,
+		"Nav":  a.Nav,
+		"Body": div,
 	})
 }
 

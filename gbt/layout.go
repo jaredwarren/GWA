@@ -1,8 +1,7 @@
-package ext
+package gbt
 
 import (
 	"fmt"
-	"io"
 )
 
 var (
@@ -29,7 +28,7 @@ type Layout struct {
 }
 
 // Render ...
-func (l *Layout) Render(w io.Writer) error {
+func (l *Layout) Render() Stringer {
 	if l.ID == "" {
 		l.ID = nextInnerhtmlID()
 	}
@@ -99,7 +98,7 @@ func (l *Layout) Render(w io.Writer) error {
 		Classes: nClasses,
 		Items:   l.Items, // don't layout again just copy items
 	}
-	return div.Render(w)
+	return div.Render()
 }
 
 // GetID ...

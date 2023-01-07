@@ -1,9 +1,8 @@
-package ext
+package gbt
 
 import (
 	"fmt"
 	"html/template"
-	"io"
 )
 
 var (
@@ -19,7 +18,7 @@ type Innerhtml struct {
 }
 
 // Render ...
-func (h *Innerhtml) Render(w io.Writer) error {
+func (h *Innerhtml) Render() Stringer {
 	if h.ID == "" {
 		h.ID = nextInnerhtmlID()
 	}
@@ -30,11 +29,9 @@ func (h *Innerhtml) Render(w io.Writer) error {
 		ID:      h.ID,
 		Classes: h.Classes,
 		Styles:  h.Styles,
-		Items: Items{&RawHTML{
-			HTML: h.HTML,
-		}},
+		Items:   Items{RawHTML(h.HTML)},
 	}
-	return div.Render(w)
+	return div.Render()
 }
 
 // GetID ...
@@ -49,14 +46,11 @@ func nextInnerhtmlID() string {
 }
 
 // RawHTML ...
-type RawHTML struct {
-	HTML template.HTML
-}
+type RawHTML template.HTML
 
 // Render ...
-func (h *RawHTML) Render(w io.Writer) error {
-	_, err := w.Write([]byte(h.HTML))
-	return err
+func (h RawHTML) Render() Stringer {
+	return h
 }
 
 // GetID ...

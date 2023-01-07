@@ -1,4 +1,4 @@
-package ext
+package gbt
 
 import "html/template"
 
@@ -165,9 +165,9 @@ func buildInput(i interface{}) *Input {
 
 	if s, ok := ii["attributes"]; ok {
 		jclass := s.(map[string]interface{})
-		attributes := map[string]template.HTMLAttr{}
+		attributes := Attributes{}
 		for i, cl := range jclass {
-			attributes[i] = template.HTMLAttr(cl.(string))
+			attributes[i] = cl.(string)
 		}
 		p.Attributes = attributes
 	}

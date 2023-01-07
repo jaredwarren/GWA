@@ -1,39 +1,66 @@
-package ext
+package gbt
 
 import (
 	"fmt"
 	"html/template"
-	"io"
 	"strings"
-)
-
-var (
-	tableID = 0
 )
 
 // Table ...
 type Table struct {
-	XType      string      `json:"xtype"`
-	ID         string      `json:"id,omitempty"`
-	Width      int         `json:"width,omitempty"`
-	Height     int         `json:"height,omitempty"`
-	HideHeader bool        `json:"hideHeader,omitempty"`
-	Docked     string      `json:"docked,omitempty"`
-	Classes    Classes     `json:"classes,omitempty"`
-	Styles     Styles      `json:"styles,omitempty"`
-	Parent     Renderer    `json:"-"`
-	Columns    Columns     `json:"columns,omitempty"`
-	Title      string      `json:"title,omitempty"`
-	Data       Rows        `json:"data,omitempty"`
-	Header     TableHeader `json:"header,omitempty"`
-	Footer     TableFooter `json:"footer,omitempty"`
+	ID     string      `json:"id,omitempty"`
+	Header TableHeader `json:"header,omitempty"`
+	Footer TableFooter `json:"footer,omitempty"`
+	// data source -> renderer
+	// raw data -> renderer
+	// Body
+
+	Width      int      `json:"width,omitempty"`
+	Height     int      `json:"height,omitempty"`
+	HideHeader bool     `json:"hideHeader,omitempty"`
+	Docked     string   `json:"docked,omitempty"`
+	Classes    Classes  `json:"classes,omitempty"`
+	Styles     Styles   `json:"styles,omitempty"`
+	Parent     Renderer `json:"-"`
+	Columns    Columns  `json:"columns,omitempty"`
+	Title      string   `json:"title,omitempty"`
+	Data       Rows     `json:"data,omitempty"`
+	XType      string   `json:"xtype"`
 }
 
 // Render ...
-func (t *Table) Render(w io.Writer) error {
-	if t.ID == "" {
-		t.ID = nextTableID()
-	}
+func (t *Table) Render() Stringer {
+	return renderToHTML(`
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">First</th>
+      <th scope="col">Last</th>
+      <th scope="col">Handle</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td>Mark</td>
+      <td>Otto</td>
+      <td>@mdo</td>
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td>Jacob</td>
+      <td>Thornton</td>
+      <td>@fat</td>
+    </tr>
+    <tr>
+      <th scope="row">3</th>
+      <td colspan="2">Larry the Bird</td>
+      <td>@twitter</td>
+    </tr>
+  </tbody>
+</table>`, t)
+
 	t.Classes.Add("pure-table")
 	t.Classes.Add("pure-table-horizontal")
 
@@ -63,7 +90,7 @@ func (t *Table) Render(w io.Writer) error {
 					} else {
 						cell = &Element{
 							Name:      "td",
-							Innerhtml: template.HTML(fmt.Sprintf("%v", v)),
+							InnerHTML: template.HTML(fmt.Sprintf("%v", v)),
 						}
 					}
 					row.Items = append(row.Items, cell)
@@ -81,7 +108,7 @@ func (t *Table) Render(w io.Writer) error {
 				} else {
 					cell = &Element{
 						Name:      "td",
-						Innerhtml: template.HTML(fmt.Sprintf("%v", v)),
+						InnerHTML: template.HTML(fmt.Sprintf("%v", v)),
 					}
 				}
 				row.Items = append(row.Items, &Element{
@@ -95,9 +122,9 @@ func (t *Table) Render(w io.Writer) error {
 	if len(bodyItems) == 0 {
 		emptyTableEl := &Element{
 			Name:      "div",
-			Innerhtml: "No Data",
+			InnerHTML: "No Data",
 		}
-		return emptyTableEl.Render(w)
+		return emptyTableEl.Render()
 	}
 	body := &Element{
 		Name:  "tbody",
@@ -116,7 +143,7 @@ func (t *Table) Render(w io.Writer) error {
 				for _, hc := range hr {
 					headerCells = append(headerCells, &Element{
 						Name:       "th",
-						Innerhtml:  hc.Innerhtml,
+						InnerHTML:  hc.Innerhtml,
 						Items:      hc.Items,
 						Attributes: hc.Attributes,
 					})
@@ -134,7 +161,7 @@ func (t *Table) Render(w io.Writer) error {
 				label := strings.Title(k)
 				headerCells = append(headerCells, &Element{
 					Name:      "th",
-					Innerhtml: template.HTML(label),
+					InnerHTML: template.HTML(label),
 				})
 			}
 			headerRows = append(headerRows, &Element{
@@ -154,7 +181,7 @@ func (t *Table) Render(w io.Writer) error {
 			for _, hc := range hr {
 				footerCells = append(footerCells, &Element{
 					Name:       "th",
-					Innerhtml:  hc.Innerhtml,
+					InnerHTML:  hc.Innerhtml,
 					Attributes: hc.Attributes,
 				})
 			}
@@ -172,7 +199,7 @@ func (t *Table) Render(w io.Writer) error {
 	navEl := &Element{
 		Name: "table",
 		Attributes: Attributes{
-			"id":    template.HTMLAttr(t.ID),
+			"id":    t.ID,
 			"class": t.Classes.ToAttr(),
 			"style": t.Styles.ToAttr(),
 		},
@@ -182,7 +209,7 @@ func (t *Table) Render(w io.Writer) error {
 			tfoot,
 		},
 	}
-	return navEl.Render(w)
+	return navEl.Render()
 }
 
 // GetID ...
@@ -213,17 +240,17 @@ func (t *Table) SetStyle(key, value string) {
  */
 
 // TableHeader ..
-type TableHeader []HeaderRow
+type TableHeader []TableRow
 
-// HeaderRow ...
-type HeaderRow []HeaderCell
+// TableRow ...
+type TableRow []DataCell
 
-// HeaderCell ...
-type HeaderCell struct {
-	Innerhtml  template.HTML
-	Attributes map[string]template.HTMLAttr
-	DataIndex  string
-	Items      Items
+// DataCell ...
+type DataCell struct {
+	Innerhtml template.HTML
+	Attributes
+	DataIndex string
+	Items     Items
 }
 
 /**
@@ -238,10 +265,10 @@ type FooterRow []FooterCell
 
 // FooterCell ...
 type FooterCell struct {
-	Innerhtml  template.HTML
-	Attributes map[string]template.HTMLAttr
-	DataIndex  string
-	Items      Items
+	Innerhtml template.HTML
+	Attributes
+	DataIndex string
+	Items     Items
 }
 
 /**
@@ -270,16 +297,6 @@ type Row map[string]interface{}
 
 // Cell ...
 type Cell struct {
-	Innerhtml  template.HTML
-	Attributes map[string]template.HTMLAttr
-}
-
-/**
-* ???
- */
-
-func nextTableID() string {
-	id := fmt.Sprintf("table-%d", tableID)
-	tableID++
-	return id
+	Innerhtml template.HTML
+	Attributes
 }

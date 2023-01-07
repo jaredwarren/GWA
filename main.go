@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/jaredwarren/goext/ext"
+	"github.com/jaredwarren/goext/gbt"
 )
 
 type Button struct {
@@ -14,8 +14,8 @@ type Button struct {
 var (
 
 	// this is here to show that objects can be in a saparate file
-	mainController = &ext.Controller{
-		Handlers: ext.Handlers{
+	mainController = &gbt.Controller{
+		Handlers: gbt.Handlers{
 			// "btnClick": func(id string) {
 			// 	fmt.Print("Button Clicked:")
 			// 	fmt.Printf("   %+v\n", id)
@@ -23,14 +23,14 @@ var (
 			// 	// Button update test
 			// 	btn := app.Find(id)
 			// 	if btn != nil {
-			// 		btn.(*ext.Button).Text = "Clicked!!!"
+			// 		btn.(*gbt.Button).Text = "Clicked!!!"
 			// 		app.Update(btn)
 			// 	}
 
 			// 	// Update Tree Test
 			// 	t := app.Find("tree-0")
 			// 	if t != nil {
-			// 		t.(*ext.Tree).Root.Text = "UPDATED"
+			// 		t.(*gbt.Tree).Root.Text = "UPDATED"
 			// 		app.Update(t)
 			// 	}
 			// },
@@ -47,13 +47,13 @@ var (
 		}
 		`,
 		},
-		FormHandlers: ext.FormHandlers{
+		FormHandlers: gbt.FormHandlers{
 			"formSubmit": func(w http.ResponseWriter, r *http.Request) {
 				fmt.Println("submit....")
 			},
 		},
 	}
-	app *ext.Application
+	app *gbt.Application
 )
 
 func main() {
@@ -67,112 +67,128 @@ func main() {
 	}
 }
 
-func load() *ext.Application {
-	return &ext.Application{
+func load() *gbt.Application {
+	return &gbt.Application{
 		XType: "app",
 		Name:  "my app",
-		Controllers: []*ext.Controller{
+		Controllers: []*gbt.Controller{
 			mainController,
 		},
-		Nav: &ext.Nav{
+		Nav: &gbt.Nav{
 			Title:  "Nav Title",
 			Shadow: true,
-			Theme:  ext.ThemeDark,
-			Items: []ext.NavItem{
-				&ext.NavBrand{
-					Image: &ext.Image{
-						Src:    "https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg",
-						Height: "20px",
+			Theme:  gbt.ThemeDark,
+			Brand: &gbt.NavBrand{
+				Image: &gbt.Image{
+					Src:    "https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg",
+					Height: "20px",
+				},
+				Title: "this is my brand",
+				Href:  "#",
+			},
+			Items: []gbt.INavItem{
+				&gbt.NavItem{
+					Title: "Item 1",
+					Href:  "1",
+				},
+				&gbt.NavDropDown{
+					Title: "Drop 1",
+					Items: []gbt.INavItem{
+						&gbt.DropDownItem{
+							Title:    "drop 1",
+							Disabled: true,
+						},
+						&gbt.DropDownItem{
+							Title:  "drop 2",
+							Active: true,
+						},
+						&gbt.DropDowndivider{},
+						&gbt.DropDownItem{
+							Title: "drop 3",
+						},
 					},
-					Title: "this is my brand",
-					Href:  "#",
 				},
 			},
-			// Items: ext.Items{
-			// 	&ext.Button{
-			// 		XType:     "button",
-			// 		Text:      "alert....",
-			// 		Handler:   `alert('hello');`,
-			// 		IconClass: "fad fa-sign-out",
-			// 	},
-			// 	&ext.Button{
-			// 		XType:     "button",
-			// 		Text:      "hello....",
-			// 		OnClick:   `btnClick`,
-			// 		IconClass: "fad fa-sign-out",
-			// 	},
-			// },
 		},
-		Head: &ext.Head{
+		Head: &gbt.Head{
 			Title: "this is the title",
 			// TODO: some of these can be made "default"
-			Items: ext.Items{
+			Items: gbt.Items{
 				// <meta>
-				&ext.Meta{
+				&gbt.Meta{
 					Charset: "utf-8",
 				},
-				&ext.Meta{
+				&gbt.Meta{
 					Name:    "viewport",
 					Content: "width=device-width, initial-scale=1, shrink-to-fit=no",
 				},
-				&ext.Meta{
+				&gbt.Meta{
 					HttpEquiv: "Content-Type",
 					Content:   "text/html; charset=utf-8",
 				},
-				ext.CSSLink("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"),
-				&ext.Link{
+				// Link/CSS
+				gbt.CSSLink("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"),
+				&gbt.Link{
 					Href:        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css",
 					Integrity:   "sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD",
 					Crossorigin: "anonymous",
 				},
-
-				&ext.Script{
+				// Script
+				&gbt.Script{
 					Src:         "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js",
 					Integrity:   "sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN",
 					Crossorigin: "anonymous",
 				},
-				// CSS
-				// ext.CSSLink("/static/css/pro.min.css"),
-				// ext.CSSLink("/static/css/pure-min.css"),
-				// &ext.Link{
-				// 	Href:        "https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css",
-				// 	Integrity:   "sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk",
-				// 	Crossorigin: "anonymous",
-				// },
-				// &ext.Link{
-				// 	Href: "/static/css/tree.css",
-				// },
-				// ext.CSSLink("/static/css/stuff.css"),
-				// JS
-				// &ext.Script{
-				// 	Src:         "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js",
-				// 	Integrity:   "sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=",
-				// 	Crossorigin: "anonymous",
-				// },
-
-				// Extra
-				// 		&ext.Style{
-				// 			Body: `nav .title {
-				//     flex: 1;
-				//     text-align: center;
-				// }`,
-				// 		},
-				&ext.Script{Src: "/static/js/test.js"},
+				&gbt.Script{Src: "/static/js/test.js"},
 			},
 		},
-		MainView: &ext.Panel{
+		MainView: &gbt.Panel{
 			XType: "panel",
 			// Shadow: true,
 			// Layout: "hbox",
 			// HTML:   "test",
-			Items: ext.Items{
-				&ext.Panel{
+			Items: gbt.Items{
+				&gbt.Card{
+					Styles: gbt.Styles{"width": "18em"},
+					Header: &gbt.CardHeader{
+						Body: gbt.Items{gbt.RawHTML("header")},
+					},
+					Body: gbt.Items{
+						&gbt.Image{
+							Src:     "/static/alien.svg",
+							Classes: gbt.Classes{"card-img-top"},
+						},
+						&gbt.CardBody{
+							Title: "Card Title",
+							Text:  "Some quick example text to build on the card title and make up the bulk of the card's content.",
+						},
+						&gbt.CardBody{
+							Body: gbt.Items{
+								&gbt.CardLink{
+									Href: "#",
+									Text: "Card Link",
+								},
+								&gbt.CardLink{
+									Href: "#",
+									Text: "Another link",
+								},
+							},
+						},
+						// 			gbt.RawHTML(`<h5 class="card-title">Card title</h5>
+						// <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's
+						//     content.</p>`),
+					},
+					Footer: &gbt.CardFooter{
+						Body: gbt.Items{gbt.RawHTML("Footer...")},
+					},
+				},
+				&gbt.Panel{
 					Docked:      "left",
 					Collapsible: true,
 					Collapsed:   true,
 					Title:       "tree panel title",
-					Items: ext.Items{
-						&ext.Tree{
+					Items: gbt.Items{
+						&gbt.Tree{
 							XType:    "tree",
 							ShowRoot: true,
 							Width:    300,
@@ -180,23 +196,23 @@ func load() *ext.Application {
 							// BranchIcon: "",
 							// LeafIcon:   "",
 							// ParentIcon: "",
-							Root: &ext.TreeNode{
+							Root: &gbt.TreeNode{
 								Text: "root",
 								// IconClass: "fas fa-folder-open",
-								Children: []*ext.TreeNode{{
+								Children: []*gbt.TreeNode{{
 									Text:      "account_deletion_requests",
 									IconClass: "fad fa-table",
 									Handler:   "onTableSelect",
 								}, {
 									Text:      "c2",
 									IconClass: "fad fa-acorn",
-									Items: ext.Items{
-										&ext.Button{
+									Items: gbt.Items{
+										&gbt.Button{
 											UI:        "none",
 											IconClass: "far fa-key",
 											Handler:   "key",
 										},
-										&ext.Button{
+										&gbt.Button{
 											UI:        "none",
 											IconClass: "far fa-info-circle",
 											Handler:   "info",
@@ -211,12 +227,12 @@ func load() *ext.Application {
 									Handler:   "onPalm",
 								}, {
 									Text: `<i class="fad fa-database"></i> Bladehq`,
-									Children: []*ext.TreeNode{{
+									Children: []*gbt.TreeNode{{
 										Text: "c2c1",
 									}},
 								}, {
 									Text: "c3",
-									Children: []*ext.TreeNode{{
+									Children: []*gbt.TreeNode{{
 										Text: "c3c1",
 									}},
 								}},
@@ -225,7 +241,7 @@ func load() *ext.Application {
 					},
 				},
 
-				&ext.Form{
+				&gbt.Form{
 					XType: "form",
 					// Docked: "top",
 					// Text:    "Click Here",
@@ -238,43 +254,43 @@ func load() *ext.Application {
 					// 	fmt.Println("submit....")
 					// },
 
-					Items: ext.Items{
-						&ext.Panel{
+					Items: gbt.Items{
+						&gbt.Panel{
 							XType:  "panel",
 							Docked: "bottom",
 							Layout: "hbox",
 							// Resize:  "vertical",
-							Classes: ext.Classes{"toolbar"},
-							Items: ext.Items{
-								&ext.Button{
+							Classes: gbt.Classes{"toolbar"},
+							Items: gbt.Items{
+								&gbt.Button{
 									XType:     "button",
 									Text:      "Run",
 									Handler:   "btnClick",
 									IconClass: "far fa-play",
-									Classes:   ext.Classes{"button-success", "pure-button"},
+									Classes:   gbt.Classes{"button-success", "pure-button"},
 								},
-								&ext.Spacer{},
-								&ext.Input{
+								&gbt.Spacer{},
+								&gbt.Input{
 									XType: "input",
 									Label: "limit:",
 									Name:  "limit",
 									Type:  "number",
-									Data: ext.Data{
+									Data: gbt.Data{
 										"dname": "v",
 									},
-									Events: ext.Events{
-										"keyup": &ext.Event{
+									Events: gbt.Events{
+										"keyup": &gbt.Event{
 											Handler: "limitChange",
 										},
 									},
 								},
-								&ext.Input{
+								&gbt.Input{
 									XType: "input",
 									Label: "Show All:",
 									Name:  "show_all",
 									Type:  "checkbox",
 								},
-								&ext.Button{
+								&gbt.Button{
 									XType:     "button",
 									Text:      "Click Here",
 									Handler:   "btnClick",
@@ -282,18 +298,18 @@ func load() *ext.Application {
 								},
 							},
 						},
-						&ext.Fieldset{
+						&gbt.Fieldset{
 							XType:  "fieldset",
 							Legend: "Form Legend",
 							Resize: "vertical",
-							Items: ext.Items{
-								&ext.Input{
+							Items: gbt.Items{
+								&gbt.Input{
 									XType: "input",
 									Label: "User Name:",
 									Name:  "username",
 									Type:  "textarea",
 								},
-								&ext.Input{
+								&gbt.Input{
 									XType: "input",
 									Label: "Send:",
 									Name:  "submit",
@@ -304,15 +320,15 @@ func load() *ext.Application {
 					},
 				},
 
-				&ext.Table{
+				&gbt.Table{
 					Title: "Table data",
-					// Header: ext.TableHeader{{{
+					// Header: gbt.TableHeader{{{
 					// 	Innerhtml: "asdf",
-					// 	Attributes: ext.Attributes{
+					// 	Attributes: gbt.Attributes{
 					// 		"colspan": "3",
 					// 	},
 					// }}},
-					Header: ext.TableHeader{{{
+					Header: gbt.TableHeader{{{
 						Innerhtml: "ID",
 						DataIndex: "id",
 					}, {
@@ -329,15 +345,15 @@ func load() *ext.Application {
             class="fas fa-search"></i></button>`,
 						DataIndex: "something",
 					}}},
-					Footer: ext.TableFooter{{{
+					Footer: gbt.TableFooter{{{
 						Innerhtml: "asdf",
-						Attributes: ext.Attributes{
+						Attributes: gbt.Attributes{
 							"colspan": "3",
 						},
 					}}},
-					Data: ext.Rows{{
+					Data: gbt.Rows{{
 						"id": 1,
-						"select": &ext.Button{
+						"select": &gbt.Button{
 							IconClass: "fad fa-times-circle",
 							UI:        "none",
 						},
@@ -345,23 +361,23 @@ func load() *ext.Application {
 					}},
 				},
 
-				// &ext.Panel{
+				// &gbt.Panel{
 				// 	XType:  "panel",
 				// 	HTML:   "TABLE",
 				// 	Docked: "left",
 				// },
-				// &ext.Panel{
+				// &gbt.Panel{
 				// 	XType:  "panel",
 				// 	HTML:   "My panel text...4",
 				// 	Docked: "bottom",
 				// },
-				// &ext.Button{
+				// &gbt.Button{
 				// 	XType:     "button",
 				// 	Text:      "Click Here",
 				// 	Handler:   "btnClick",
 				// 	IconClass: "fad fa-window-close",
 				// },
-				// &ext.Button{
+				// &gbt.Button{
 				// 	XType: "button",
 				// 	Text:  "2 Here",
 				// 	HandlerFn: func(id string) {
@@ -371,14 +387,14 @@ func load() *ext.Application {
 				// 		// Button update test
 				// 		btn := app.Find(id)
 				// 		if btn != nil {
-				// 			btn.(*ext.Button).Text = "Clicked!!!"
+				// 			btn.(*gbt.Button).Text = "Clicked!!!"
 				// 			app.Update(btn)
 				// 		}
 
 				// 		// Update Tree Test
 				// 		t := app.Find("tree-0")
 				// 		if t != nil {
-				// 			t.(*ext.Tree).Root.Text = "UPDATED"
+				// 			t.(*gbt.Tree).Root.Text = "UPDATED"
 				// 			app.Update(t)
 				// 		}
 				// 	},

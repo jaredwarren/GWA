@@ -1,9 +1,8 @@
-package ext
+package gbt
 
 import (
 	"fmt"
 	"html/template"
-	"io"
 	"strings"
 )
 
@@ -27,12 +26,8 @@ type Button struct {
 	HandlerFn    Handler       `json:"-"`
 }
 
-func (b *Button) RenderString() string {
-	return "TODO: Application"
-}
-
 // Render ...
-func (b *Button) Render(w io.Writer) error {
+func (b *Button) Render() Stringer {
 	if b.ID == "" {
 		b.ID = nextButtonID()
 	}
@@ -56,8 +51,8 @@ func (b *Button) Render(w io.Writer) error {
 	b.Classes.Add(fmt.Sprintf("button-%s", b.UI))
 
 	// Attributes
-	attrs := map[string]template.HTMLAttr{
-		"id":    template.HTMLAttr(b.ID),
+	attrs := Attributes{
+		"id":    b.ID,
 		"class": b.Classes.ToAttr(),
 	}
 
@@ -83,7 +78,7 @@ func (b *Button) Render(w io.Writer) error {
 		b.Handler = template.JS(fmt.Sprintf("%s(event, this);", b.OnClick))
 	}
 	if b.Handler != "" {
-		attrs["onclick"] = template.HTMLAttr(b.Handler)
+		attrs["onclick"] = b.Handler
 	}
 
 	items := Items{}
@@ -93,7 +88,7 @@ func (b *Button) Render(w io.Writer) error {
 		items = append(items, &Element{
 			Name: "i",
 			Attributes: Attributes{
-				"class": template.HTMLAttr(b.IconClass),
+				"class": b.IconClass,
 			},
 		})
 	}
@@ -102,7 +97,7 @@ func (b *Button) Render(w io.Writer) error {
 	if b.Text != "" {
 		items = append(items, &Element{
 			Name:      "span",
-			Innerhtml: template.HTML(b.Text),
+			InnerHTML: template.HTML(b.Text),
 		})
 	}
 
@@ -112,7 +107,7 @@ func (b *Button) Render(w io.Writer) error {
 		Items:      items,
 	}
 
-	return buttonEl.Render(w)
+	return buttonEl.Render()
 }
 
 // GetID ...

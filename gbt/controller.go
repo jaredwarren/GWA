@@ -1,9 +1,8 @@
-package ext
+package gbt
 
 import (
 	"fmt"
 	"html/template"
-	"io"
 	"net/http"
 )
 
@@ -32,17 +31,16 @@ func (h Handler) Call(args ...interface{}) {
 }
 
 // Render ...
-func (c *Controller) Render(w io.Writer) error {
-
+func (c *Controller) Render() Stringer {
 	var innerJS template.JS
 	for k, h := range c.Handlers {
 		innerJS = innerJS + template.JS(fmt.Sprintf(`const %s = function (...args) {%s}`, k, h))
 	}
-	buttonEl := &Script{
+	script := &Script{
 		InnerJS: innerJS,
 	}
 
-	return buttonEl.Render(w)
+	return script.Render()
 }
 
 // GetID ...

@@ -1,9 +1,8 @@
-package ext
+package gbt
 
 import (
 	"fmt"
 	"html/template"
-	"io"
 )
 
 var (
@@ -41,7 +40,7 @@ type Header struct {
 }
 
 // Render ...
-func (h *Header) Render(w io.Writer) error {
+func (h *Header) Render() Stringer {
 	if h.ID == "" {
 		h.ID = nextHeaderID()
 	}
@@ -129,7 +128,7 @@ func (h *Header) Render(w io.Writer) error {
 		Styles:  styles,
 		Items:   Items{layout},
 	}
-	return div.Render(w)
+	return div.Render()
 }
 
 // GetID ...

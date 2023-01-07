@@ -1,9 +1,8 @@
-package ext
+package gbt
 
 import (
 	"fmt"
 	"html/template"
-	"io"
 )
 
 var (
@@ -31,7 +30,7 @@ type Tree struct {
 }
 
 // Render ...
-func (t *Tree) Render(w io.Writer) error {
+func (t *Tree) Render() Stringer {
 	if t.ID == "" {
 		t.ID = nextTreeID()
 	}
@@ -87,7 +86,7 @@ func (t *Tree) Render(w io.Writer) error {
 
 	// Attributes
 	attrs := Attributes{
-		"id":    template.HTMLAttr(t.ID),
+		"id":    t.ID,
 		"class": t.Classes.ToAttr(),
 	}
 	if len(t.Styles) > 0 {
@@ -99,7 +98,7 @@ func (t *Tree) Render(w io.Writer) error {
 		Attributes: attrs,
 		Items:      items,
 	}
-	return navEl.Render(w)
+	return navEl.Render()
 }
 
 // GetID ...
@@ -140,25 +139,25 @@ type TreeNode struct {
 }
 
 // Render ...
-func (tn *TreeNode) Render(w io.Writer) error {
+func (tn *TreeNode) Render() Stringer {
 	if tn.ID == "" {
 		tn.ID = nextTreeNodeID()
 	}
 
 	if len(tn.Children) > 0 {
-		return tn.RenderParent(w)
+		return tn.RenderParent()
 	}
 
-	return tn.RenderLeaf(w)
+	return tn.RenderLeaf()
 }
 
 // RenderParent ...
-func (tn *TreeNode) RenderParent(w io.Writer) error {
+func (tn *TreeNode) RenderParent() Stringer {
 	items := Items{}
 
 	// Attributes
 	attrs := Attributes{
-		"id": template.HTMLAttr(tn.ID),
+		"id": tn.ID,
 	}
 
 	// add parent label
@@ -174,7 +173,7 @@ func (tn *TreeNode) RenderParent(w io.Writer) error {
 				"class": "fas fa-folder-open",
 			},
 		},
-			&RawHTML{template.HTML(tn.Text)},
+			RawHTML(template.HTML(tn.Text)),
 		},
 	}
 	items = append(items, leaf)
@@ -205,14 +204,14 @@ func (tn *TreeNode) RenderParent(w io.Writer) error {
 		Attributes: attrs,
 		Items:      items,
 	}
-	return tnEl.Render(w)
+	return tnEl.Render()
 }
 
 // RenderLeaf ...
-func (tn *TreeNode) RenderLeaf(w io.Writer) error {
+func (tn *TreeNode) RenderLeaf() Stringer {
 	// Attributes
 	attrs := Attributes{
-		"id": template.HTMLAttr(tn.ID),
+		"id": tn.ID,
 	}
 	leaf := &Element{
 		Name: "span",
@@ -222,14 +221,14 @@ func (tn *TreeNode) RenderLeaf(w io.Writer) error {
 		Items: Items{},
 	}
 	if tn.Handler != "" {
-		leaf.Attributes["onclick"] = template.HTMLAttr(fmt.Sprintf("%s('%s')", tn.Handler, tn.ID))
+		leaf.Attributes["onclick"] = fmt.Sprintf("%s('%s')", tn.Handler, tn.ID)
 	}
 
 	// if tn.IconClass != "" {
 	leaf.Items = append(leaf.Items, &Element{
 		Name: "i",
 		Attributes: Attributes{
-			"class": template.HTMLAttr(tn.IconClass),
+			"class": tn.IconClass,
 		},
 	})
 	// }
@@ -241,7 +240,7 @@ func (tn *TreeNode) RenderLeaf(w io.Writer) error {
 			Attributes: Attributes{
 				"style": "align-self:center", // TODO: fix this!!!
 			},
-			Innerhtml: template.HTML(tn.Text),
+			InnerHTML: template.HTML(tn.Text),
 		})
 
 	}
@@ -267,7 +266,7 @@ func (tn *TreeNode) RenderLeaf(w io.Writer) error {
 		Attributes: attrs,
 		Items:      Items{leaf, extra},
 	}
-	return tnEl.Render(w)
+	return tnEl.Render()
 }
 
 // GetID ...
@@ -300,7 +299,7 @@ type Search struct {
 }
 
 // Render ...
-func (s *Search) Render(w io.Writer) error {
+func (s *Search) Render() Stringer {
 	// if tn.ID == "" {
 	// 	tn.ID = nextTreeNodeID()
 	// }
@@ -321,7 +320,7 @@ func (s *Search) Render(w io.Writer) error {
 		},
 	}
 
-	return search.Render(w)
+	return search.Render()
 }
 
 // GetID ...

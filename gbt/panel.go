@@ -1,9 +1,8 @@
-package ext
+package gbt
 
 import (
 	"fmt"
 	"html/template"
-	"io"
 	"unicode"
 )
 
@@ -54,7 +53,7 @@ type Panel struct {
 }
 
 // Render ...
-func (p *Panel) Render(w io.Writer) error {
+func (p *Panel) Render() Stringer {
 	if p.ID == "" {
 		p.ID = nextPanelID()
 	}
@@ -211,7 +210,7 @@ func (p *Panel) Render(w io.Writer) error {
 		Styles:  styles,
 		Items:   LayoutItems(items),
 	}
-	return div.Render(w)
+	return div.Render()
 }
 
 func nextPanelID() string {

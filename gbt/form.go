@@ -1,9 +1,8 @@
-package ext
+package gbt
 
 import (
 	"fmt"
 	"html/template"
-	"io"
 )
 
 var (
@@ -35,12 +34,8 @@ type Form struct {
 	// TODO: success/fail handler, how to push info back to front?
 }
 
-func (f *Form) RenderString() string {
-	return "TODO: Application"
-}
-
 // Render ...
-func (f *Form) Render(w io.Writer) error {
+func (f *Form) Render() Stringer {
 	if f.ID == "" {
 		f.ID = nextFormID()
 	}
@@ -126,12 +121,12 @@ func (f *Form) Render(w io.Writer) error {
 	}
 
 	// Attributes
-	attrs := map[string]template.HTMLAttr{
-		"id":       template.HTMLAttr(f.ID),
+	attrs := Attributes{
+		"id":       f.ID,
 		"class":    f.Classes.ToAttr(),
-		"action":   template.HTMLAttr(f.Action),
-		"method":   template.HTMLAttr(f.Method),
-		"onsubmit": template.HTMLAttr(fmt.Sprintf("submitForm('%s', event)", f.ID)),
+		"action":   f.Action,
+		"method":   f.Method,
+		"onsubmit": fmt.Sprintf("submitForm('%s', event)", f.ID),
 	}
 	if len(styles) > 0 {
 		attrs["style"] = styles.ToAttr()
@@ -142,7 +137,7 @@ func (f *Form) Render(w io.Writer) error {
 		Attributes: attrs,
 		Items:      LayoutItems(items),
 	}
-	return navEl.Render(w)
+	return navEl.Render()
 }
 
 // GetID ...
@@ -192,17 +187,13 @@ type Fieldset struct {
 	Parent    Renderer          `json:"-"`
 }
 
-func (f *Fieldset) RenderString() string {
-	return "TODO: Application"
-}
-
 // Render ...
-func (f *Fieldset) Render(w io.Writer) error {
+func (f *Fieldset) Render() Stringer {
 	items := Items{}
 	if f.Legend != "" {
 		items = append(items, &Element{
 			Name:  "legend",
-			Items: Items{&RawHTML{f.Legend}},
+			Items: Items{RawHTML(f.Legend)},
 		})
 	}
 
@@ -234,7 +225,7 @@ func (f *Fieldset) Render(w io.Writer) error {
 		},
 		Items: LayoutItems(items),
 	}
-	return navEl.Render(w)
+	return navEl.Render()
 }
 
 // GetID ...
@@ -266,12 +257,8 @@ type Input struct {
 	Parent       Renderer      `json:"-"`
 }
 
-func (i *Input) RenderString() string {
-	return "TODO: Application"
-}
-
 // Render ...
-func (i *Input) Render(w io.Writer) error {
+func (i *Input) Render() Stringer {
 	if i.ID == "" {
 		i.ID = nextInputID()
 	}
@@ -279,27 +266,27 @@ func (i *Input) Render(w io.Writer) error {
 	// TODO: validate attributes based on type
 
 	if len(i.Attributes) == 0 {
-		i.Attributes = map[string]template.HTMLAttr{}
+		i.Attributes = Attributes{}
 	}
 
 	// ID
-	i.Attributes["id"] = template.HTMLAttr(i.ID)
+	i.Attributes["id"] = i.ID
 
 	// Type
 	if i.Type == "" {
 		// required, default text??
 		panic("type required")
 	}
-	i.Attributes["type"] = template.HTMLAttr(i.Type)
+	i.Attributes["type"] = i.Type
 
 	// Name
 	if i.Name != "" {
-		i.Attributes["name"] = template.HTMLAttr(i.Name)
+		i.Attributes["name"] = i.Name
 	}
 
 	// Value
 	if i.Value != "" {
-		i.Attributes["value"] = template.HTMLAttr(i.Value)
+		i.Attributes["value"] = i.Value
 	}
 
 	// Disabled
@@ -314,12 +301,12 @@ func (i *Input) Render(w io.Writer) error {
 
 	// Autocomplete
 	if i.Autocomplete != "" {
-		i.Attributes["autocomplete"] = template.HTMLAttr(i.Autocomplete)
+		i.Attributes["autocomplete"] = i.Autocomplete
 	}
 
 	// Form
 	if i.Form != "" {
-		i.Attributes["form"] = template.HTMLAttr(i.Form)
+		i.Attributes["form"] = i.Form
 	} // TODO: else get from parent form?
 
 	// Add Events
@@ -339,8 +326,8 @@ func (i *Input) Render(w io.Writer) error {
 	if i.Label != "" {
 		items = append(items, &Element{
 			Name:       "label",
-			Attributes: Attributes{"for": template.HTMLAttr(i.ID)},
-			Innerhtml:  i.Label,
+			Attributes: Attributes{"for": i.ID},
+			InnerHTML:  i.Label,
 		})
 	}
 
@@ -355,7 +342,7 @@ func (i *Input) Render(w io.Writer) error {
 	}
 
 	items = append(items, e)
-	return items.Render(w)
+	return items.Render()
 }
 
 func nextInputID() string {

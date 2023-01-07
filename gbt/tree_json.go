@@ -1,4 +1,4 @@
-package ext
+package gbt
 
 func buildTree(i interface{}) *Tree {
 	ii := i.(map[string]interface{})

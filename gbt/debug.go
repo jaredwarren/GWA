@@ -1,4 +1,4 @@
-package ext
+package gbt
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ func d(p Renderer, depth int) {
 	typeof := reflect.TypeOf(p).String()
 
 	switch typeof {
-	case "*ext.Panel":
+	case "*gbt.Panel":
 		fmt.Print("| ", "Panel", p.(*Panel).ID)
 		fmt.Println("  html:", p.(*Panel).HTML)
 		pd(depth)
@@ -23,22 +23,22 @@ func d(p Renderer, depth int) {
 		for _, i := range p.(*Panel).Items {
 			d(i, depth+1)
 		}
-	case "*ext.Innerhtml":
+	case "*gbt.Innerhtml":
 		fmt.Print("| ", "Innerhtml", p.(*Innerhtml).ID)
 		fmt.Println("  html:", p.(*Innerhtml).HTML)
-	case "*ext.Layout":
+	case "*gbt.Layout":
 		fmt.Print("| ", "Layout", p.(*Layout).ID)
 		fmt.Println(":", p.(*Layout).Type)
 		for _, i := range p.(*Layout).Items {
 			d(i, depth+1)
 		}
-	// case "*ext.Body":
+	// case "*gbt.Body":
 	// 	fmt.Print("| ", "Body", p.(*DivContainer).ID)
 	// 	fmt.Println("")
 	// 	for _, i := range p.(*DivContainer).Items {
 	// 		d(i, depth+1)
 	// 	}
-	case "*ext.Header":
+	case "*gbt.Header":
 		fmt.Print("| ", "Header", p.(*Header).ID)
 		fmt.Println("::", p.(*Header).Title)
 	default:
