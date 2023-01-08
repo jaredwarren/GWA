@@ -174,9 +174,6 @@ func load() *gbt.Application {
 								},
 							},
 						},
-						// 			gbt.RawHTML(`<h5 class="card-title">Card title</h5>
-						// <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's
-						//     content.</p>`),
 					},
 					Footer: &gbt.CardFooter{
 						Body: gbt.Items{gbt.RawHTML("Footer...")},
@@ -242,78 +239,79 @@ func load() *gbt.Application {
 				},
 
 				&gbt.Form{
-					XType: "form",
+					// XType: "form",
 					// Docked: "top",
 					// Text:    "Click Here",
 					// Handler: "btnClick",
 					// Method: "post",
 					// Action: "submit",
-					Resize:  "vertical",
-					Handler: "formSubmit",
+					// Resize:  "vertical",
+					// Handler: "formSubmit",
 					// Handler: func(w http.ResponseWriter, r *http.Request) {
 					// 	fmt.Println("submit....")
 					// },
 
 					Items: gbt.Items{
-						&gbt.Panel{
-							XType:  "panel",
-							Docked: "bottom",
-							Layout: "hbox",
-							// Resize:  "vertical",
-							Classes: gbt.Classes{"toolbar"},
-							Items: gbt.Items{
-								&gbt.Button{
-									XType:     "button",
-									Text:      "Run",
-									Handler:   "btnClick",
-									IconClass: "far fa-play",
-									Classes:   gbt.Classes{"button-success", "pure-button"},
-								},
-								&gbt.Spacer{},
-								&gbt.Input{
-									XType: "input",
-									Label: "limit:",
-									Name:  "limit",
-									Type:  "number",
-									Data: gbt.Data{
-										"dname": "v",
-									},
-									Events: gbt.Events{
-										"keyup": &gbt.Event{
-											Handler: "limitChange",
-										},
-									},
-								},
-								&gbt.Input{
-									XType: "input",
-									Label: "Show All:",
-									Name:  "show_all",
-									Type:  "checkbox",
-								},
-								&gbt.Button{
-									XType:     "button",
-									Text:      "Click Here",
-									Handler:   "btnClick",
-									IconClass: "fad fa-window-close",
-								},
-							},
-						},
+						// &gbt.Panel{
+						// 	XType:  "panel",
+						// 	Docked: "bottom",
+						// 	Layout: "hbox",
+						// 	// Resize:  "vertical",
+						// 	Classes: gbt.Classes{"toolbar"},
+						// 	Items: gbt.Items{
+						// 		&gbt.Button{
+						// 			XType:     "button",
+						// 			Text:      "Run",
+						// 			Handler:   "btnClick",
+						// 			IconClass: "far fa-play",
+						// 			Classes:   gbt.Classes{"button-success", "pure-button"},
+						// 		},
+						// 		&gbt.Spacer{},
+						// 		&gbt.Input{
+						// 			Type: "number",
+						// 			// Data: gbt.Data{
+						// 			// 	"dname": "v",
+						// 			// },
+						// 			// Events: gbt.Events{
+						// 			// 	"keyup": &gbt.Event{
+						// 			// 		Handler: "limitChange",
+						// 			// 	},
+						// 			// },
+						// 		},
+						// 		&gbt.Input{
+						// 			// XType: "input",
+						// 			// Label: "Show All:",
+						// 			// Name:  "show_all",
+						// 			Type: "checkbox",
+						// 		},
+						// 		&gbt.Button{
+						// 			XType:     "button",
+						// 			Text:      "Click Here",
+						// 			Handler:   "btnClick",
+						// 			IconClass: "fad fa-window-close",
+						// 		},
+						// 	},
+						// },
 						&gbt.Fieldset{
-							XType:  "fieldset",
-							Legend: "Form Legend",
-							Resize: "vertical",
+							Legend: "NEW Form Legend!!!",
 							Items: gbt.Items{
-								&gbt.Input{
-									XType: "input",
-									Label: "User Name:",
-									Name:  "username",
-									Type:  "textarea",
+								&gbt.FormEmail{
+									Label:       "Email address",
+									Name:        "email",
+									HelpText:    "We'll never share your email with anyone else.",
+									Placeholder: "some@email.com",
 								},
 								&gbt.Input{
-									XType: "input",
-									Label: "Send:",
-									Name:  "submit",
-									Type:  "submit",
+									// XType: "input",
+									// Label: "User Name:",
+									// Name:  "username",
+									Type: "textarea",
+								},
+								&gbt.Input{
+									// XType: "input",
+									// Label: "Send:",
+									// Name:  "submit",
+									Type: "submit",
 								},
 							},
 						},

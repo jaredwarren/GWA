@@ -27,10 +27,14 @@ func (i Items) Render() Stringer {
 // Attributes ...
 type Attributes map[string]Stringer
 
-func (a *Attributes) Render() Stringer {
+func (a Attributes) Render() Stringer {
 	al := ""
-	for k, v := range *a {
-		al = al + fmt.Sprintf(` %s="%s"`, k, v)
+	for k, v := range a {
+		if v == "" {
+			al = al + fmt.Sprintf(` %s`, k)
+		} else {
+			al = al + fmt.Sprintf(` %s="%s"`, k, v)
+		}
 	}
 	return template.HTMLAttr(strings.TrimSpace(al))
 }
@@ -300,6 +304,7 @@ func (d *DivContainer) GetID() string {
 
 // Element gerneric div container
 type Element struct {
+	ID   string
 	Name string
 	Attributes
 	Classes
@@ -318,8 +323,15 @@ func (e *Element) Render() Stringer {
 		e.Attributes = Attributes{}
 	}
 
+	if e.ID != "" {
+		e.Attributes["id"] = e.ID
+	}
+
 	if _, ok := e.Attributes["class"]; !ok {
-		e.Attributes["class"] = e.Classes.Render()
+		c := e.Classes.Render()
+		if c != "" {
+			e.Attributes["class"] = c
+		}
 	}
 
 	if isSelfClosing(name) {
@@ -330,6 +342,10 @@ func (e *Element) Render() Stringer {
 		return renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>{{.InnerHTML}}</%s>`, name, name), e)
 	}
 
+	if e.Name == "form" {
+		fmt.Printf("~~~~~~~~~~~~~~~\n %+v\n\n", e)
+		fmt.Printf("~~~~~~~~~~~~~~~\n %+v\n\n", e.Items[0])
+	}
 	return renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>{{.Items.Render}}</%s>`, name, name), e)
 }
 
@@ -355,11 +371,6 @@ var closing = map[string]bool{
 func isSelfClosing(name string) bool {
 	_, ok := closing[name]
 	return ok
-}
-
-// GetID ...
-func (e *Element) GetID() string {
-	return ""
 }
 
 /**

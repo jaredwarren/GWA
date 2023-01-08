@@ -3,355 +3,321 @@ package gbt
 import (
 	"fmt"
 	"html/template"
-)
-
-var (
-	formID  = 0
-	inputID = 0
+	"math/rand"
 )
 
 // Form ...
 type Form struct {
-	XType     string            `json:"xtype"`
-	ID        string            `json:"id,omitempty"`
-	Parent    Renderer          `json:"-"`
-	Width     int               `json:"width,omitempty"`
-	Height    int               `json:"height,omitempty"`
-	Layout    string            `json:"layout,omitempty"`
-	Resizable bool              `json:"resizable,omitempty"`
-	Resize    string            `json:"resize,omitempty"`
-	Border    template.CSS      `json:"border,omitempty"`
-	Docked    string            `json:"docked,omitempty"` // top, bottom, left, right, ''
-	Flex      string            `json:"flex,omitempty"`
-	Shadow    bool              `json:"shadow,omitempty"`
-	Classes   Classes           `json:"classes,omitempty"`
-	Styles    map[string]string `json:"styles,omitempty"`
-	Items     Items             `json:"items,omitempty"`
-	Action    string            `json:"action,omitempty"`
-	Method    string            `json:"method,omitempty"`
-	Handler   string            `json:"handler,omitempty"`
-	HandlerFn FormHandler       `json:"-"`
-	// TODO: success/fail handler, how to push info back to front?
+	Items
+	// TODO: form attributes
 }
 
-// Render ...
 func (f *Form) Render() Stringer {
-	if f.ID == "" {
-		f.ID = nextFormID()
+	fr := &Element{
+		Name:  "form",
+		Items: f.Items,
 	}
-
-	// TODO: find a way to make form use same logic as panel, so there isn't duplicate code
-
-	// default to post method
-	if f.Method == "" {
-		f.Method = "post"
-	}
-
-	// default action
-	if f.Action == "" {
-		f.Action = fmt.Sprintf("/submit/%s", f.Handler)
-	}
-
-	// default classes
-	classess := map[string]bool{
-		"x-form": true,
-	}
-	// copy classes
-	for _, c := range f.Classes {
-		if _, ok := classess[c]; !ok {
-			classess[c] = true
-		}
-	}
-	if f.Shadow {
-		classess["x-shadow"] = true
-	}
-
-	// copy styles
-	styles := Styles{}
-	if len(f.Styles) > 0 {
-		styles = f.Styles
-	}
-
-	// append new styles based on p's properties
-	// what if I want width to be 0px?
-	if f.Width != 0 && f.Docked != "top" && f.Docked != "bottom" {
-		styles["width"] = fmt.Sprintf("%dpx", f.Width)
-		classess["x-widthed"] = true
-	}
-	// what if I want height to be 0px?
-	if f.Height != 0 && f.Docked != "left" && f.Docked != "right" {
-		styles["height"] = fmt.Sprintf("%dpx", f.Height)
-		classess["x-heighted"] = true
-	}
-	if f.Border != "" {
-		styles["border"] = string(f.Border)
-		classess["x-managed-border"] = true
-	}
-
-	if f.Layout == "hbox" {
-		styles["flex-direction"] = "row"
-	} else {
-		styles["flex-direction"] = "column"
-	}
-
-	if f.Flex != "" {
-		styles["flex"] = f.Flex
-	}
-
-	if f.Resizable {
-		styles["resize"] = "both"
-	} else if f.Resize != "" {
-		styles["resize"] = f.Resize
-	}
-
-	// convert class back to array
-	npClasses := []string{}
-	for k := range classess {
-		npClasses = append(npClasses, k)
-	}
-
-	// ITEMS
-	items := Items{}
-	for _, i := range f.Items {
-		c, ok := i.(Child)
-		if ok {
-			c.SetParent(f)
-		}
-		items = append(items, i)
-	}
-
-	// Attributes
-	attrs := Attributes{
-		"id":       f.ID,
-		"class":    f.Classes.ToAttr(),
-		"action":   f.Action,
-		"method":   f.Method,
-		"onsubmit": fmt.Sprintf("submitForm('%s', event)", f.ID),
-	}
-	if len(styles) > 0 {
-		attrs["style"] = styles.ToAttr()
-	}
-
-	navEl := &Element{
-		Name:       "form",
-		Attributes: attrs,
-		Items:      LayoutItems(items),
-	}
-	return navEl.Render()
+	return fr.Render()
 }
 
-// GetID ...
-func (f *Form) GetID() string {
-	return f.ID
-}
-
-// SetParent ...
-func (f *Form) SetParent(p Renderer) {
-	f.Parent = p
-}
-
-// GetDocked ...
-func (f *Form) GetDocked() string {
-	return f.Docked
-}
-
-// SetStyle ...
-func (f *Form) SetStyle(key, value string) {
-	if f.Styles == nil {
-		f.Styles = map[string]string{}
-	}
-	f.Styles[key] = value
-}
-
-func nextFormID() string {
-	id := fmt.Sprintf("form-%d", formID)
-	formID++
-	return id
-}
-
-/*
- * Fieldset
- */
-
-// Fieldset ...
+// Fieldset
 type Fieldset struct {
-	XType     string            `json:"xtype"`
-	ID        string            `json:"id,omitempty"`
-	Docked    string            `json:"docked,omitempty"`
-	Classes   []string          `json:"classes,omitempty"`
-	Styles    map[string]string `json:"styles,omitempty"`
-	Resizable bool              `json:"resizable,omitempty"`
-	Resize    string            `json:"resize,omitempty"`
-	Legend    template.HTML     `json:"legend,omitempty"`
-	Items     Items             `json:"items,omitempty"`
-	Parent    Renderer          `json:"-"`
+	Legend template.HTML
+	Items
 }
 
-// Render ...
 func (f *Fieldset) Render() Stringer {
 	items := Items{}
 	if f.Legend != "" {
 		items = append(items, &Element{
-			Name:  "legend",
-			Items: Items{RawHTML(f.Legend)},
+			Name:      "legend",
+			InnerHTML: f.Legend,
 		})
 	}
-
-	// copy styles
-	styles := Styles{}
-	if len(f.Styles) > 0 {
-		styles = f.Styles
+	items = append(items, f.Items...)
+	fs := &Element{
+		Name:  "fieldset",
+		Items: items,
 	}
-	if f.Resizable {
-		styles["resize"] = "both"
-		styles["overflow"] = "auto" // needs to be anything but "visible"
-	} else if f.Resize != "" {
-		styles["resize"] = f.Resize
-		styles["overflow"] = "auto"
-	}
+	return fs.Render()
+}
 
-	for _, i := range f.Items {
-		c, ok := i.(Child)
-		if ok {
-			c.SetParent(f)
-		}
-		items = append(items, i)
-	}
+// FormLabel
+type FormLabel struct {
+	Label template.HTML
+	ForID string
+}
 
-	navEl := &Element{
-		Name: "fieldset",
+func (f *FormLabel) Render() Stringer {
+	if f.Label == "" {
+		return ""
+	}
+	l := &Element{
+		Name: "label",
 		Attributes: Attributes{
-			"style": styles.ToAttr(),
+			"for": f.ForID,
 		},
-		Items: LayoutItems(items),
+		Classes:   Classes{"form-label"},
+		InnerHTML: f.Label,
 	}
-	return navEl.Render()
+	return l.Render()
 }
 
-// GetID ...
-func (f *Fieldset) GetID() string {
-	return f.ID
+type Size string
+
+var (
+	SizeSmall Size = "sm"
+	SizeLarge Size = "lg"
+)
+
+// FormControl ...
+// Alias for Input
+type FormControl struct {
+	ID     string
+	Size   Size // "", "sm", "lg" -> class="form-control form-control-lg"
+	Type   InputType
+	HelpID string
+	Attributes
+	Classes
 }
 
-/*
- * Input
- */
+func (f *FormControl) Render() Stringer {
+	if f.Attributes == nil {
+		f.Attributes = Attributes{}
+	}
+	f.Attributes["aria-describedby"] = f.HelpID
 
-// Input ...
-type Input struct {
-	XType        string        `json:"xtype"`
-	ID           string        `json:"id,omitempty"`
-	Classes      Classes       `json:"classes,omitempty"`
-	Styles       Styles        `json:"styles,omitempty"`
-	Type         string        `json:"type,omitempty"`
-	Name         string        `json:"name,omitempty"`
-	Value        string        `json:"value,omitempty"`
-	Attributes   Attributes    `json:"attributes,omitempty"`
-	Events       Events        `json:"events,omitempty"`
-	Data         Data          `json:"data,omitempty"`
-	Form         string        `json:"form,omitempty"`
-	Disabled     bool          `json:"disabled,omitempty"`
-	Autofocus    bool          `json:"autofocus,omitempty"`
-	Autocomplete string        `json:"autocomplete,omitempty"`
-	Label        template.HTML `json:"label,omitempty"`
-	Parent       Renderer      `json:"-"`
+	f.Classes = append(f.Classes, "form-control")
+	switch f.Size {
+	case SizeSmall:
+		f.Classes = append(f.Classes, "form-control-sm")
+	case SizeLarge:
+		f.Classes = append(f.Classes, "form-control-lg")
+	}
+
+	i := &Input{
+		ID:         f.ID,
+		Type:       f.Type,
+		Classes:    f.Classes,
+		Attributes: f.Attributes,
+	}
+	return i.Render()
 }
 
-// Render ...
-func (i *Input) Render() Stringer {
-	if i.ID == "" {
-		i.ID = nextInputID()
+// FormText
+type FormText struct {
+	ID   string
+	Text template.HTML
+}
+
+func (f *FormText) Render() Stringer {
+	if f.Text == "" {
+		return ""
+	}
+	e := &Element{
+		ID:        f.ID,
+		Classes:   Classes{"form-text"},
+		InnerHTML: f.Text,
+	}
+	return e.Render()
+}
+
+// FormCheck inline, switch, togglebtn (style), radio button(style),
+type FormCheck struct{}
+
+func (f *FormCheck) Render() Stringer {
+	return ""
+}
+
+// FormCheckInput radio/checkbox
+type FormCheckInput struct{}
+
+func (f *FormCheckInput) Render() Stringer {
+	return ""
+}
+
+// FormCheckLabel
+type FormCheckLabel struct{}
+
+func (f *FormCheckLabel) Render() Stringer {
+	return ""
+}
+
+// FormSelect
+type FormSelect struct{}
+
+func (f *FormSelect) Render() Stringer {
+	return ""
+}
+
+//
+// custom form
+//
+
+// FormEmail ...
+type FormEmail struct {
+	ID          string
+	Name        string
+	Placeholder string
+	Value       string
+	Required    bool
+	ReadOnly    bool
+	Multiple    bool
+	Label       template.HTML
+	HelpText    template.HTML
+}
+
+func (f *FormEmail) Render() Stringer {
+	if f.Name == "" {
+		f.Name = "email" // possible conflict?
+	}
+	if f.ID == "" {
+		f.ID = fmt.Sprintf("%s-%d", f.Name, rand.Intn(100))
 	}
 
-	// TODO: validate attributes based on type
-
-	if len(i.Attributes) == 0 {
-		i.Attributes = Attributes{}
-	}
-
-	// ID
-	i.Attributes["id"] = i.ID
-
-	// Type
-	if i.Type == "" {
-		// required, default text??
-		panic("type required")
-	}
-	i.Attributes["type"] = i.Type
-
-	// Name
-	if i.Name != "" {
-		i.Attributes["name"] = i.Name
-	}
-
-	// Value
-	if i.Value != "" {
-		i.Attributes["value"] = i.Value
-	}
-
-	// Disabled
-	if i.Disabled {
-		i.Attributes["disabled"] = ""
-	}
-
-	// Autofocus
-	if i.Autofocus {
-		i.Attributes["autofocus"] = ""
-	}
-
-	// Autocomplete
-	if i.Autocomplete != "" {
-		i.Attributes["autocomplete"] = i.Autocomplete
-	}
-
-	// Form
-	if i.Form != "" {
-		i.Attributes["form"] = i.Form
-	} // TODO: else get from parent form?
-
-	// Add Events
-	eattr := i.Events.ToAttr()
-	for n, e := range eattr {
-		i.Attributes[n] = e
-	}
-
-	// Add Data
-	dAttrs := i.Data.ToAttr()
-	for n, v := range dAttrs {
-		i.Attributes[n] = v
-	}
-
-	// Label
 	items := Items{}
-	if i.Label != "" {
-		items = append(items, &Element{
-			Name:       "label",
-			Attributes: Attributes{"for": i.ID},
-			InnerHTML:  i.Label,
+	if f.Label != "" {
+		items = append(items, &FormLabel{
+			Label: f.Label,
+			ForID: f.ID,
 		})
 	}
 
-	e := &Element{
-		Name:       "input",
-		Attributes: i.Attributes,
+	helpID := fmt.Sprintf("%s-help-%d", f.ID, rand.Intn(100))
+
+	attributes := Attributes{}
+	if f.Value != "" {
+		attributes["value"] = f.Value
+	}
+	if f.Placeholder != "" {
+		attributes["placeholder"] = f.Placeholder
+	}
+	if f.Required {
+		attributes["required"] = f.Required
+	}
+	if f.ReadOnly {
+		attributes["readonly"] = f.ReadOnly
+	}
+	if f.Multiple {
+		attributes["multiple"] = f.Multiple
 	}
 
-	// override name for textarea
-	if i.Type == "textarea" {
-		e.Name = "textarea"
+	attributes["name"] = f.Name // should always exist
+
+	items = append(items, &FormControl{
+		ID:         f.ID,
+		Type:       InputTypeEmail,
+		HelpID:     helpID,
+		Attributes: attributes,
+	})
+
+	if f.HelpText != "" {
+		items = append(items, &FormText{
+			ID:   helpID,
+			Text: f.HelpText,
+		})
 	}
 
-	items = append(items, e)
-	return items.Render()
+	d := &Element{
+		Classes: Classes{"mb-3"},
+		Items:   items,
+	}
+	return d.Render()
 }
 
-func nextInputID() string {
-	id := fmt.Sprintf("input-%d", inputID)
-	inputID++
-	return id
+type AutoComplete string
+
+var (
+	AutoCompleteOn      AutoComplete = "on"
+	AutoCompleteOff     AutoComplete = "off"
+	AutoCompleteCurrent AutoComplete = "current-password"
+	AutoCompleteNew     AutoComplete = "new-password"
+)
+
+type InputMode string
+
+var (
+	InputModeNone    InputMode = "none"
+	InputModeText    InputMode = "text"
+	InputModeDecimal InputMode = "decimal"
+	InputModeNumeric InputMode = "numeric"
+	InputModeTel     InputMode = "tel"
+	InputModeSearch  InputMode = "search"
+	InputModeEmail   InputMode = "email"
+	InputModeURL     InputMode = "url"
+)
+
+// FormPassword ...
+type FormPassword struct {
+	ID          string
+	Name        string
+	Placeholder string
+	Required    bool
+	ReadOnly    bool
+	MinLength   uint
+	MaxLength   uint
+	Size        uint
+	Pattern     string
+	AutoComplete
+	InputMode
+	Label    template.HTML
+	HelpText template.HTML
+	Value    string // ??
 }
 
-// GetID ...
-func (i *Input) GetID() string {
-	return i.ID
+func (f *FormPassword) Render() Stringer {
+	if f.Name == "" {
+		f.Name = "email" // possible conflict?
+	}
+	if f.ID == "" {
+		f.ID = fmt.Sprintf("%s-%d", f.Name, rand.Intn(100))
+	}
+
+	items := Items{}
+	if f.Label != "" {
+		items = append(items, &FormLabel{
+			Label: f.Label,
+			ForID: f.ID,
+		})
+	}
+
+	helpID := fmt.Sprintf("%s-help-%d", f.ID, rand.Intn(100))
+
+	attributes := Attributes{}
+	if f.Value != "" {
+		attributes["value"] = f.Value
+	}
+	if f.Placeholder != "" {
+		attributes["placeholder"] = f.Placeholder
+	}
+	if f.Required {
+		attributes["required"] = f.Required
+	}
+	if f.ReadOnly {
+		attributes["readonly"] = f.ReadOnly
+	}
+
+	TODO: add new struct values from above!
+
+	attributes["name"] = f.Name // should always exist
+
+	items = append(items, &FormControl{
+		ID:         f.ID,
+		Type:       InputTypeEmail,
+		HelpID:     helpID,
+		Attributes: attributes,
+	})
+
+	if f.HelpText != "" {
+		items = append(items, &FormText{
+			ID:   helpID,
+			Text: f.HelpText,
+		})
+	}
+
+	d := &Element{
+		Classes: Classes{"mb-3"},
+		Items:   items,
+	}
+	return d.Render()
 }
