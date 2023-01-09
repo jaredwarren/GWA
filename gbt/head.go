@@ -93,7 +93,12 @@ func (l *Link) Render() Stringer {
 	if len(l.Attributes) == 0 {
 		return ""
 	}
-	return renderToHTML(`<link {{.Attributes.Render}}>`, l)
+
+	e := &Element{
+		Name:       "link",
+		Attributes: l.Attributes,
+	}
+	return e.Render()
 }
 
 // Style <style> tag
@@ -110,14 +115,27 @@ func (s *Style) Render() Stringer {
 	if s.Type != "" {
 		s.Attributes["type"] = s.Type
 	}
-	return renderToHTML(`<style {{.Attributes.Render}}>{{.Body}}</style>`, s)
+
+	e := &Element{
+		Name:       "style",
+		Attributes: s.Attributes,
+		InnerHTML:  template.HTML(s.Body),
+	}
+	return e.Render()
 }
 
 // CSSLink plain local css link
 type CSSLink string
 
 // Render ...
-// <link rel="stylesheet" type="text/css" href="/static/css/all.min.css">
 func (s CSSLink) Render() Stringer {
-	return renderToHTML(`<link rel="stylesheet" type="text/css" href="{{.}}">`, template.HTMLAttr(s))
+	e := &Element{
+		Name: "link",
+		Attributes: Attributes{
+			"rel":  "stylesheet",
+			"type": "text/css",
+			"href": s,
+		},
+	}
+	return e.Render()
 }

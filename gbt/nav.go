@@ -93,10 +93,11 @@ func (n *NavBrand) Render() Stringer {
 type Nav struct {
 	ID string `json:"id,omitempty"` // how to auto generate
 	// Title (optional) overwritten if Brand is set
-	Title template.HTML `json:"title,omitempty"`
-	Brand *NavBrand
-	Items []INavItem `json:"items,omitempty"`
-	Theme Theme
+	Title  template.HTML `json:"title,omitempty"`
+	Brand  *NavBrand
+	Items  []INavItem `json:"items,omitempty"`
+	Theme  Theme
+	Search bool
 	//
 	Height int `json:"height,omitempty"`
 	Width  int `json:"width,omitempty"`
@@ -139,6 +140,12 @@ func (n *Nav) Render() Stringer {
 			  {{$item.Render}}
 			{{end}}
 		  </ul>
+			{{if .Search}}
+			  <form class="d-flex" role="search">
+				<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+				<button class="btn btn-outline-success" type="submit">Search</button>
+			  </form>
+			{{end}}
 		</div>
 	{{end}}
   </div>

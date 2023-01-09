@@ -142,7 +142,6 @@ func (a *Application) Render() Stringer {
 	items := Items{}
 	// set controllers ui, so ui.Bind works
 	for _, c := range a.Controllers {
-		// c.ui = a.ui
 		items = append(items, c)
 	}
 
@@ -232,7 +231,7 @@ func addChild(i interface{}) Renderer {
 	case "panel":
 		return buildPanel(i)
 	case "button":
-		return buildButton(i)
+		// return buildButton(i)
 	case "form":
 		return buildForm(i)
 	case "input":

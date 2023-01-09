@@ -9,10 +9,14 @@ import (
 // Form ...
 type Form struct {
 	Items
+	Submit *Button
 	// TODO: form attributes
 }
 
 func (f *Form) Render() Stringer {
+	if f.Submit != nil {
+		f.Items = append(f.Items, f.Submit)
+	}
 	fr := &Element{
 		Name:  "form",
 		Items: f.Items,
@@ -254,9 +258,9 @@ type FormPassword struct {
 	Placeholder string
 	Required    bool
 	ReadOnly    bool
-	MinLength   uint
-	MaxLength   uint
-	Size        uint
+	MinLength   string // use string because it allows "" to omit empty
+	MaxLength   string
+	Size        string
 	Pattern     string
 	AutoComplete
 	InputMode
@@ -296,8 +300,24 @@ func (f *FormPassword) Render() Stringer {
 	if f.ReadOnly {
 		attributes["readonly"] = f.ReadOnly
 	}
-
-	TODO: add new struct values from above!
+	if f.AutoComplete != "" {
+		attributes["autocomplete"] = f.AutoComplete
+	}
+	if f.InputMode != "" {
+		attributes["inputmode"] = f.InputMode
+	}
+	if f.Pattern != "" {
+		attributes["pattern"] = f.Pattern
+	}
+	if f.MinLength != "" {
+		attributes["minlength"] = f.MinLength
+	}
+	if f.MaxLength != "" {
+		attributes["maxlength"] = f.MaxLength
+	}
+	if f.Size != "" {
+		attributes["size"] = f.Size
+	}
 
 	attributes["name"] = f.Name // should always exist
 

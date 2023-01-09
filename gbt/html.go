@@ -34,11 +34,6 @@ func (h *Innerhtml) Render() Stringer {
 	return div.Render()
 }
 
-// GetID ...
-func (h *Innerhtml) GetID() string {
-	return h.ID
-}
-
 func nextInnerhtmlID() string {
 	id := fmt.Sprintf("innerhtml-%d", innerhtmlID)
 	innerhtmlID++

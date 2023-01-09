@@ -3,7 +3,6 @@ package gbt
 import (
 	"fmt"
 	"html/template"
-	"unicode"
 )
 
 var (
@@ -54,10 +53,13 @@ type Panel struct {
 
 // Render ...
 func (p *Panel) Render() Stringer {
-	if p.ID == "" {
-		p.ID = nextPanelID()
+	ddiv := &DivContainer{
+		ID:      p.ID,
+		Classes: p.Classes,
+		// Styles:  styles,
+		Items: p.Items,
 	}
-
+	return ddiv.Render()
 	// default classes
 	p.Classes.Add("x-panel")
 	if p.Shadow {
@@ -140,15 +142,15 @@ func (p *Panel) Render() Stringer {
 			header = NewHeader("&nbsp;")
 		}
 		header.Items = append(header.Items, &Button{
-			Handler:   "collapsePanel",
-			IconClass: "far fa-angle-left",
+			Handler: "collapsePanel",
+			// IconClass: "far fa-angle-left",
 		})
 
 		collapsedPanel := &Panel{
 			Docked: "right",
 			Items: Items{&Button{
-				Handler:   "expandPanel",
-				IconClass: "far fa-angle-right",
+				Handler: "expandPanel",
+				// IconClass: "far fa-angle-right",
 			}},
 		}
 
@@ -245,13 +247,6 @@ func (p *Panel) GetChildren() Items {
 // GetID ...
 func (p *Panel) GetID() string {
 	return p.ID
-}
-
-func lowerInitial(str string) string {
-	for i, v := range str {
-		return string(unicode.ToUpper(v)) + str[i+1:]
-	}
-	return ""
 }
 
 func buildPanel(i interface{}) *Panel {

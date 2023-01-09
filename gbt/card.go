@@ -11,7 +11,16 @@ type Card struct {
 }
 
 func (c *Card) Render() Stringer {
-	return renderToHTML(`<div class="card {{.Classes.Render}}">{{.Header.Render}}{{.Body.Render}}{{.Footer.Render}}</div>`, c)
+	classes := append(c.Classes, "card")
+	e := &Element{
+		Classes: classes,
+		Items: Items{
+			c.Header,
+			c.Body,
+			c.Footer,
+		},
+	}
+	return e.Render()
 }
 
 type CardHeader struct {
@@ -65,13 +74,13 @@ func (c *CardBody) Render() Stringer {
 			Text: template.HTML(c.Text),
 		})
 	}
-	c.Body = append(i, c.Body...)
-	if len(c.Body) == 0 {
+	i = append(i, c.Body...)
+	if len(i) == 0 {
 		return ""
 	}
 	e := &Element{
 		Classes: Classes{"card-body"},
-		Items:   c.Body,
+		Items:   i,
 	}
 	return e.Render()
 }

@@ -74,9 +74,42 @@ func load() *gbt.Application {
 		Controllers: []*gbt.Controller{
 			mainController,
 		},
+		Head: &gbt.Head{
+			Title: "this is the title",
+			// TODO: some of these can be made "default"
+			Items: gbt.Items{
+				// <meta>
+				&gbt.Meta{
+					Charset: "utf-8",
+				},
+				&gbt.Meta{
+					Name:    "viewport",
+					Content: "width=device-width, initial-scale=1, shrink-to-fit=no",
+				},
+				&gbt.Meta{
+					HttpEquiv: "Content-Type",
+					Content:   "text/html; charset=utf-8",
+				},
+				// Link/CSS
+				gbt.CSSLink("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"),
+				&gbt.Link{
+					Href:        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css",
+					Integrity:   "sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD",
+					Crossorigin: "anonymous",
+				},
+				// Script
+				&gbt.Script{
+					Src:         "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js",
+					Integrity:   "sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN",
+					Crossorigin: "anonymous",
+				},
+				&gbt.Script{Src: "/static/js/test.js"},
+			},
+		},
 		Nav: &gbt.Nav{
 			Title:  "Nav Title",
 			Shadow: true,
+			Search: true,
 			Theme:  gbt.ThemeDark,
 			Brand: &gbt.NavBrand{
 				Image: &gbt.Image{
@@ -110,40 +143,8 @@ func load() *gbt.Application {
 				},
 			},
 		},
-		Head: &gbt.Head{
-			Title: "this is the title",
-			// TODO: some of these can be made "default"
-			Items: gbt.Items{
-				// <meta>
-				&gbt.Meta{
-					Charset: "utf-8",
-				},
-				&gbt.Meta{
-					Name:    "viewport",
-					Content: "width=device-width, initial-scale=1, shrink-to-fit=no",
-				},
-				&gbt.Meta{
-					HttpEquiv: "Content-Type",
-					Content:   "text/html; charset=utf-8",
-				},
-				// Link/CSS
-				gbt.CSSLink("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"),
-				&gbt.Link{
-					Href:        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css",
-					Integrity:   "sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD",
-					Crossorigin: "anonymous",
-				},
-				// Script
-				&gbt.Script{
-					Src:         "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js",
-					Integrity:   "sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN",
-					Crossorigin: "anonymous",
-				},
-				&gbt.Script{Src: "/static/js/test.js"},
-			},
-		},
 		MainView: &gbt.Panel{
-			XType: "panel",
+			// XType: "panel",
 			// Shadow: true,
 			// Layout: "hbox",
 			// HTML:   "test",
@@ -205,14 +206,10 @@ func load() *gbt.Application {
 									IconClass: "fad fa-acorn",
 									Items: gbt.Items{
 										&gbt.Button{
-											UI:        "none",
-											IconClass: "far fa-key",
-											Handler:   "key",
+											Handler: "key",
 										},
 										&gbt.Button{
-											UI:        "none",
-											IconClass: "far fa-info-circle",
-											Handler:   "info",
+											Handler: "info",
 										},
 									},
 								}, {
@@ -239,59 +236,7 @@ func load() *gbt.Application {
 				},
 
 				&gbt.Form{
-					// XType: "form",
-					// Docked: "top",
-					// Text:    "Click Here",
-					// Handler: "btnClick",
-					// Method: "post",
-					// Action: "submit",
-					// Resize:  "vertical",
-					// Handler: "formSubmit",
-					// Handler: func(w http.ResponseWriter, r *http.Request) {
-					// 	fmt.Println("submit....")
-					// },
-
 					Items: gbt.Items{
-						// &gbt.Panel{
-						// 	XType:  "panel",
-						// 	Docked: "bottom",
-						// 	Layout: "hbox",
-						// 	// Resize:  "vertical",
-						// 	Classes: gbt.Classes{"toolbar"},
-						// 	Items: gbt.Items{
-						// 		&gbt.Button{
-						// 			XType:     "button",
-						// 			Text:      "Run",
-						// 			Handler:   "btnClick",
-						// 			IconClass: "far fa-play",
-						// 			Classes:   gbt.Classes{"button-success", "pure-button"},
-						// 		},
-						// 		&gbt.Spacer{},
-						// 		&gbt.Input{
-						// 			Type: "number",
-						// 			// Data: gbt.Data{
-						// 			// 	"dname": "v",
-						// 			// },
-						// 			// Events: gbt.Events{
-						// 			// 	"keyup": &gbt.Event{
-						// 			// 		Handler: "limitChange",
-						// 			// 	},
-						// 			// },
-						// 		},
-						// 		&gbt.Input{
-						// 			// XType: "input",
-						// 			// Label: "Show All:",
-						// 			// Name:  "show_all",
-						// 			Type: "checkbox",
-						// 		},
-						// 		&gbt.Button{
-						// 			XType:     "button",
-						// 			Text:      "Click Here",
-						// 			Handler:   "btnClick",
-						// 			IconClass: "fad fa-window-close",
-						// 		},
-						// 	},
-						// },
 						&gbt.Fieldset{
 							Legend: "NEW Form Legend!!!",
 							Items: gbt.Items{
@@ -312,6 +257,18 @@ func load() *gbt.Application {
 									// Label: "Send:",
 									// Name:  "submit",
 									Type: "submit",
+								},
+								&gbt.Button{
+									Text:    "Settings",
+									Outline: true,
+									// IconPosition: "right",
+									Icon: &gbt.Icon{
+										Icon: "settings",
+									},
+									Badge: &gbt.Badge{
+										Text:  "100",
+										Style: gbt.ButtonDanger,
+									},
 								},
 							},
 						},
@@ -350,53 +307,11 @@ func load() *gbt.Application {
 						},
 					}}},
 					Data: gbt.Rows{{
-						"id": 1,
-						"select": &gbt.Button{
-							IconClass: "fad fa-times-circle",
-							UI:        "none",
-						},
+						"id":        1,
+						"select":    &gbt.Button{},
 						"something": "something...",
 					}},
 				},
-
-				// &gbt.Panel{
-				// 	XType:  "panel",
-				// 	HTML:   "TABLE",
-				// 	Docked: "left",
-				// },
-				// &gbt.Panel{
-				// 	XType:  "panel",
-				// 	HTML:   "My panel text...4",
-				// 	Docked: "bottom",
-				// },
-				// &gbt.Button{
-				// 	XType:     "button",
-				// 	Text:      "Click Here",
-				// 	Handler:   "btnClick",
-				// 	IconClass: "fad fa-window-close",
-				// },
-				// &gbt.Button{
-				// 	XType: "button",
-				// 	Text:  "2 Here",
-				// 	HandlerFn: func(id string) {
-				// 		fmt.Print("Button 2 Clicked:")
-				// 		fmt.Printf("   %+v\n", id)
-
-				// 		// Button update test
-				// 		btn := app.Find(id)
-				// 		if btn != nil {
-				// 			btn.(*gbt.Button).Text = "Clicked!!!"
-				// 			app.Update(btn)
-				// 		}
-
-				// 		// Update Tree Test
-				// 		t := app.Find("tree-0")
-				// 		if t != nil {
-				// 			t.(*gbt.Tree).Root.Text = "UPDATED"
-				// 			app.Update(t)
-				// 		}
-				// 	},
-				// },
 			},
 		},
 	}

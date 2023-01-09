@@ -312,10 +312,10 @@ func (s *Search) Render() Stringer {
 		Items: Items{
 			&Input{},
 			&Button{
-				Classes:   Classes{"button-xsmall", "pure-button"},
-				Styles:    Styles{"visibility": "hidden"},
-				Handler:   "clearSearch",
-				IconClass: "fad fa-times-circle",
+				Classes: Classes{"button-xsmall", "pure-button"},
+				// Styles:    Styles{"visibility": "hidden"},
+				Handler: "clearSearch",
+				// IconClass: "fad fa-times-circle",
 			},
 		},
 	}

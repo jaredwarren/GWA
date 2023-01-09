@@ -39,5 +39,10 @@ func (s *Script) Render() Stringer {
 		s.Attributes["crossorigin"] = s.Crossorigin
 	}
 
-	return renderToHTML(`<script {{.Attributes.Render}}>{{.InnerJS}}</script>`, s)
+	e := &Element{
+		Name:       "script",
+		Attributes: s.Attributes,
+		InnerHTML:  s.InnerJS,
+	}
+	return e.Render()
 }

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"io"
 	"strings"
 )
 
@@ -145,32 +144,6 @@ type Renderer interface {
 	Render() Stringer
 }
 
-// Render a template
-func renderTemplate(w io.Writer, t string, data interface{}) error {
-	// funcMap := template.FuncMap{
-	// 	"Render": func(item Renderer) template.HTML {
-	// 		buf := new(bytes.Buffer)
-	// 		err := item.Render(buf)
-	// 		if err != nil {
-	// 			fmt.Printf("[E] renderTemplate:%s -> %+v\n", err, item)
-	// 		}
-	// 		return template.HTML(buf.String())
-	// 	},
-	// }
-	// tpl, err := template.New("base").Funcs(funcMap).ParseFiles(fmt.Sprintf("templates/%s.html", t))
-	// if err != nil {
-	// 	fmt.Printf("[E] %s parse error:%s\n", t, err)
-	// }
-	// templates := template.Must(tpl, err)
-	// return templates.ExecuteTemplate(w, "base", data)
-	return fmt.Errorf("deprecated")
-}
-
-// func renderToString() string {
-
-// 	return ""
-// }
-
 func renderToHTML(tmp string, data any) template.HTML {
 	t := template.New("")
 	t, err := t.Parse(tmp)
@@ -309,7 +282,7 @@ type Element struct {
 	Attributes
 	Classes
 	Items
-	InnerHTML template.HTML
+	InnerHTML Stringer
 }
 
 // Render ...
@@ -335,18 +308,14 @@ func (e *Element) Render() Stringer {
 	}
 
 	if isSelfClosing(name) {
-		return renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>`, name), e)
+		return template.HTML(renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>`, name), e))
 	}
 
-	if e.InnerHTML != "" {
-		return renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>{{.InnerHTML}}</%s>`, name, name), e)
+	if e.InnerHTML != "" && e.InnerHTML != nil {
+		return template.HTML(renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>{{.InnerHTML}}</%s>`, name, name), e))
 	}
 
-	if e.Name == "form" {
-		fmt.Printf("~~~~~~~~~~~~~~~\n %+v\n\n", e)
-		fmt.Printf("~~~~~~~~~~~~~~~\n %+v\n\n", e.Items[0])
-	}
-	return renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>{{.Items.Render}}</%s>`, name, name), e)
+	return template.HTML(renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>{{.Items.Render}}</%s>`, name, name), e))
 }
 
 // List of self closing tags
