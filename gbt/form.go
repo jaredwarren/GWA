@@ -77,10 +77,11 @@ var (
 // FormControl ...
 // Alias for Input
 type FormControl struct {
-	ID     string
-	Size   Size // "", "sm", "lg" -> class="form-control form-control-lg"
-	Type   InputType
-	HelpID string
+	ID          string
+	Size        Size // "", "sm", "lg" -> class="form-control form-control-lg"
+	Type        InputType
+	Placeholder string
+	HelpID      string
 	Attributes
 	Classes
 }
@@ -89,7 +90,13 @@ func (f *FormControl) Render() Stringer {
 	if f.Attributes == nil {
 		f.Attributes = Attributes{}
 	}
-	f.Attributes["aria-describedby"] = f.HelpID
+	if f.HelpID != "" {
+		f.Attributes["aria-describedby"] = f.HelpID
+	}
+
+	if f.Placeholder != "" {
+		f.Attributes["placeholder"] = f.Placeholder
+	}
 
 	f.Classes = append(f.Classes, "form-control")
 	switch f.Size {

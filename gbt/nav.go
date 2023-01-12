@@ -6,11 +6,6 @@ import (
 	"math/rand"
 )
 
-// temp to test new interface
-type INavItem interface {
-	Render() Stringer
-}
-
 // NavItem belongs to Nav
 type NavItem struct {
 	Image    *Image
@@ -21,26 +16,58 @@ type NavItem struct {
 }
 
 func (n *NavItem) Render() Stringer {
-	return renderToHTML(`<li class="nav-item"><a class="nav-link {{if .Active}}active{{end}} {{if .Disabled}}disabled{{end}}" aria-current="page" href="{{.Href}}">{{.Title}}</a></li>`, n)
+	attributes := Attributes{"href": n.Href}
+	classes := Classes{"nav-link"}
+	if n.Active {
+		classes = append(classes, "active")
+		attributes["aria-current"] = "page"
+	}
+	if n.Disabled {
+		classes = append(classes, "disabled")
+	}
+	el := &Element{
+		Name:    "li",
+		Classes: Classes{"nav-item"},
+		Items: Items{&Element{
+			Name:       "a",
+			Classes:    classes,
+			Attributes: attributes,
+			InnerHTML:  n.Title,
+		}},
+	}
+	return el.Render()
 }
 
 // NavDropDown Navitem, but with dropdown items
 type NavDropDown struct {
 	Title string
-	Items []INavItem
+	Items
 }
 
 func (n *NavDropDown) Render() Stringer {
-	return renderToHTML(`<li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {{.Title}}
-          </a>
-          <ul class="dropdown-menu">
-		  	{{range $index, $item := .Items}}
-				{{$item.Render}}
-			{{end}}
-          </ul>
-        </li>`, n)
+	el := &Element{
+		Name:    "li",
+		Classes: Classes{"nav-item", "dropdown"},
+		Items: Items{
+			&Element{
+				Name:    "a",
+				Classes: Classes{"nav-link", "dropdown-toggle"},
+				Attributes: Attributes{
+					"href":           "#",
+					"role":           "button",
+					"data-bs-toggle": "dropdown",
+					"aria-expanded":  "false",
+				},
+				InnerHTML: n.Title,
+			},
+			&Element{
+				Name:    "ul",
+				Classes: Classes{"dropdown-menu"},
+				Items:   n.Items,
+			},
+		},
+	}
+	return el.Render()
 }
 
 // DropDownItem belongs to NavDropDown
@@ -52,7 +79,23 @@ type DropDownItem struct {
 }
 
 func (n *DropDownItem) Render() Stringer {
-	return renderToHTML(`<li><a class="dropdown-item {{if .Active}}active{{end}} {{if .Disabled}}disabled{{end}}" href="{{.Href}}">{{.Title}}</a></li>`, n)
+	classes := Classes{"dropdown-item"}
+	if n.Active {
+		classes = append(classes, "active")
+	}
+	if n.Disabled {
+		classes = append(classes, "disabled")
+	}
+	el := &Element{
+		Name: "li",
+		Items: Items{&Element{
+			Name:       "a",
+			Classes:    classes,
+			Attributes: Attributes{"href": n.Href},
+			InnerHTML:  n.Title,
+		}},
+	}
+	return el.Render()
 }
 
 // DropDowndivider belongs to NavDropDown
@@ -62,7 +105,14 @@ type DropDowndivider struct {
 }
 
 func (n *DropDowndivider) Render() Stringer {
-	return template.HTML(`<li><hr class="dropdown-divider"></li>`)
+	el := &Element{
+		Name: "li",
+		Items: Items{&Element{
+			Name:    "hr",
+			Classes: Classes{"dropdown-divider"},
+		}},
+	}
+	return el.Render()
 }
 
 // NavBrand nav band
@@ -73,20 +123,25 @@ type NavBrand struct {
 }
 
 func (n *NavBrand) Render() Stringer {
-	var tmp string
+	var el *Element
 	if n.Href == "" {
-		tmp = `<span class="navbar-brand mb-0 h1">
-			{{if .Image}}{{.Image.Render}}{{end}}
-		{{.Title}}
-		</span>`
+		el = &Element{
+			Name:    "span",
+			Classes: Classes{"navbar-brand", "mb-0", "h1"},
+		}
 	} else {
-		tmp = `<a class="navbar-brand" href="{{.Href}}">
-		{{if .Image}}{{.Image.Render}}{{end}}
-		{{.Title}}
-	</a>`
+		el = &Element{
+			Name:       "a",
+			Classes:    Classes{"navbar-brand"},
+			Attributes: Attributes{"href": n.Href},
+		}
 	}
-
-	return renderToHTML(tmp, n)
+	el.Items = Items{}
+	if n.Image != nil {
+		el.Items = append(el.Items, n.Image)
+	}
+	el.Items = append(el.Items, RawHTML(n.Title))
+	return el.Render()
 }
 
 // Nav ...
@@ -95,7 +150,7 @@ type Nav struct {
 	// Title (optional) overwritten if Brand is set
 	Title  template.HTML `json:"title,omitempty"`
 	Brand  *NavBrand
-	Items  []INavItem `json:"items,omitempty"`
+	Items  Items `json:"items,omitempty"`
 	Theme  Theme
 	Search bool
 	//
@@ -124,30 +179,61 @@ func (n *Nav) Render() Stringer {
 		n.ID = fmt.Sprintf("navbarSupportedContent%d", rand.Intn(100))
 	}
 
-	return renderToHTML(`
-<nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="{{.Theme}}">
-  <div class="container-fluid">
-	{{if .Brand}}
-		{{.Brand.Render}}
-	{{end}}
-	{{if gt (len .Items) 0}}
-		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#{{.ID}}" aria-controls="{{.ID}}" aria-expanded="false" aria-label="Toggle navigation">
-      	  <span class="navbar-toggler-icon"></span>
-    	</button>
-		<div class="collapse navbar-collapse" id="{{.ID}}">
-		  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-			{{range $index, $item := .Items}}
-			  {{$item.Render}}
-			{{end}}
-		  </ul>
-			{{if .Search}}
-			  <form class="d-flex" role="search">
-				<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-				<button class="btn btn-outline-success" type="submit">Search</button>
-			  </form>
-			{{end}}
-		</div>
-	{{end}}
-  </div>
-</nav>`, n)
+	var searchEl *Element
+	if n.Search {
+		searchEl = &Element{
+			Name:       "form",
+			Classes:    Classes{"d-flex"},
+			Attributes: Attributes{"role": "search"},
+			Items: Items{
+				&FormControl{},
+				&Button{
+					Outline: true,
+					Style:   ButtonSuccess,
+					Type:    ButtonTypeSubmit,
+					Text:    "Search",
+				},
+			},
+		}
+	}
+
+	el := &Element{
+		Name:       "nav",
+		Classes:    Classes{"navbar", "navbar-expand-lg", "bg-body-tertiary"},
+		Attributes: Attributes{"data-bs-theme": n.Theme},
+		Items: Items{&Element{
+			Classes: Classes{"container-fluid"},
+			Items: Items{
+				n.Brand,
+				&Button{
+					Classes: Classes{"navbar-toggler"},
+					Items: Items{&Element{
+						Name:    "span",
+						Classes: Classes{"navbar-toggler-icon"},
+						Attributes: Attributes{
+							"type":           "button",
+							"data-bs-toggle": "collapse",
+							"data-bs-target": fmt.Sprintf("#%s", n.ID),
+							"aria-controls":  n.ID,
+							"aria-expanded":  "false",
+							"aria-label":     "Toggle navigation",
+						},
+					}},
+				},
+				&Element{
+					ID:      n.ID,
+					Classes: Classes{"collapse", "navbar-collapse"},
+					Items: Items{
+						&Element{
+							Name:    "ul",
+							Classes: Classes{"navbar-nav", "me-auto", "mb-2", "mb-lg-0"},
+							Items:   n.Items,
+						},
+						searchEl,
+					},
+				},
+			},
+		}},
+	}
+	return el.Render()
 }

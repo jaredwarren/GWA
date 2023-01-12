@@ -307,7 +307,7 @@ func (e *Element) Render() Stringer {
 		}
 	}
 
-	if isSelfClosing(name) {
+	if IsSelfClosing(name) {
 		return template.HTML(renderToHTML(fmt.Sprintf(`<%s {{.Attributes.Render}}>`, name), e))
 	}
 
@@ -337,7 +337,7 @@ var closing = map[string]bool{
 }
 
 // check if node name is self closing
-func isSelfClosing(name string) bool {
+func IsSelfClosing(name string) bool {
 	_, ok := closing[name]
 	return ok
 }

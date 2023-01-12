@@ -38,10 +38,11 @@ type Button struct {
 	Outline      bool
 	Disabled     bool
 	Href         string
-	Type         string  //
-	OnClick      string  // TODO:
-	HandlerFn    Handler // TODO:
+	Type         ButtonType //
+	OnClick      string     // TODO:
+	HandlerFn    Handler    // TODO:
 	Badge        *Badge
+	Items
 	Size
 	Classes
 	Attributes
@@ -63,30 +64,34 @@ func (b *Button) Render() Stringer {
 		b.Attributes["href"] = b.Href
 	}
 
-	// Icon and Text
 	items := Items{}
-	if b.Icon != nil {
-		if b.IconPosition == "right" {
-			items = append(items, &Element{
-				Name:      "span",
-				InnerHTML: template.HTML(b.Text),
-			}, b.Icon)
+	if len(b.Items) > 0 {
+		items = b.Items
+	} else {
+		// Icon and Text
+		if b.Icon != nil {
+			if b.IconPosition == "right" {
+				items = append(items, &Element{
+					Name:      "span",
+					InnerHTML: template.HTML(b.Text),
+				}, b.Icon)
+			} else {
+				items = append(items, b.Icon, &Element{
+					Name:      "span",
+					InnerHTML: template.HTML(b.Text),
+				})
+			}
 		} else {
-			items = append(items, b.Icon, &Element{
+			items = append(items, &Element{
 				Name:      "span",
 				InnerHTML: template.HTML(b.Text),
 			})
 		}
-	} else {
-		items = append(items, &Element{
-			Name:      "span",
-			InnerHTML: template.HTML(b.Text),
-		})
-	}
 
-	// Badge
-	if b.Badge != nil {
-		items = append(items, b.Badge)
+		// Badge
+		if b.Badge != nil {
+			items = append(items, b.Badge)
+		}
 	}
 
 	// Style

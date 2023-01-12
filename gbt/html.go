@@ -45,7 +45,7 @@ type RawHTML template.HTML
 
 // Render ...
 func (h RawHTML) Render() Stringer {
-	return h
+	return template.HTML(h)
 }
 
 // GetID ...
