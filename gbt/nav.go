@@ -124,25 +124,26 @@ type NavBrand struct {
 
 type Option[T any] func(*T)
 
-// Verbosity sets Foo's verbosity level to v.
-// func NavTitle[P Option](v string) P {
-// 	return func(f *NavBrand) {
-// 		f.Title = v
+func NavTitle(title string) Option[NavBrand] {
+	// return navTitle[NavBrand](title)
+	return func(title string) Option[NavBrand] {
+		return func(a *NavBrand) {
+			x, ok := any(a).(*NavBrand)
+			if ok {
+				x.Title = title
+			}
+		}
+	}(title)
+}
+
+// func navTitle[T any](title string) Option[T] {
+// 	return func(a *T) {
+// 		x, ok := any(a).(*NavBrand)
+// 		if ok {
+// 			x.Title = title
+// 		}
 // 	}
 // }
-
-func NavTitle(title string) Option[NavBrand] {
-	return navTitle[NavBrand](title)
-}
-
-func navTitle[T any](title string) Option[T] {
-	return func(a *T) {
-		switch x := any(a).(type) {
-		case *NavBrand:
-			x.Title = title
-		}
-	}
-}
 
 func NavImage(image string) Option[NavBrand] {
 	return navImage[NavBrand](image)
@@ -164,22 +165,6 @@ type Imager interface {
 	SetImage(i *Image)
 }
 
-// func NavImage[T Option](v string) T {
-// 	return func(f Imager) {
-// 		f.SetImage(&Image{
-// 			Src:    v,
-// 			Height: "20px",
-// 		})
-// 	}
-// }
-
-// func OptionTemperature(t Celsius) func(*Foobar) error {
-// 	return func(fb *Foobar) error {
-// 		fb.temperature = t
-// 		return nil
-// 	}
-// }
-// func Append[T any](s []T, t ...T) []T {
 func NewBrand(opts ...Option[NavBrand]) *NavBrand {
 	fb := &NavBrand{
 		Title: "{{.Nav.Title}}",
