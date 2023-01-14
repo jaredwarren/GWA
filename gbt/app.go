@@ -137,6 +137,21 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+func (a *Application) ToHTML(path string) error {
+	h := a.Render()
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = fmt.Fprint(f, h)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Render ...
 func (a *Application) Render() Stringer {
 	items := Items{}

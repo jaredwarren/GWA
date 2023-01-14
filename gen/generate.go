@@ -23,7 +23,7 @@ func Generate(rawHtml string) {
 	fmt.Fprintf(f, "%#v", e)
 }
 
-var TagNameRegex = regexp.MustCompile(`<(.+?) `)
+var TagNameRegex = regexp.MustCompile(`<(.+?)[ >]`)
 
 func getName(t html.Token) string {
 	parts := TagNameRegex.FindStringSubmatch(t.String())
