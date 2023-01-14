@@ -125,44 +125,24 @@ type NavBrand struct {
 type Option[T any] func(*T)
 
 func NavTitle(title string) Option[NavBrand] {
-	// return navTitle[NavBrand](title)
-	return func(title string) Option[NavBrand] {
-		return func(a *NavBrand) {
-			x, ok := any(a).(*NavBrand)
-			if ok {
-				x.Title = title
-			}
+	return func(a *NavBrand) {
+		x, ok := any(a).(*NavBrand)
+		if ok {
+			x.Title = title
 		}
-	}(title)
+	}
 }
-
-// func navTitle[T any](title string) Option[T] {
-// 	return func(a *T) {
-// 		x, ok := any(a).(*NavBrand)
-// 		if ok {
-// 			x.Title = title
-// 		}
-// 	}
-// }
 
 func NavImage(image string) Option[NavBrand] {
-	return navImage[NavBrand](image)
-}
-
-func navImage[T any](image string) Option[T] {
-	return func(a *T) {
-		switch x := any(a).(type) {
-		case *NavBrand:
+	return func(a *NavBrand) {
+		x, ok := any(a).(*NavBrand)
+		if ok {
 			x.Image = &Image{
 				Src:    image,
 				Height: "20px",
 			}
 		}
 	}
-}
-
-type Imager interface {
-	SetImage(i *Image)
 }
 
 func NewBrand(opts ...Option[NavBrand]) *NavBrand {
@@ -174,10 +154,6 @@ func NewBrand(opts ...Option[NavBrand]) *NavBrand {
 		op(fb)
 	}
 	return fb
-}
-
-func (n *NavBrand) SetImage(i *Image) {
-	n.Image = i
 }
 
 func (n *NavBrand) Render() Stringer {
@@ -225,6 +201,35 @@ type Nav struct {
 	XType  string        `json:"xtype"`
 	Layout string        `json:"layout,omitempty"`
 	HTML   template.HTML `json:"html,omitempty"`
+}
+
+func NewNav(opts ...Option[Nav]) *Nav {
+	fb := &Nav{
+		Search: true,
+		Theme:  ThemeDark,
+	}
+	for _, op := range opts {
+		op(fb)
+	}
+	return fb
+}
+
+func WithBrand(brand *NavBrand) Option[Nav] {
+	return func(a *Nav) {
+		x, ok := any(a).(*Nav)
+		if ok {
+			x.Brand = brand
+		}
+	}
+}
+
+func WithSearch(search bool) Option[Nav] {
+	return func(a *Nav) {
+		x, ok := any(a).(*Nav)
+		if ok {
+			x.Search = search
+		}
+	}
 }
 
 // Render ...

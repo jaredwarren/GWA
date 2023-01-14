@@ -111,47 +111,56 @@ func load() *gbt.Application {
 				&gbt.Script{Src: "/static/js/test.js"},
 			},
 		},
-		Nav: &gbt.Nav{
-			Title:  "Nav Title",
-			Shadow: true,
-			Search: true,
-			Theme:  gbt.ThemeDark,
-			// Brand: &gbt.NavBrand{
-			// 	Image: &gbt.Image{
-			// 		Src:    "https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg",
-			// 		Height: "20px",
-			// 	},
-			// 	Title: "this is my brand",
-			// 	Href:  "#",
-			// },
-			Brand: gbt.NewBrand(
-				gbt.NavImage("https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg"),
-				gbt.NavTitle("This is the title"),
+		Nav: gbt.NewNav(
+			gbt.WithBrand(
+				gbt.NewBrand(
+					gbt.NavImage("https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg"),
+					gbt.NavTitle("This is the title"),
+				),
 			),
-			Items: gbt.Items{
-				&gbt.NavItem{
-					Title: "Item 1",
-					Href:  "1",
-				},
-				&gbt.NavDropDown{
-					Title: "Drop 1",
-					Items: gbt.Items{
-						&gbt.DropDownItem{
-							Title:    "drop 1",
-							Disabled: true,
-						},
-						&gbt.DropDownItem{
-							Title:  "drop 2",
-							Active: true,
-						},
-						&gbt.DropDowndivider{},
-						&gbt.DropDownItem{
-							Title: "drop 3",
-						},
-					},
-				},
-			},
-		},
+			gbt.WithSearch(false),
+		),
+		// Nav: &gbt.Nav{
+		// 	// Title:  "Nav Title",
+		// 	Shadow: true,
+		// 	Search: true,
+		// 	Theme:  gbt.ThemeDark,
+		// 	// Brand: &gbt.NavBrand{
+		// 	// 	Image: &gbt.Image{
+		// 	// 		Src:    "https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg",
+		// 	// 		Height: "20px",
+		// 	// 	},
+		// 	// 	Title: "this is my brand",
+		// 	// 	Href:  "#",
+		// 	// },
+		// 	Brand: gbt.NewBrand(
+		// 		gbt.NavImage("https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg"),
+		// 		gbt.NavTitle("This is the title"),
+		// 	),
+		// 	Items: gbt.Items{
+		// 		&gbt.NavItem{
+		// 			Title: "Item 1",
+		// 			Href:  "1",
+		// 		},
+		// 		&gbt.NavDropDown{
+		// 			Title: "Drop 1",
+		// 			Items: gbt.Items{
+		// 				&gbt.DropDownItem{
+		// 					Title:    "drop 1",
+		// 					Disabled: true,
+		// 				},
+		// 				&gbt.DropDownItem{
+		// 					Title:  "drop 2",
+		// 					Active: true,
+		// 				},
+		// 				&gbt.DropDowndivider{},
+		// 				&gbt.DropDownItem{
+		// 					Title: "drop 3",
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// },
 		MainView: &gbt.Panel{
 
 			// XType: "panel",
