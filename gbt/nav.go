@@ -15,6 +15,37 @@ type NavItem struct {
 	Active   bool
 }
 
+func (n *NavItem) SetTitle(t string) {
+	n.Title = t
+}
+
+func (n *NavItem) SetHref(href string) {
+	n.Href = href
+}
+
+func (n *NavItem) SetActive(active bool) {
+	n.Active = active
+}
+
+func (n *NavItem) SetDisabled(disabled bool) {
+	n.Disabled = disabled
+}
+
+func (n *NavItem) SetImage(i *Image) {
+	n.Image = i
+}
+
+func NewNavItem(opts ...Option[any]) *NavItem {
+	fb := &NavItem{
+		Active:   true,
+		Disabled: false,
+	}
+	for _, op := range opts {
+		op(any(fb))
+	}
+	return fb
+}
+
 func (n *NavItem) Render() Stringer {
 	attributes := Attributes{"href": n.Href}
 	classes := Classes{"nav-link"}
@@ -122,19 +153,31 @@ type NavBrand struct {
 	Href  string
 }
 
-type Option[T any] func(*T)
+type Option[T any] func(T)
 
-func NavTitle(title string) Option[NavBrand] {
-	return func(a *NavBrand) {
-		x, ok := any(a).(*NavBrand)
-		if ok {
-			x.Title = title
-		}
-	}
-}
+// func NavTitle(title string) Option[NavBrand] {
+// 	return func(a *NavBrand) {
+// 		x, ok := any(a).(*NavBrand)
+// 		if ok {
+// 			x.Title = title
+// 		}
+// 	}
+// }
 
-func NavImage(image string) Option[NavBrand] {
-	return func(a *NavBrand) {
+// func xNavImage(image string) Option[NavBrand] {
+// 	return func(a *NavBrand) {
+// 		x, ok := any(a).(*NavBrand)
+// 		if ok {
+// 			x.Image = &Image{
+// 				Src:    image,
+// 				Height: "20px",
+// 			}
+// 		}
+// 	}
+// }
+
+func NavImage[F func(any)](image string) F {
+	return func(a any) {
 		x, ok := any(a).(*NavBrand)
 		if ok {
 			x.Image = &Image{
@@ -145,15 +188,20 @@ func NavImage(image string) Option[NavBrand] {
 	}
 }
 
-func NewBrand(opts ...Option[NavBrand]) *NavBrand {
+func NewBrand(opts ...Option[any]) *NavBrand {
 	fb := &NavBrand{
 		Title: "{{.Nav.Title}}",
 		Href:  "#",
 	}
 	for _, op := range opts {
-		op(fb)
+		op(any(fb))
 	}
 	return fb
+}
+
+// SetTitle set title for nav brand
+func (n *NavBrand) SetTitle(t string) {
+	n.Title = t
 }
 
 func (n *NavBrand) Render() Stringer {
@@ -178,7 +226,9 @@ func (n *NavBrand) Render() Stringer {
 	return el.Render()
 }
 
+//
 // Nav ...
+//
 type Nav struct {
 	ID string `json:"id,omitempty"` // how to auto generate
 	// Title (optional) overwritten if Brand is set
@@ -203,19 +253,19 @@ type Nav struct {
 	HTML   template.HTML `json:"html,omitempty"`
 }
 
-func NewNav(opts ...Option[Nav]) *Nav {
+func NewNav(opts ...Option[any]) *Nav {
 	fb := &Nav{
 		Search: true,
 		Theme:  ThemeDark,
 	}
 	for _, op := range opts {
-		op(fb)
+		op(any(fb))
 	}
 	return fb
 }
 
-func WithBrand(brand *NavBrand) Option[Nav] {
-	return func(a *Nav) {
+func WithBrand[F func(any)](brand *NavBrand) F {
+	return func(a any) {
 		x, ok := any(a).(*Nav)
 		if ok {
 			x.Brand = brand
@@ -223,11 +273,20 @@ func WithBrand(brand *NavBrand) Option[Nav] {
 	}
 }
 
-func WithSearch(search bool) Option[Nav] {
-	return func(a *Nav) {
+func WithSearch[F func(any)](search bool) F {
+	return func(a any) {
 		x, ok := any(a).(*Nav)
 		if ok {
 			x.Search = search
+		}
+	}
+}
+
+func WithItems[F func(any)](items Items) F {
+	return func(a any) {
+		x, ok := any(a).(*Nav)
+		if ok {
+			x.Items = items
 		}
 	}
 }
