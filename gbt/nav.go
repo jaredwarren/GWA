@@ -6,69 +6,6 @@ import (
 	"math/rand"
 )
 
-// NavItem belongs to Nav
-type NavItem struct {
-	Image    *Image
-	Title    string
-	Href     string
-	Disabled bool
-	Active   bool
-}
-
-func (n *NavItem) SetTitle(t string) {
-	n.Title = t
-}
-
-func (n *NavItem) SetHref(href string) {
-	n.Href = href
-}
-
-func (n *NavItem) SetActive(active bool) {
-	n.Active = active
-}
-
-func (n *NavItem) SetDisabled(disabled bool) {
-	n.Disabled = disabled
-}
-
-func (n *NavItem) SetImage(i *Image) {
-	n.Image = i
-}
-
-func NewNavItem(opts ...Option[any]) *NavItem {
-	fb := &NavItem{
-		Active:   true,
-		Disabled: false,
-	}
-	for _, op := range opts {
-		op(any(fb))
-	}
-	return fb
-}
-
-func (n *NavItem) Render() Stringer {
-	attributes := Attributes{"href": n.Href}
-	classes := Classes{"nav-link"}
-	if n.Active {
-		classes = append(classes, "active")
-		attributes["aria-current"] = "page"
-	}
-	if n.Disabled {
-		classes = append(classes, "disabled")
-	}
-	el := &Element{
-		Name:    "li",
-		Classes: Classes{"nav-item"},
-		Items: Items{&Element{
-			Name:       "a",
-			Classes:    classes,
-			Attributes: attributes,
-			InnerHTML:  n.Title,
-		}},
-	}
-	return el.Render()
-}
-
 // NavDropDown Navitem, but with dropdown items
 type NavDropDown struct {
 	Title string
@@ -153,41 +90,6 @@ type NavBrand struct {
 	Href  string
 }
 
-type Option[T any] func(T)
-
-// func NavTitle(title string) Option[NavBrand] {
-// 	return func(a *NavBrand) {
-// 		x, ok := any(a).(*NavBrand)
-// 		if ok {
-// 			x.Title = title
-// 		}
-// 	}
-// }
-
-// func xNavImage(image string) Option[NavBrand] {
-// 	return func(a *NavBrand) {
-// 		x, ok := any(a).(*NavBrand)
-// 		if ok {
-// 			x.Image = &Image{
-// 				Src:    image,
-// 				Height: "20px",
-// 			}
-// 		}
-// 	}
-// }
-
-func NavImage[F func(any)](image string) F {
-	return func(a any) {
-		x, ok := any(a).(*NavBrand)
-		if ok {
-			x.Image = &Image{
-				Src:    image,
-				Height: "20px",
-			}
-		}
-	}
-}
-
 func NewBrand(opts ...Option[any]) *NavBrand {
 	fb := &NavBrand{
 		Title: "{{.Nav.Title}}",
@@ -253,6 +155,10 @@ type Nav struct {
 	HTML   template.HTML `json:"html,omitempty"`
 }
 
+func (e *Nav) SetItems(items Items) {
+	e.Items = items
+}
+
 func NewNav(opts ...Option[any]) *Nav {
 	fb := &Nav{
 		Search: true,
@@ -278,15 +184,6 @@ func WithSearch[F func(any)](search bool) F {
 		x, ok := any(a).(*Nav)
 		if ok {
 			x.Search = search
-		}
-	}
-}
-
-func WithItems[F func(any)](items Items) F {
-	return func(a any) {
-		x, ok := any(a).(*Nav)
-		if ok {
-			x.Items = items
 		}
 	}
 }

@@ -22,6 +22,21 @@ type Icon struct {
 	Style IconStyle
 }
 
+func NewIcon(icon string, opts ...Option[any]) *Icon {
+	fb := &Icon{
+		Icon:  icon,
+		Style: IconOutlined,
+	}
+	for _, op := range opts {
+		op(any(fb))
+	}
+	return fb
+}
+
+func (i *Icon) SetStyle(st string) {
+	i.Style = IconStyle(st)
+}
+
 func (i *Icon) Render() Stringer {
 	if i.Style == "" {
 		i.Style = IconOutlined

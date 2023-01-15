@@ -80,7 +80,7 @@ func load() *gbt.Application {
 			mainController,
 		},
 		Head: &gbt.Head{
-			Title: "this is the title",
+			// Title: "this is the title",
 			// TODO: some of these can be made "default"
 			Items: gbt.Items{
 				// <meta>
@@ -97,6 +97,7 @@ func load() *gbt.Application {
 				},
 				// Link/CSS
 				gbt.CSSLink("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"),
+				gbt.CSSLink("https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@48,400,0,0"),
 				&gbt.Link{
 					Href:        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css",
 					Integrity:   "sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD",
@@ -121,7 +122,10 @@ func load() *gbt.Application {
 			gbt.WithSearch(true),
 			gbt.WithItems(
 				gbt.Items{
-					gbt.NewNavItem(gbt.WithTitle("asdf")),
+					gbt.NewNavItem(
+						gbt.WithTitle("asdf"),
+						gbt.WithIcon("home", gbt.WithStyle(string(gbt.IconSharp))),
+					),
 					&gbt.NavItem{
 						Title: "Item 1",
 						Href:  "1",
